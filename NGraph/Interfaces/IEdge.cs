@@ -11,11 +11,11 @@ namespace NGraph.Interfaces
         /// <summary>
         /// Gets the source vertex
         /// </summary>
-        IVertex Source { get; }
+        IVertex From { get; }
         /// <summary>
         /// Gets the target vertex
         /// </summary>
-        IVertex Target { get; }
+        IVertex To { get; }
 
         bool Oriented { get; set; }
     }

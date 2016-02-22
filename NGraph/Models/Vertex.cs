@@ -19,10 +19,6 @@ namespace NGraph.Models
         private EdgeList outcomingEdges;
         private EdgeList incomingEdges;
 
-        public Vertex():this(String.Empty)
-        {
-        }
-
         public Vertex(string name = "")
         {
             Name = name;
@@ -37,7 +33,13 @@ namespace NGraph.Models
 
         public bool AddEdge(Edge e)
         {
-            throw new NotImplementedException();
+           if(e.From == this)
+               outcomingEdges.Add(e);
+           else if (e.To == this)
+               incomingEdges.Add(e);
+           else
+               return false;
+           return true;
         }
 
         public bool AddIncomingEdge(Vertex from)
@@ -48,6 +50,37 @@ namespace NGraph.Models
         public bool AddOutgoinEdge(Vertex to)
         {
             throw new NotImplementedException();
+        }
+
+        public bool HasEdge(Edge e)
+        {
+            if (e.From == this)
+                return incomingEdges.Contains(e);
+            else if (e.To == this)
+                return outcomingEdges.Contains(e);
+            else
+                return false;
+        }
+
+        public bool Remove(Edge e)
+        {
+            if (e.From == this)
+                outcomingEdges.Remove(e);
+            else if (e.To == this)
+                incomingEdges.Remove(e);
+            else
+                return false;
+            return true;
+        }
+
+        public int GetIncommingEdgeCount()
+        {
+            return incomingEdges.Count;
+        }
+
+        public int GetOutcommingCount()
+        {
+            return outcomingEdges.Count;
         }
     }
 }

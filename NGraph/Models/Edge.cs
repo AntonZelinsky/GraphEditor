@@ -10,18 +10,16 @@ namespace NGraph.Models
 {
     public class Edge : IEdge
     {
-        private readonly IVertex source;
-        private readonly IVertex target;
+        private readonly IVertex from;
+        private readonly IVertex to;
         private bool oriented = false;
-        public IVertex Source
+
+        public IVertex From
         {
-            get { return source; }
+            get { return from; }
         }
 
-        public IVertex Target
-        {
-            get { return target; }
-        }
+        public IVertex To => to;
 
         public bool Oriented
         {
@@ -29,15 +27,15 @@ namespace NGraph.Models
             set { oriented = value; }
         }
 
-        public Edge(IVertex source, IVertex target, bool oriented = false)
+        public Edge(IVertex from, IVertex to, bool oriented = false)
         {
-            Contract.Requires(this.source != null);
-            Contract.Requires(this.target != null);
-            Contract.Ensures(this.Source.Equals(this.source));
-            Contract.Ensures(this.Target.Equals(this.target));
+            //Contract.Requires(this.source != null);
+            //Contract.Requires(this.target != null);
+            //Contract.Ensures(this.Source.Equals(this.source));
+            //Contract.Ensures(this.Target.Equals(this.target));
 
-            this.source = source;
-            this.target = target;
+            this.from = from;
+            this.to = to;
             this.oriented = oriented;
         }         
 
@@ -49,7 +47,7 @@ namespace NGraph.Models
         /// </returns>
         public override string ToString()
         {
-            return source + "->" + target;
+            return from + "->" + to;
         }
     }
 }
