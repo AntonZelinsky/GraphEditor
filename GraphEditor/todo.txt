@@ -1,0 +1,4 @@
+﻿Язык представлени 
+https://ru.wikipedia.org/wiki/GraphML
+https://ru.wikipedia.org/wiki/Trivial_Graph_Format
+https://ru.wikipedia.org/wiki/DOT_(%D1%8F%D0%B7%D1%8B%D0%BA)
