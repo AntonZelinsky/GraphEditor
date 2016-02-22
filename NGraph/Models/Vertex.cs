@@ -11,13 +11,14 @@ namespace NGraph.Models
     public class Vertex : IVertex
     {
         public string Name { get; set; }
-        /// <summary>
-        /// Unique vertex ID
-        /// </summary>
-        public long ID { get; set; }
 
         private EdgeList outcomingEdges;
+
         private EdgeList incomingEdges;
+
+        public EdgeList IncommingEdges => incomingEdges;
+
+        public EdgeList OutcommingEdges => outcomingEdges;
 
         public Vertex(string name = "")
         {
@@ -25,13 +26,8 @@ namespace NGraph.Models
             incomingEdges = new EdgeList();
             outcomingEdges = new EdgeList();
         }
-
-        public override string ToString()
-        {
-            return Name;
-        }
-
-        public bool AddEdge(Edge e)
+             
+        public bool AddEdge(IEdge e)
         {
            if(e.From == this)
                outcomingEdges.Add(e);
@@ -42,27 +38,27 @@ namespace NGraph.Models
            return true;
         }
 
-        public bool AddIncomingEdge(Vertex from)
+        public bool AddIncomingEdge(IVertex from)
         {
             throw new NotImplementedException();
         }
 
-        public bool AddOutgoinEdge(Vertex to)
+        public bool AddOutgoinEdge(IVertex to)
         {
             throw new NotImplementedException();
         }
 
-        public bool HasEdge(Edge e)
+        public bool HasEdge(IEdge e)
         {
             if (e.From == this)
-                return incomingEdges.Contains(e);
-            else if (e.To == this)
                 return outcomingEdges.Contains(e);
+            else if (e.To == this)
+                return incomingEdges.Contains(e);
             else
                 return false;
         }
 
-        public bool Remove(Edge e)
+        public bool Remove(IEdge e)
         {
             if (e.From == this)
                 outcomingEdges.Remove(e);
@@ -71,7 +67,12 @@ namespace NGraph.Models
             else
                 return false;
             return true;
-        }
+        }        
+
+        public IEdge FindEdge(IVertex v)
+        {
+             return outcomingEdges.FirstOrDefault(e => e.To == v);
+        }                    
 
         public int GetIncommingEdgeCount()
         {
@@ -81,6 +82,11 @@ namespace NGraph.Models
         public int GetOutcommingCount()
         {
             return outcomingEdges.Count;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name}, In {GetIncommingEdgeCount()}, Out {GetOutcommingCount()}";
         }
     }
 }

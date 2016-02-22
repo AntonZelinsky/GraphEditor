@@ -12,10 +12,24 @@ namespace NGraph.Interfaces
     {
         string Name { get; set; }
 
-        bool AddEdge(Edge e);
+        EdgeList IncommingEdges { get; }
 
-        bool AddIncomingEdge(Vertex from);
+        EdgeList OutcommingEdges { get; }
 
-        bool AddOutgoinEdge(Vertex to);
+        bool AddEdge(IEdge e);
+
+        bool AddIncomingEdge(IVertex from);
+
+        bool AddOutgoinEdge(IVertex to);
+
+        bool HasEdge(IEdge e);
+
+        bool Remove(IEdge e);
+
+        int GetIncommingEdgeCount();
+
+        int GetOutcommingCount();
+
+        IEdge FindEdge(IVertex v);
     }
 }

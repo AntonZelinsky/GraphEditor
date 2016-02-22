@@ -47,7 +47,7 @@ namespace NGraph.Models
         /// </returns>
         public override string ToString()
         {
-            return from + "->" + to;
+            return $"{from.Name} -> {to.Name}";
         }
     }
 }

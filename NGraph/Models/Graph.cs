@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using NGraph.Collections;
@@ -10,100 +11,142 @@ using NGraph.Interfaces;
 
 namespace NGraph.Models
 {
-    [DebuggerDisplay("VertexCount = {VertexCount}, EdgeCount = {EdgeCount}")]
+   // [DebuggerDisplay("VertexCount = {VertexCount}, EdgeCount = {EdgeCount}")]
     public class Graph : IGraph
     {
-        private readonly VertexList vertexs;
-        private readonly EdgeList edges;
-
-
-        /// <summary>
-        /// Inbox edges
-        /// </summary>
-        private readonly VertexEdgeDictionary vertexInEdges;
-        /// <summary>
-        /// Outbox edges
-        /// </summary>
-        private readonly VertexEdgeDictionary vertexOutEdges;    
-
-        //private readonly Vertex
-        private int edgeCount = 0;
-
-        public int EdgeCount { get { return edgeCount; } }
-          public int VertexCount { get { return vertexInEdges.Count; } }
+        private readonly VertexList verticies;
+        private readonly EdgeList edges;      
+                                     
+        public int EdgeCount { get { return edges.Count; } }
+        public int VertexCount => verticies.Count;
 
         public Graph()
         {
-            vertexs = new VertexList();
-            edges = new EdgeList();
-
-            vertexInEdges = new VertexEdgeDictionary();
-            vertexOutEdges = new VertexEdgeDictionary();
+            verticies = new VertexList();
+            edges = new EdgeList();                    
         }
 
-    #region vertex
+        public bool IsEmpty()
+        {
+            return verticies.Count == 0;
+        }
+
+    #region Add
+
         public bool AddVertex(IVertex v)
         {
             if (ContainsVertex(v))
                 return false;
 
-            vertexs.Add(v);
-            //vertexInEdges.Add(v, new EdgeList());
-            //vertexOutEdges.Add(v, new EdgeList());
+            verticies.Add(v);                      
             //event OnVertexAdded
             return true;
         }
+
+        /// <summary>
+        /// Insert a directed, Edge into the graph
+        /// </summary>
+        /// <param name="e">the Edge </param>
+        /// <returns></returns>
+        public bool AddEdge(IVertex from, IVertex to)
+        {
+            return AddEdge(new Edge(from, to));
+        }
+        
+        /// <summary>
+        /// Insert a directed, Edge into the graph
+        /// </summary>
+        /// <param name="e">the Edge </param>
+        /// <returns></returns>
+        public bool AddEdge(IEdge e)
+        {
+            //if(ContainsEdge(e))
+
+            if (e.From.FindEdge(e.To) != null)
+                return false;
+
+            e.From.AddEdge(e);
+            e.To.AddEdge(e);
+            edges.Add(e);
+            return true;
+        }
+
+    #endregion
+
+    #region Remove
 
         public bool RemoveVertex(IVertex v)
         {
             if (!ContainsVertex(v))
                 return false;
-
-            var edgeToRemove = new EdgeList();
-
-
-            /**/
-            return false;
+            verticies.Remove(v);
+            
+            // Remove the edges associated with v
+            foreach (var e in v.IncommingEdges.ToArray())
+            {
+                v.Remove(e);
+                e.From.Remove(e);  //возможно зацикливание
+                edges.Remove(e);
+            }
+            foreach (var e in v.OutcommingEdges)
+            {
+                v.Remove(e);
+                e.To.Remove(e);   
+                edges.Remove(e);    // out error
+            }
+            return true;
         }
-    #endregion
 
-    #region Edge
-
-        public bool AddEdge(IEdge e, bool oriented = false)
+        public bool RemoveEdge(IVertex from, IVertex to)
         {
+            var e = from.FindEdge(to);
+            if (e == null)
+                return false;
+            return RemoveEdge(e);//new Edge(from, to)
+        }
 
-            //if(ContainsEdge(e))
-            //vertexInEdges[e.Target].Add(e);
-            //vertexOutEdges[e.Source].Add(e);
-            //edgeCount++;
-            //OnEdgeAdded
+        public bool RemoveEdge(IEdge e)
+        {
+            e.From.Remove(e);
+            e.To.Remove(e);
+            edges.Remove(e);
             return true;
         }
 
         public bool ContainsEdge(IEdge e)
         {
-            return ContainsEdge(e.Source, e.Target);
+            return ContainsEdge(e.From, e.To);
         }
 
-        public bool ContainsEdge(IVertex source, IVertex Target)
+        public bool ContainsEdge(IVertex source, IVertex target)
         {
             return true;
+        }
+
+        public EdgeList GetEdges()
+        {
+            return edges;
+        }
+
+        public VertexList GetVerticies()
+        {
+            return verticies;
         }
     #endregion
 
 
-        #region sup
-        //public IEnumerable<IEdge> OutEdges(IVertex v)
-        //{
-        //    return this.vertexs[v];
-        //}
+    #region sup   
 
         public bool ContainsVertex(IVertex v)
         {
-            return vertexOutEdges.ContainsKey(v);
-            //return vertexs.Contains(v);
+            return verticies.Contains(v); 
         }
 
-#endregion
+    #endregion
+
+        public override string ToString()
+        {
+            return $"VertexCount = {VertexCount}, EdgeCount = {EdgeCount}";
+        }
     }
 }
