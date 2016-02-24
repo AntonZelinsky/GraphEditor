@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using NGraph.Collections;
+using System.Threading.Tasks;  
 using NGraph.Models;
 
 namespace NGraph.Interfaces
@@ -12,9 +11,9 @@ namespace NGraph.Interfaces
     {
         string Name { get; set; }
 
-        EdgeList IncommingEdges { get; }
+        List<IEdge> IncommingEdges { get; }
 
-        EdgeList OutcommingEdges { get; }
+        List<IEdge> OutcommingEdges { get; }
 
         bool AddEdge(IEdge e);
 

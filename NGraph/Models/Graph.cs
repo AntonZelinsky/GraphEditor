@@ -5,8 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using NGraph.Collections;
+using System.Threading.Tasks;  
 using NGraph.Interfaces;
 
 namespace NGraph.Models
@@ -14,16 +13,16 @@ namespace NGraph.Models
    // [DebuggerDisplay("VertexCount = {VertexCount}, EdgeCount = {EdgeCount}")]
     public class Graph : IGraph
     {
-        private readonly VertexList verticies;
-        private readonly EdgeList edges;      
+        private readonly List<IVertex> verticies;
+        private readonly List<IEdge> edges;      
                                      
         public int EdgeCount { get { return edges.Count; } }
         public int VertexCount => verticies.Count;
 
         public Graph()
         {
-            verticies = new VertexList();
-            edges = new EdgeList();                    
+            verticies = new List<IVertex>();
+            edges = new List<IEdge>();                    
         }
 
         public bool IsEmpty()
@@ -123,12 +122,12 @@ namespace NGraph.Models
             return true;
         }
 
-        public EdgeList GetEdges()
+        public List<IEdge> GetEdges()
         {
             return edges;
         }
 
-        public VertexList GetVerticies()
+        public List<IVertex> GetVerticies()
         {
             return verticies;
         }
