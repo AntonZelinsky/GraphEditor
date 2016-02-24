@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NGraph.Collections;
 using NGraph.Interfaces;
 
 namespace NGraph.Models
@@ -12,19 +11,19 @@ namespace NGraph.Models
     {
         public string Name { get; set; }
 
-        private EdgeList outcomingEdges;
+        private List<IEdge> outcomingEdges;
 
-        private EdgeList incomingEdges;
+        private List<IEdge> incomingEdges;
 
-        public EdgeList IncommingEdges => incomingEdges;
+        public List<IEdge> IncommingEdges => incomingEdges;
 
-        public EdgeList OutcommingEdges => outcomingEdges;
+        public List<IEdge> OutcommingEdges => outcomingEdges;
 
         public Vertex(string name = "")
         {
             Name = name;
-            incomingEdges = new EdgeList();
-            outcomingEdges = new EdgeList();
+            incomingEdges = new List<IEdge>();
+            outcomingEdges = new List<IEdge>();
         }
              
         public bool AddEdge(IEdge e)

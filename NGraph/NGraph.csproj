@@ -40,11 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
-    <Compile Include="Collections\EdgeEdgeDictionary.cs" />
-    <Compile Include="Collections\EdgeList.cs" />
-    <Compile Include="Collections\VertexEdgeDictionary.cs" />
-    <Compile Include="Collections\VertexList.cs" />
     <Compile Include="Interfaces\IEdge.cs" />
     <Compile Include="Interfaces\IGraph.cs" />
     <Compile Include="Interfaces\IVertex.cs" />
@@ -54,6 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Collections\" />
     <Folder Include="Common\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
