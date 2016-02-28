@@ -12,60 +12,56 @@ using GraphEditor.Controls.Interfaces;
 namespace GraphEditor.View
 {
     public class GraphArea : Canvas
-    {                                    
-        private List<IElement> selectedElements = new List<IElement>();          
+    {
+        private bool selection;
+        public readonly List<IElement> selectedElements = new List<IElement>();          
         private Point startPointClick;
         private Rectangle selectionRectangle;
+        private bool created;
 
         public GraphArea()
         {
-            Background = Brushes.AliceBlue;
+            Background = Brushes.White;
             MouseLeftButtonDown += OnMouseLeftButtonDown;
-            Focusable = true;       
+            Focusable = true;
+            MouseEventHandler mouseMove = (sender, args) => {
+                if (selectionRectangle == null && args.LeftButton == MouseButtonState.Pressed)
+                {
+                    var element = (UIElement)sender;
+                    var p2 = args.GetPosition(this);
+                    Canvas.SetLeft(element, p2.X - startPointClick.X);
+                    Canvas.SetTop(element, p2.Y - startPointClick.Y);
+                }
+            };
         }
                  
         private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             startPointClick = e.GetPosition(this);
+            var element = GetElement(startPointClick);
             if (e.ClickCount == 2)
             {
-                // предотвращение создания узлов один на другом
-                var element = GetElement(startPointClick);
-                if (element == null)
-                {
+                // предотвращение создания узлов один на другом   
+                if (element == null)   // TODO: вынести
+                {                                                          
                     var vc = CreateVertexControl(startPointClick);
                     GraphArea.SetLeft(vc, startPointClick.X);
                     GraphArea.SetTop(vc, startPointClick.Y);
                     this.Children.Add(vc);
+                    created = true;
                 }
             }
-            else if(e.ClickCount == 1)
+            else if (e.ClickCount == 1)
             {
-                var element = GetElement(startPointClick);
-                if (element != null)
-                {
-                    if (!element.IsSelected)
-                    {
-                        // Выделение элемента, при нажатой CTRL добавить к уже выделеным
-                        if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
-                            selectedElements.RemoveAll(s => s.IsSelected = false);
-                            element.IsSelected = true;
-                            selectedElements.Add(element);
-                        }                      
-                    }
-                    else
-                    {
-                        //selectedElements.RemoveAll(s => s.IsSelected = false);
-                        element.IsSelected = false;
-                        selectedElements.Remove(element);
-                    }      
-                }
-                else
+                // Мультивыделение
+                if (element == null)
                 {
                     if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
-                    selectedElements.RemoveAll(s => s.IsSelected = false);
-
-                    // Мультивыделение                
+                    {
+                        selectedElements.ForEach(s => s.IsSelected = false);
+                        selectedElements.Clear();
+                    }
+                    selection = true;
                     selectionRectangle = new Rectangle
                         {
                             Width = 0, Height = 0,
@@ -87,36 +83,89 @@ namespace GraphEditor.View
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            Point mousePosition = e.GetPosition(null);
-            if (e.LeftButton == MouseButtonState.Pressed && selectionRectangle != null)
-            {
-                var pos = e.GetPosition(this);
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {                   
+                Point mousePosition = e.GetPosition(null);
 
-                var x = Math.Min(pos.X, startPointClick.X);
-                var y = Math.Min(pos.Y, startPointClick.Y);
+                // мультивыделение              
+                if(selection)
+                {                   
+                    // защита от случайных движений мыши              
+                   if(Math.Max(Math.Abs(startPointClick.X - mousePosition.X), Math.Abs(startPointClick.Y - mousePosition.Y)) < 5)
+                        return;
+                    var x = Math.Min(mousePosition.X, startPointClick.X);
+                    var y = Math.Min(mousePosition.Y, startPointClick.Y);
 
-                var w = Math.Max(pos.X, startPointClick.X) - x;
-                var h = Math.Max(pos.Y, startPointClick.Y) - y;
+                    var w = Math.Max(mousePosition.X, startPointClick.X) - x;
+                    var h = Math.Max(mousePosition.Y, startPointClick.Y) - y;
 
-                selectionRectangle.Width = w;
-                selectionRectangle.Height = h;
+                    selectionRectangle.Width = w;
+                    selectionRectangle.Height = h;
 
-                Canvas.SetLeft(selectionRectangle, x);
-                Canvas.SetTop(selectionRectangle, y);
+                    Canvas.SetLeft(selectionRectangle, x);
+                    Canvas.SetTop(selectionRectangle, y);                                         
+                }
+                // перетаскивание
+                else
+                {
+                    var vectorPosition = startPointClick - mousePosition;     
+                    startPointClick = mousePosition;
 
-                Debug.WriteLine($"SelectionSquare from {startPointClick.ToString()},to {mousePosition.ToString()}");        
-            } 
-
+                    if (selectedElements.Count > 0)
+                    {
+                        foreach (var element in selectedElements)
+                        {
+                            var selectedElement = (UIElement)element;
+                            var x = GraphArea.GetLeft(selectedElement);
+                            var y = GraphArea.GetTop(selectedElement);
+                            GraphArea.SetLeft(selectedElement, x - vectorPosition.X);
+                            GraphArea.SetTop(selectedElement, y - vectorPosition.Y);
+                        }                                   
+                    }
+                }
+            }
             base.OnMouseMove(e);
         }
 
         protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
         {
-            var geometry = new RectangleGeometry(new Rect(startPointClick, e.GetPosition(this)));
-            var elementsInRegion = GetElements(geometry);
-            this.Children.Remove(selectionRectangle);
-            selectionRectangle = null; 
+            Point mousePosition = e.GetPosition(this);
+            var element = GetElement(mousePosition);
+            if (e.ClickCount == 1)
+            {      
+                // мультивыделение
+                if (selectionRectangle != null)
+                {
+                    var geometry = new RectangleGeometry(new Rect(startPointClick, e.GetPosition(this)));
+                    GetElements(geometry);
+                    this.Children.Remove(selectionRectangle);
+                    selectionRectangle = null;
+                    selection = false;
+                }
+                // еденичное выделение 
+                else if (element != null && !created)
+                {   
+                    if (!element.IsSelected)
+                    {
+                        // Выделение элемента, при нажатой CTRL добавить к уже выделеным
+                        if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
+                        {
+                            selectedElements.ForEach(s => s.IsSelected = false);
+                            selectedElements.Clear();
+                        }
 
+                        element.IsSelected = true;
+                        selectedElements.Add(element);
+                    }
+                    else
+                    {
+                        element.IsSelected = false;
+                        selectedElements.Remove(element);
+                    }              
+                } 
+            }
+
+            created = false;
             ReleaseMouseCapture();
             base.OnMouseLeftButtonUp(e);
         }
@@ -136,7 +185,7 @@ namespace GraphEditor.View
 
         private VertexElement CreateVertexControl(Point p)
         {                           
-            var vc = new VertexElement();
+            var vc = new VertexElement(); 
             return vc;
         }  
 
@@ -166,7 +215,8 @@ namespace GraphEditor.View
                 geometryResult.IntersectionDetail == IntersectionDetail.FullyInside)
             {
                 element.IsSelected = true;
-                selectedElements.Add(element);
+                if(!selectedElements.Contains(element))
+                    selectedElements.Add(element);
             }
             return HitTestResultBehavior.Continue;
         }     
