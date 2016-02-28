@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -23,33 +24,7 @@ namespace GraphEditor
         public MainWindow()
         {
             InitializeComponent();
-        }
-
-        private void UIElement_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            Point p = e.GetPosition(workArea);
-
-            //DrawingVisual visual = new DrawingVisual();
-            //DrawSquare(visual, p, false);
-            //workArea.AddVisual(visual);
-
-          
-        }
-
-        // Константы рисования.
-        private Brush drawingBrush = Brushes.AliceBlue;
-        private Brush selectedDrawingBrush = Brushes.LightGoldenrodYellow;
-        private Pen drawingPen = new Pen(Brushes.SteelBlue, 3);
-        private Size squareSize = new Size(30, 30);
-        private void DrawSquare(DrawingVisual visual, Point topLeftCorner, bool isSelected)
-        {
-            using (DrawingContext dc = visual.RenderOpen())
-            {
-                Brush brush = drawingBrush;
-                if (isSelected)
-                    brush = selectedDrawingBrush;
-                dc.DrawRectangle(brush, drawingPen, new Rect(topLeftCorner, squareSize));
-            }
+            Loaded += (x, y) => Keyboard.Focus(graphArea);
         }
     }
 }
