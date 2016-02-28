@@ -15,6 +15,9 @@ namespace NGraph.Interfaces
 
         List<IEdge> OutcommingEdges { get; }
 
+        //List<Edge> SelfEdges { get; set; }
+        //bool IsSelfLoop
+
         bool AddEdge(IEdge e);
 
         bool AddIncomingEdge(IVertex from);
