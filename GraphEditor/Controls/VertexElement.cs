@@ -51,7 +51,7 @@ namespace GraphEditor.Controls
         protected override void OnMouseEnter(MouseEventArgs e)
         {
             IsEnter = true;
-           // InvalidateVisual();
+            InvalidateVisual();
             base.OnMouseEnter(e);
         }
 

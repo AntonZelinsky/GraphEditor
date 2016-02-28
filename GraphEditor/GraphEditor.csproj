@@ -99,9 +99,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="todo.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\NGraph\NGraph.csproj">
       <Project>{373c848d-33ed-48d7-a8d5-46e3b33125a6}</Project>
       <Name>NGraph</Name>
