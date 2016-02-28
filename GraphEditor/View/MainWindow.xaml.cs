@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -23,33 +24,16 @@ namespace GraphEditor
         public MainWindow()
         {
             InitializeComponent();
+            Loaded += (x, y) => Keyboard.Focus(graphArea);
         }
 
-        private void UIElement_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        protected override void OnMouseMove(MouseEventArgs e)
         {
-            Point p = e.GetPosition(workArea);
-
-            //DrawingVisual visual = new DrawingVisual();
-            //DrawSquare(visual, p, false);
-            //workArea.AddVisual(visual);
-
-          
-        }
-
-        // Константы рисования.
-        private Brush drawingBrush = Brushes.AliceBlue;
-        private Brush selectedDrawingBrush = Brushes.LightGoldenrodYellow;
-        private Pen drawingPen = new Pen(Brushes.SteelBlue, 3);
-        private Size squareSize = new Size(30, 30);
-        private void DrawSquare(DrawingVisual visual, Point topLeftCorner, bool isSelected)
-        {
-            using (DrawingContext dc = visual.RenderOpen())
-            {
-                Brush brush = drawingBrush;
-                if (isSelected)
-                    brush = selectedDrawingBrush;
-                dc.DrawRectangle(brush, drawingPen, new Rect(topLeftCorner, squareSize));
-            }
+            var p1 = e.GetPosition(null);
+            var p = e.GetPosition(graphArea);
+            Coordinates.Text = $"X: {p.X}, Y: {p.Y}";
+            Counter.Text = $"Elements: {graphArea.Children.Count}, Selected Elements: {graphArea.GetSelectedElements}";
+            base.OnMouseMove(e);
         }
     }
 }

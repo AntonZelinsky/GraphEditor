@@ -7,6 +7,30 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <Ui:WorkArea x:Name="workArea" MouseLeftButtonDown="UIElement_OnMouseLeftButtonDown"></Ui:WorkArea>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Ui:GraphArea x:Name="graphArea" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2"></Ui:GraphArea>
+        <StatusBar Grid.Row="1">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0">
+                <TextBlock x:Name="Coordinates"></TextBlock>
+            </StatusBarItem>
+            <Separator Grid.Column="1"/>
+            <StatusBarItem Grid.Column="2">
+                <TextBlock x:Name="Counter"></TextBlock>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>
