@@ -14,7 +14,8 @@ namespace GraphEditor.View
     public class GraphArea : Canvas
     {
         private bool selection;
-        public readonly List<IElement> selectedElements = new List<IElement>();          
+        private readonly List<IElement> selectedElements = new List<IElement>();
+        public int GetSelectedElements => selectedElements.Count;      
         private Point startPointClick;
         private Rectangle selectionRectangle;
         private bool created;

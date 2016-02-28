@@ -26,5 +26,14 @@ namespace GraphEditor
             InitializeComponent();
             Loaded += (x, y) => Keyboard.Focus(graphArea);
         }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            var p1 = e.GetPosition(null);
+            var p = e.GetPosition(graphArea);
+            Coordinates.Text = $"X: {p.X}, Y: {p.Y}";
+            Counter.Text = $"Elements: {graphArea.Children.Count}, Selected Elements: {graphArea.GetSelectedElements}";
+            base.OnMouseMove(e);
+        }
     }
 }
