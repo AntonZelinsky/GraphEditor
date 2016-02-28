@@ -47,13 +47,7 @@ namespace GraphEditor.View
                     if (!element.IsSelected)
                     {
                         // Выделение элемента, при нажатой CTRL добавить к уже выделеным
-                        if (Keyboard.IsKeyDown(Key.RightCtrl) || Keyboard.IsKeyDown(Key.LeftCtrl))
-                        {
-                            element.IsSelected = true;
-                            selectedElements.Add(element);
-                        }
-                        else
-                        {      
+                        if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
                             selectedElements.RemoveAll(s => s.IsSelected = false);
                             element.IsSelected = true;
                             selectedElements.Add(element);
@@ -68,6 +62,7 @@ namespace GraphEditor.View
                 }
                 else
                 {
+                    if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
                     selectedElements.RemoveAll(s => s.IsSelected = false);
 
                     // Мультивыделение                
