@@ -29,10 +29,15 @@ namespace GraphEditor.View
             startPointClick = e.GetPosition(this);
             if (e.ClickCount == 2)
             {
-                var vc = CreateVertexControl(startPointClick);
-                GraphArea.SetLeft(vc, startPointClick.X);
-                GraphArea.SetTop(vc, startPointClick.Y);
-                this.Children.Add(vc);
+                // предотвращение создания узлов один на другом
+                var element = GetElement(startPointClick);
+                if (element == null)
+                {
+                    var vc = CreateVertexControl(startPointClick);
+                    GraphArea.SetLeft(vc, startPointClick.X);
+                    GraphArea.SetTop(vc, startPointClick.Y);
+                    this.Children.Add(vc);
+                }
             }
             else if(e.ClickCount == 1)
             {
