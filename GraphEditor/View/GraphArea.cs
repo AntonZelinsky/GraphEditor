@@ -24,16 +24,7 @@ namespace GraphEditor.View
         {
             Background = Brushes.White;
             MouseLeftButtonDown += OnMouseLeftButtonDown;
-            Focusable = true;
-            MouseEventHandler mouseMove = (sender, args) => {
-                if (selectionRectangle == null && args.LeftButton == MouseButtonState.Pressed)
-                {
-                    var element = (UIElement)sender;
-                    var p2 = args.GetPosition(this);
-                    Canvas.SetLeft(element, p2.X - startPointClick.X);
-                    Canvas.SetTop(element, p2.Y - startPointClick.Y);
-                }
-            };
+            Focusable = true; 
         }
                  
         private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
