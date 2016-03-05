@@ -5,17 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
+using System.Windows.Media; 
+using System.Windows.Controls;
 using GraphEditor.Controls.Interfaces;
 
 namespace GraphEditor.Controls
 {
-    public class VertexElement : FrameworkElement, IElement
+    public class VertexControl : Control, IElement
     {
-        static VertexElement()
+        static VertexControl()
         {
             
-        }    
+        }                                        
 
         #region Property
 
@@ -30,7 +31,7 @@ namespace GraphEditor.Controls
         /// </summary>
         public static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register(
-                "IsSelected", typeof (bool), typeof (VertexElement),
+                "IsSelected", typeof (bool), typeof (VertexControl),
                 new FrameworkPropertyMetadata(false,
                   FrameworkPropertyMetadataOptions.AffectsRender));
 
@@ -40,8 +41,8 @@ namespace GraphEditor.Controls
         /// <value>The Content.</value>
         public bool IsSelected
         {
-            get { return (bool)GetValue(VertexElement.IsSelectedProperty); }
-            set { SetValue(VertexElement.IsSelectedProperty, value); }
+            get { return (bool)GetValue(VertexControl.IsSelectedProperty); }
+            set { SetValue(VertexControl.IsSelectedProperty, value); }
         }
 
         #endregion

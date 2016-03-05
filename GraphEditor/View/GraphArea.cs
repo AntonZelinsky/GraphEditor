@@ -175,9 +175,9 @@ namespace GraphEditor.View
             base.OnKeyDown(e);
         }
 
-        private VertexElement CreateVertexControl(Point p)
+        private VertexControl CreateVertexControl(Point p)
         {                           
-            var vc = new VertexElement(); 
+            var vc = new VertexControl(); 
             return vc;
         }  
 
