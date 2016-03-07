@@ -32,21 +32,17 @@ namespace GraphEditor.View
         {
             startPointClick = e.GetPosition(this);
             var element = GetElement(startPointClick);
-            if (e.ClickCount == 2)
+            if (element == null)
             {
-                // предотвращение создания узлов один на другом   
-                if (element == null)   // TODO: вынести
-                {                                                          
+                if (e.ClickCount == 2)
+                {                                                    
                     var vc = CreateVertexControl(startPointClick);
                     
                     created = true;
                 }
-            }
-            else if (e.ClickCount == 1)
-            {
-                // Мультивыделение
-                if (element == null)
-                {
+                // Мультивыделение   
+                else if (e.ClickCount == 1)
+                {                        
                     if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
                     {
                         selectedElements.ForEach(s => s.IsSelected = false);
@@ -54,21 +50,22 @@ namespace GraphEditor.View
                     }
                     selection = true;
                     selectionRectangle = new Rectangle
-                        {
-                            Width = 0, Height = 0,
-                            Fill = Brushes.LightCyan,
-                            Stroke = Brushes.Orange,
-                            StrokeThickness = 2,
-                            Opacity = 0.3
-                        };
+                    {
+                        Width = 0,
+                        Height = 0,
+                        Fill = Brushes.LightCyan,
+                        Stroke = Brushes.Orange,
+                        StrokeThickness = 2,
+                        Opacity = 0.3
+                    };
 
                     this.Children.Add(selectionRectangle);
                     Canvas.SetLeft(selectionRectangle, e.GetPosition(this).X);
                     Canvas.SetTop(selectionRectangle, e.GetPosition(this).Y);
                     // Гарантированое получение MouseLeftButtonUp даже если вышли за пределы области
-                    CaptureMouse();
+                    CaptureMouse();   
                 }
-            }
+            }     
             base.OnMouseLeftButtonDown(e);
         }
 
