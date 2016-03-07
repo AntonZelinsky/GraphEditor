@@ -1,6 +1,7 @@
-﻿using System;              
+﻿using System;     
+using NGraph.Models;         
 using System.Windows;   
-using System.Diagnostics; 
+using System.Diagnostics;
 using GraphEditor.Controls; 
 using System.Windows.Input;
 using System.Windows.Media;
@@ -24,16 +25,7 @@ namespace GraphEditor.View
         {
             Background = Brushes.White;
             MouseLeftButtonDown += OnMouseLeftButtonDown;
-            Focusable = true;
-            MouseEventHandler mouseMove = (sender, args) => {
-                if (selectionRectangle == null && args.LeftButton == MouseButtonState.Pressed)
-                {
-                    var element = (UIElement)sender;
-                    var p2 = args.GetPosition(this);
-                    Canvas.SetLeft(element, p2.X - startPointClick.X);
-                    Canvas.SetTop(element, p2.Y - startPointClick.Y);
-                }
-            };
+            Focusable = true; 
         }
                  
         private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -45,10 +37,8 @@ namespace GraphEditor.View
                 if (e.ClickCount == 2)
                 {                                                    
                     var vc = CreateVertexControl(startPointClick);
-                    GraphArea.SetLeft(vc, startPointClick.X);
-                    GraphArea.SetTop(vc, startPointClick.Y);
-                    this.Children.Add(vc);
-                    created = true;       
+                    
+                    created = true;
                 }
                 // Мультивыделение   
                 else if (e.ClickCount == 1)
@@ -113,11 +103,9 @@ namespace GraphEditor.View
                     {
                         foreach (var element in selectedElements)
                         {
-                            var selectedElement = (UIElement)element;
-                            var x = GraphArea.GetLeft(selectedElement);
-                            var y = GraphArea.GetTop(selectedElement);
-                            GraphArea.SetLeft(selectedElement, x - vectorPosition.X);
-                            GraphArea.SetTop(selectedElement, y - vectorPosition.Y);
+                            var selectedElement = (IElement)element;     
+                            var currentPosition = selectedElement.GetPosition();
+                            selectedElement.SetPosition(currentPosition.X - vectorPosition.X, currentPosition.Y - vectorPosition.Y);
                         }                                   
                     }
                 }
@@ -181,11 +169,67 @@ namespace GraphEditor.View
             base.OnKeyDown(e);
         }
 
-        private VertexElement CreateVertexControl(Point p)
-        {                           
-            var vc = new VertexElement(); 
+        private VertexControl CreateVertexControl(Point p)
+        {
+            var v = new Vertex();  
+            var vc = new VertexControl(v);             
+            vc.SetPosition(p);
+            this.Children.Add(vc);
             return vc;
-        }  
+        }
+
+
+        #region Attached Dependency Property registrations
+        public static readonly DependencyProperty XProperty =
+            DependencyProperty.RegisterAttached("X", typeof(double), typeof(GraphArea),
+                                                 new FrameworkPropertyMetadata(double.NaN,
+                                                    FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                    FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                    FrameworkPropertyMetadataOptions.AffectsRender |
+                                                    FrameworkPropertyMetadataOptions.AffectsParentMeasure |
+                                                    FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                                                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, x_changed));
+
+        private static void x_changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            d.SetValue(LeftProperty, e.NewValue);
+        }
+
+        public static double GetX(DependencyObject obj)
+        {
+            return (double)obj.GetValue(XProperty);
+        }
+
+        public static void SetX(DependencyObject obj, double value, bool alsoSetFinal = true)
+        {
+            obj.SetValue(XProperty, value);
+        }
+
+        public static readonly DependencyProperty YProperty =
+           DependencyProperty.RegisterAttached("Y", typeof(double), typeof(GraphArea),
+                                                 new FrameworkPropertyMetadata(double.NaN,
+                                                    FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                    FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                    FrameworkPropertyMetadataOptions.AffectsRender |
+                                                    FrameworkPropertyMetadataOptions.AffectsParentMeasure |
+                                                    FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                                                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault
+                                                    , y_changed));
+
+        private static void y_changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            d.SetValue(TopProperty, e.NewValue);
+        }
+        public static double GetY(DependencyObject obj)
+        {
+            return (double)obj.GetValue(YProperty);
+        }
+
+        public static void SetY(DependencyObject obj, double value)
+        {
+            obj.SetValue(YProperty, value);
+        }
+        #endregion
 
         #region HitTest
         public IElement GetElement(Point p)
@@ -218,6 +262,6 @@ namespace GraphEditor.View
             }
             return HitTestResultBehavior.Continue;
         }     
-        #endregion  
+        #endregion
     }
 }
