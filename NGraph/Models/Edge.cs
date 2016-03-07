@@ -12,32 +12,16 @@ namespace NGraph.Models
     {
         private readonly IVertex from;
         private readonly IVertex to;
-        private bool oriented = false;
 
-        public IVertex From
-        {
-            get { return from; }
-        }
+        public IVertex From => from;
 
         public IVertex To => to;
-
-        public bool Oriented
+        
+        public Edge(IVertex from, IVertex to)
         {
-            get { return oriented; }  
-            set { oriented = value; }
-        }
-
-        public Edge(IVertex from, IVertex to, bool oriented = false)
-        {
-            //Contract.Requires(this.source != null);
-            //Contract.Requires(this.target != null);
-            //Contract.Ensures(this.Source.Equals(this.source));
-            //Contract.Ensures(this.Target.Equals(this.target));
-
             this.from = from;
             this.to = to;
-            this.oriented = oriented;
-        }         
+        }
 
         /// <summary>
         /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
@@ -47,7 +31,7 @@ namespace NGraph.Models
         /// </returns>
         public override string ToString()
         {
-            return $"{from.Name} -> {to.Name}";
+            return $"{from.Name} <=> {to.Name}";
         }
     }
 }
