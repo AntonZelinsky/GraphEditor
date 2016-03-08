@@ -85,9 +85,9 @@ namespace GraphEditor.View
             Point mousePosition = e.GetPosition(null);
 
             // Создание дуги
-            if (createEdge != null && e.RightButton == MouseButtonState.Pressed &&
-                e.LeftButton == MouseButtonState.Pressed &&
-                targetElement != null)
+            if (createEdge != null && 
+                e.RightButton == MouseButtonState.Pressed &&
+                e.LeftButton == MouseButtonState.Pressed)
             {
                 CreatingEdgeControl(mousePosition);
             }
