@@ -64,6 +64,7 @@ namespace GraphEditor.View
                     };
 
                     this.Children.Add(selectionRectangle);
+                    Canvas.SetZIndex(selectionRectangle, 200);
                     Canvas.SetLeft(selectionRectangle, e.GetPosition(this).X);
                     Canvas.SetTop(selectionRectangle, e.GetPosition(this).Y);
                 }
