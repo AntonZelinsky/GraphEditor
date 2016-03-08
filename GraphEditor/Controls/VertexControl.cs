@@ -14,14 +14,21 @@ namespace GraphEditor.Controls
 {
     public class VertexControl : Control, IElement
     {
-        static VertexControl()
-        {
+        private readonly List<EdgeControl> outcomingEdges;
 
-        }
+        private readonly List<EdgeControl> incomingEdges;
+
+        public List<EdgeControl> IncommingEdges => incomingEdges;
+
+        public List<EdgeControl> OutcommingEdges => outcomingEdges;
+
         public VertexControl(object vertexData)
         {
             DataContext = vertexData;
             Vertex = vertexData;
+
+            incomingEdges = new List<EdgeControl>();
+            outcomingEdges = new List<EdgeControl>();
         }                                  
 
         #region Property
@@ -79,8 +86,7 @@ namespace GraphEditor.Controls
             InvalidateVisual();
             base.OnMouseLeave(e);
         }
-
-
+        
         protected override void OnRender(DrawingContext drawingContext)
         {
             drawingContext.DrawEllipse(
@@ -93,6 +99,8 @@ namespace GraphEditor.Controls
                 new Pen(MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
                 new Point(0, 0), 5, 5);
         }
+
+        #region Position trace feature
 
         public Point GetPosition()
         {
@@ -113,7 +121,6 @@ namespace GraphEditor.Controls
             OnPositionChanged(new Point(), GetPosition());
         }
         
-        #region Position trace feature
         /// <summary>
         /// Fires when Position property set and object changes its coordinates.
         /// </summary>
@@ -124,6 +131,7 @@ namespace GraphEditor.Controls
             if (PositionChanged != null)
                 PositionChanged.Invoke(this, new VertexPositionEventArgs(offset, pos, this));
         }
+
         #endregion
     }
 }
