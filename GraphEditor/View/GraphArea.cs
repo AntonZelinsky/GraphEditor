@@ -246,7 +246,9 @@ namespace GraphEditor.View
 
         private EdgeControl ReleasedEdgeControl(VertexControl to)
         {
-            createEdge.SetTo(to);    
+            createEdge.SetTo(to);
+            createEdge.From.AddEdge(createEdge);
+            createEdge.To.AddEdge(createEdge);
             return createEdge;
         }
 
