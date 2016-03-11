@@ -50,7 +50,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Controls\EdgeControl.cs" />
+    <Compile Include="Controls\Interfaces\IEdgeElement.cs" />
     <Compile Include="Controls\Interfaces\IElement.cs" />
+    <Compile Include="Controls\Interfaces\IVertexElement.cs" />
     <Compile Include="Controls\VertexControl.cs" />
     <Compile Include="Models\EventType.cs" />
     <Compile Include="Models\VertexPositionChanged.cs" />

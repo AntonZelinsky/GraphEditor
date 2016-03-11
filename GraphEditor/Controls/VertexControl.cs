@@ -1,4 +1,5 @@
 ﻿using System;     
+using System.Linq;
 using System.Windows;
 using GraphEditor.View;
 using GraphEditor.Models;
@@ -7,23 +8,34 @@ using System.Windows.Input;
 using System.Windows.Media; 
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using System.Collections.Generic;    
+using System.Collections.Generic;
 using GraphEditor.Controls.Interfaces;
 
 namespace GraphEditor.Controls
 {
-    public class VertexControl : Control, IElement
+    public class VertexControl : Control, IVertexElement
     {
-        static VertexControl()
-        {
+        private readonly List<EdgeControl> outcomingEdges;
 
-        }
+        private readonly List<EdgeControl> incomingEdges;
+                                   
+        public List<EdgeControl> IncommingEdges => incomingEdges;
+                                   
+        public List<EdgeControl> OutcommingEdges => outcomingEdges;
+
+        public List<EdgeControl> UndirectedEdges => (List<EdgeControl>)incomingEdges.Intersect(outcomingEdges);
+
+        public List<EdgeControl> AllEdges => (List<EdgeControl>)incomingEdges.Union(outcomingEdges);
+
         public VertexControl(object vertexData)
         {
             DataContext = vertexData;
             Vertex = vertexData;
-        }                                  
 
+            incomingEdges = new List<EdgeControl>();
+            outcomingEdges = new List<EdgeControl>();
+        }
+       
         #region Property
 
         private Brush BrushColor = Brushes.Green;
@@ -79,8 +91,7 @@ namespace GraphEditor.Controls
             InvalidateVisual();
             base.OnMouseLeave(e);
         }
-
-
+        
         protected override void OnRender(DrawingContext drawingContext)
         {
             drawingContext.DrawEllipse(
@@ -93,6 +104,8 @@ namespace GraphEditor.Controls
                 new Pen(MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
                 new Point(0, 0), 5, 5);
         }
+
+        #region Position trace feature
 
         public Point GetPosition()
         {
@@ -113,7 +126,6 @@ namespace GraphEditor.Controls
             OnPositionChanged(new Point(), GetPosition());
         }
         
-        #region Position trace feature
         /// <summary>
         /// Fires when Position property set and object changes its coordinates.
         /// </summary>
@@ -124,6 +136,7 @@ namespace GraphEditor.Controls
             if (PositionChanged != null)
                 PositionChanged.Invoke(this, new VertexPositionEventArgs(offset, pos, this));
         }
+
         #endregion
     }
 }
