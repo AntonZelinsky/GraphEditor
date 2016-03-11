@@ -23,9 +23,9 @@ namespace GraphEditor.Controls
                                    
         public List<EdgeControl> OutcommingEdges => outcomingEdges;
 
-        public List<EdgeControl> UndirectedEdges => (List<EdgeControl>)incomingEdges.Intersect(outcomingEdges);
+        public IList<EdgeControl> UndirectedEdges => (IList<EdgeControl>)incomingEdges.Intersect(outcomingEdges).ToList().AsReadOnly();
 
-        public List<EdgeControl> AllEdges => (List<EdgeControl>)incomingEdges.Union(outcomingEdges);
+        public IList<EdgeControl> AllEdges => (IList<EdgeControl>)incomingEdges.Union(outcomingEdges).ToList().AsReadOnly();
 
         public VertexControl(object vertexData)
         {

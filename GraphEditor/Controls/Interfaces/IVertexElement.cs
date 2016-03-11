@@ -9,10 +9,10 @@ namespace GraphEditor.Controls.Interfaces
         List<EdgeControl> IncommingEdges { get; }
 
         List<EdgeControl> OutcommingEdges { get; }
+                          
+        IList<EdgeControl> UndirectedEdges { get; }
 
-        List<EdgeControl> UndirectedEdges { get; }
-
-        List<EdgeControl> AllEdges { get; }
+        IList<EdgeControl> AllEdges { get; }
 
         /// <summary>
         /// Fires when Position property set and object changes its coordinates.
