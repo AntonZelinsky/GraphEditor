@@ -8,14 +8,14 @@ using GraphEditor.Controls.Interfaces;
 
 namespace GraphEditor.Controls
 {
-    public class EdgeControl : Control, IElement
+    public class EdgeControl : Control, IEdgeElement
     {
         #region Properties & Fields
 
         /// <summary>
         /// Source visual vertex object
         /// </summary>
-        public VertexControl From
+        public IVertexElement From
         {
             get { return (VertexControl)GetValue(FromProperty); }
             set { SetValue(FromProperty, value); }
@@ -35,13 +35,13 @@ namespace GraphEditor.Controls
         protected void OnFromChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             From.PositionChanged += source_PositionChanged;
-            From.SizeChanged += Source_SizeChanged;
+            InvalidateVisual();
         }
 
         /// <summary>
         /// Target visual vertex object
         /// </summary>
-        public VertexControl To
+        public IVertexElement To
         {
             get { return (VertexControl)GetValue(ToProperty); }
             set { SetValue(ToProperty, value); }
@@ -61,7 +61,7 @@ namespace GraphEditor.Controls
         protected void OnToChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             To.PositionChanged += source_PositionChanged;
-            To.SizeChanged += Source_SizeChanged;
+            InvalidateVisual();
         }
 
         private Point toPoint;
@@ -92,7 +92,7 @@ namespace GraphEditor.Controls
 
         public bool IsSelected { get; set; }
 
-        private bool mouseOver;
+        private bool isMouseOver;
 
         #endregion
 
@@ -101,12 +101,6 @@ namespace GraphEditor.Controls
         private void source_PositionChanged(object sender, EventArgs e)
         {
             //update edge on any connected vertex position changes
-            InvalidateVisual();
-        }
-
-
-        void Source_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
             InvalidateVisual();
         }
 
@@ -137,43 +131,26 @@ namespace GraphEditor.Controls
         public void SetFrom(VertexControl from)
         {
             From = from;
-            InvalidateVisual();
         }
 
         public void SetTo(VertexControl to)
         {
             To = to;
-            toPoint = new Point();
-            InvalidateVisual();
+            toPoint = new Point(); 
         }
         
         #endregion
-
-        public Point GetPosition()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetPosition(Point pt)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetPosition(double x, double y)
-        {
-            throw new System.NotImplementedException();
-        }
-        
+              
         protected override void OnMouseEnter(MouseEventArgs e)
         {
-            mouseOver = true;
+            isMouseOver = true;
             InvalidateVisual();
             base.OnMouseEnter(e);
         }
 
         protected override void OnMouseLeave(MouseEventArgs e)
         {
-            mouseOver = false;
+            isMouseOver = false;
             InvalidateVisual();
             base.OnMouseLeave(e);
         }
@@ -185,7 +162,7 @@ namespace GraphEditor.Controls
             to = To?.GetPosition() ?? toPoint;
             if (to.X == 0 && to.Y == 0)
                 return;
-            drawingContext.DrawLine(new Pen(mouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3), from, to);
+            drawingContext.DrawLine(new Pen(isMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3), from, to);
             base.OnRender(drawingContext);
         }
     }

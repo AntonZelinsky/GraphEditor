@@ -118,13 +118,13 @@ namespace GraphEditor.View
 
                     if (selectedElements.Count > 0)
                     {
-                        foreach (var element in selectedElements)
+                        foreach (IElement element in selectedElements)
                         {
-                            var selectedElement = (IElement)element;    
-                            if(selectedElement is EdgeControl)
-                                 continue;
-                            var currentPosition = selectedElement.GetPosition();
-                            selectedElement.SetPosition(currentPosition.X - vectorPosition.X, currentPosition.Y - vectorPosition.Y);
+                            // отсеиваем не вершины
+                            if (!(element is IVertexElement))
+                                continue;
+                            var currentPosition = ((IVertexElement)element).GetPosition();
+                            ((IVertexElement)element).SetPosition(currentPosition.X - vectorPosition.X, currentPosition.Y - vectorPosition.Y);
                         }                                   
                     }
                 }
@@ -245,9 +245,7 @@ namespace GraphEditor.View
 
         private EdgeControl ReleasedEdgeControl(VertexControl to)
         {
-            createEdge.SetTo(to);
-            var edge = new Edge((IVertex)createEdge.From.Vertex, (IVertex)createEdge.To.Vertex);
-            createEdge.Edge = edge;
+            createEdge.SetTo(to);    
             return createEdge;
         }
 
@@ -343,7 +341,7 @@ namespace GraphEditor.View
 
         private HitTestResultBehavior HitTestRectangleCallback(HitTestResult result)
         {
-            GeometryHitTestResult geometryResult = (GeometryHitTestResult)result; //проверить почему as файлился  
+            var geometryResult = (GeometryHitTestResult) result;
             var element = result.VisualHit as IElement;
             if (element != null &&
                 geometryResult.IntersectionDetail == IntersectionDetail.FullyInside)
@@ -351,7 +349,7 @@ namespace GraphEditor.View
                 element.IsSelected = true;
                 if (!selectedElements.Contains(element))
                     selectedElements.Add(element);
-            }
+            }               
             return HitTestResultBehavior.Continue;
         }
         #endregion

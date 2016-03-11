@@ -1,4 +1,5 @@
 ﻿using System;     
+using System.Linq;
 using System.Windows;
 using GraphEditor.View;
 using GraphEditor.Models;
@@ -7,20 +8,24 @@ using System.Windows.Input;
 using System.Windows.Media; 
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using System.Collections.Generic;    
+using System.Collections.Generic;
 using GraphEditor.Controls.Interfaces;
 
 namespace GraphEditor.Controls
 {
-    public class VertexControl : Control, IElement
+    public class VertexControl : Control, IVertexElement
     {
         private readonly List<EdgeControl> outcomingEdges;
 
         private readonly List<EdgeControl> incomingEdges;
-
+                                   
         public List<EdgeControl> IncommingEdges => incomingEdges;
-
+                                   
         public List<EdgeControl> OutcommingEdges => outcomingEdges;
+
+        public List<EdgeControl> UndirectedEdges => (List<EdgeControl>)incomingEdges.Intersect(outcomingEdges);
+
+        public List<EdgeControl> AllEdges => (List<EdgeControl>)incomingEdges.Union(outcomingEdges);
 
         public VertexControl(object vertexData)
         {
@@ -29,8 +34,8 @@ namespace GraphEditor.Controls
 
             incomingEdges = new List<EdgeControl>();
             outcomingEdges = new List<EdgeControl>();
-        }                                  
-
+        }
+       
         #region Property
 
         private Brush BrushColor = Brushes.Green;
