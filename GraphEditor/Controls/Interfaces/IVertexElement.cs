@@ -9,11 +9,14 @@ namespace GraphEditor.Controls.Interfaces
         List<EdgeControl> IncommingEdges { get; }
 
         List<EdgeControl> OutcommingEdges { get; }
+                          
+        IList<EdgeControl> UndirectedEdges { get; }
 
-        List<EdgeControl> UndirectedEdges { get; }
+        IList<EdgeControl> AllEdges { get; }
 
-        List<EdgeControl> AllEdges { get; }
+        bool AddEdge(IEdgeElement e);
 
+        IEdgeElement FindEdge(IVertexElement v);
         /// <summary>
         /// Fires when Position property set and object changes its coordinates.
         /// </summary>

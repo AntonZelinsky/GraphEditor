@@ -23,9 +23,11 @@ namespace GraphEditor.Controls
                                    
         public List<EdgeControl> OutcommingEdges => outcomingEdges;
 
-        public List<EdgeControl> UndirectedEdges => (List<EdgeControl>)incomingEdges.Intersect(outcomingEdges);
+        public IList<EdgeControl> UndirectedEdges => (IList<EdgeControl>)incomingEdges.Intersect(outcomingEdges).ToList().AsReadOnly();
 
-        public List<EdgeControl> AllEdges => (List<EdgeControl>)incomingEdges.Union(outcomingEdges);
+        public IList<EdgeControl> AllEdges => (IList<EdgeControl>)incomingEdges.Union(outcomingEdges).ToList().AsReadOnly();
+
+        public GraphArea RootGraph { get; }
 
         public VertexControl(object vertexData)
         {
@@ -35,7 +37,34 @@ namespace GraphEditor.Controls
             incomingEdges = new List<EdgeControl>();
             outcomingEdges = new List<EdgeControl>();
         }
-       
+
+        public VertexControl(GraphArea rootGraph, Point coordinate)
+        {                          
+            RootGraph = rootGraph;
+            SetPosition(coordinate);
+            RootGraph.Children.Add(this);
+            GraphArea.SetZIndex(this, 100);
+
+            incomingEdges = new List<EdgeControl>();
+            outcomingEdges = new List<EdgeControl>();    
+        }
+
+        public bool AddEdge(IEdgeElement e)
+        {
+            if (e.From == this)
+                outcomingEdges.Add((EdgeControl)e);
+            else if (e.To == this)
+                incomingEdges.Add((EdgeControl)e);
+            else
+                return false;
+            return true;
+        }
+                  
+        public IEdgeElement FindEdge(IVertexElement v)
+        {
+            return AllEdges.FirstOrDefault(e => e.To == v);
+        }
+
         #region Property
 
         private Brush BrushColor = Brushes.Green;
@@ -93,16 +122,17 @@ namespace GraphEditor.Controls
         }
         
         protected override void OnRender(DrawingContext drawingContext)
-        {
+        {            
+            var rate = AllEdges.Count / 2;
             drawingContext.DrawEllipse(
                 Brushes.AliceBlue, 
                 new Pen(MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
-                new Point(0, 0), 10, 10);
+                new Point(0, 0), 10 + rate, 10 + rate);
 
             drawingContext.DrawEllipse(
                 MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 
                 new Pen(MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
-                new Point(0, 0), 5, 5);
+                new Point(0, 0), 5 + rate, 5 + rate);
         }
 
         #region Position trace feature

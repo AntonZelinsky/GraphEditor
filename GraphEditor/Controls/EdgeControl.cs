@@ -1,6 +1,7 @@
 ﻿using System;
-using NGraph.Models;
-using System.Windows;
+using NGraph.Models;  
+using System.Windows; 
+using GraphEditor.View;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Controls;
@@ -11,6 +12,8 @@ namespace GraphEditor.Controls
     public class EdgeControl : Control, IEdgeElement
     {
         #region Properties & Fields
+          
+        public GraphArea RootGraph { get; }
 
         /// <summary>
         /// Source visual vertex object
@@ -108,20 +111,21 @@ namespace GraphEditor.Controls
 
         #region Construction Edge
 
-        public EdgeControl(VertexControl from)
+        public EdgeControl(GraphArea rootGraph, VertexControl from, object edge = null)
         {
-            From = from;
-        }
-
-        public EdgeControl(VertexControl from, object edge)
-        {
-            DataContext = edge;
             Edge = edge;
             From = from;
-        }
+            DataContext = edge;
+            RootGraph = rootGraph;
+            RootGraph.Children.Add(this);
+            GraphArea.SetZIndex(this, 10);
+        }          
 
-        public EdgeControl(VertexControl from, VertexControl to, object edge)
-        {
+        public EdgeControl(GraphArea rootGraph, VertexControl from, VertexControl to, object edge)
+        {                               
+            GraphArea.SetZIndex(this, 10);
+            RootGraph.Children.Add(this);
+            RootGraph = rootGraph;
             DataContext = edge;
             Edge = edge;
             From = from;

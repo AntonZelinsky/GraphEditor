@@ -1,7 +1,6 @@
-﻿using System;     
-using NGraph.Models;         
+﻿using System;             
 using System.Windows;   
-using NGraph.Interfaces;
+using GraphEditor.Models; 
 using GraphEditor.Controls; 
 using System.Windows.Input;
 using System.Windows.Media;
@@ -23,8 +22,11 @@ namespace GraphEditor.View
         private EdgeControl createEdge;
         private IElement targetElement;
 
+        private Graph graph;
+
         public GraphArea()
         {
+            graph = new Graph(this);
             Background = Brushes.White;
             MouseLeftButtonDown += OnMouseLeftButtonDown;
             Focusable = true; 
@@ -208,30 +210,21 @@ namespace GraphEditor.View
         #region IElement
 
         private VertexControl CreateVertexControl(Point p)
-        {
-            var v = new Vertex();  
-            var vc = new VertexControl(v);             
-            vc.SetPosition(p);
-            GraphArea.SetZIndex(vc, 100);
-            this.Children.Add(vc);
+        { 
+            var vc = new VertexControl(this, p);
             return vc;
         }
 
         private EdgeControl CreateEdgeControl(VertexControl from, VertexControl to)
-        {
-            var edge = new Edge((IVertex)from.Vertex, (IVertex)to.Vertex);
-            var edgeControl = new EdgeControl(from, to, edge);
-            this.Children.Add(edgeControl);
-            GraphArea.SetZIndex(edgeControl, 10);
+        {                                                                                                                      
+            var edgeControl = new EdgeControl(this, from, to);      
             createEdge = edgeControl;
             return edgeControl;
         }
 
         private EdgeControl CreateEdgeControl(VertexControl from)
         {
-            var edgeControl = new EdgeControl(from);
-            this.Children.Add(edgeControl);
-            GraphArea.SetZIndex(edgeControl, 10);
+            var edgeControl = new EdgeControl(this, from);
             createEdge = edgeControl;
             return edgeControl;
         }
@@ -246,7 +239,9 @@ namespace GraphEditor.View
 
         private EdgeControl ReleasedEdgeControl(VertexControl to)
         {
-            createEdge.SetTo(to);    
+            createEdge.SetTo(to);
+            createEdge.From.AddEdge(createEdge);
+            createEdge.To.AddEdge(createEdge);
             return createEdge;
         }
 
