@@ -27,6 +27,8 @@ namespace GraphEditor.Controls
 
         public IList<EdgeControl> AllEdges => (IList<EdgeControl>)incomingEdges.Union(outcomingEdges).ToList().AsReadOnly();
 
+        public GraphArea RootGraph { get; }
+
         public VertexControl(object vertexData)
         {
             DataContext = vertexData;
@@ -35,7 +37,29 @@ namespace GraphEditor.Controls
             incomingEdges = new List<EdgeControl>();
             outcomingEdges = new List<EdgeControl>();
         }
-       
+
+        public VertexControl(GraphArea rootGraph, Point coordinate)
+        {                          
+            RootGraph = rootGraph;
+            SetPosition(coordinate);
+            RootGraph.Children.Add(this);
+            GraphArea.SetZIndex(this, 100);
+
+            incomingEdges = new List<EdgeControl>();
+            outcomingEdges = new List<EdgeControl>();    
+        }
+
+        public bool AddEdge(IEdgeElement e)
+        {
+            if (e.From == this)
+                outcomingEdges.Add((EdgeControl)e);
+            else if (e.To == this)
+                incomingEdges.Add((EdgeControl)e);
+            else
+                return false;
+            return true;
+        }
+
         #region Property
 
         private Brush BrushColor = Brushes.Green;

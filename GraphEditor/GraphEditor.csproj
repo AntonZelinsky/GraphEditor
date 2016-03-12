@@ -55,6 +55,7 @@
     <Compile Include="Controls\Interfaces\IVertexElement.cs" />
     <Compile Include="Controls\VertexControl.cs" />
     <Compile Include="Models\EventType.cs" />
+    <Compile Include="Models\Graph.cs" />
     <Compile Include="Models\VertexPositionChanged.cs" />
     <Compile Include="Models\VertexPositionEventArgs.cs" />
     <Compile Include="View\GraphArea.cs" />
