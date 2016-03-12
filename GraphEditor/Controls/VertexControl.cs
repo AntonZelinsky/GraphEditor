@@ -122,16 +122,18 @@ namespace GraphEditor.Controls
         }
         
         protected override void OnRender(DrawingContext drawingContext)
-        {
+        {            
+            var rate = AllEdges.Count / 2;
             drawingContext.DrawEllipse(
                 Brushes.AliceBlue, 
                 new Pen(MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
-                new Point(0, 0), 10, 10);
+                new Point(0, 0), 10 + rate, 10 + rate);
 
+            rate = AllEdges.Count / 3;    
             drawingContext.DrawEllipse(
                 MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 
                 new Pen(MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
-                new Point(0, 0), 5, 5);
+                new Point(0, 0), 5 + rate, 5 + rate);
         }
 
         #region Position trace feature
