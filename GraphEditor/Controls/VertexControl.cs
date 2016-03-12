@@ -100,6 +100,7 @@ namespace GraphEditor.Controls
                 new Pen(MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
                 new Point(0, 0), 10 + rate, 10 + rate);
 
+            rate = AllEdges.Count / 3;    
             drawingContext.DrawEllipse(
                 MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 
                 new Pen(MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
