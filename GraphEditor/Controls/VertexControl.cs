@@ -59,6 +59,11 @@ namespace GraphEditor.Controls
                 return false;
             return true;
         }
+                  
+        public IEdgeElement FindEdge(IVertexElement v)
+        {
+            return AllEdges.FirstOrDefault(e => e.To == v);
+        }
 
         #region Property
 
