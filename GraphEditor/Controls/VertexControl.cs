@@ -56,7 +56,10 @@ namespace GraphEditor.Controls
             else if (e.To == this)
                 incomingEdges.Add((EdgeControl)e);
             else
-                return false;
+                return false;  
+
+            InvalidateVisual();
+
             return true;
         }
 
@@ -68,6 +71,9 @@ namespace GraphEditor.Controls
                 incomingEdges.Remove((EdgeControl)e);
             else
                 return false;
+
+            InvalidateVisual();
+
             return true;
         }
 
