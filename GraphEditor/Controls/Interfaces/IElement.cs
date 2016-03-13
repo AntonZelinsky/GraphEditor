@@ -8,5 +8,7 @@ namespace GraphEditor.Controls.Interfaces
         bool IsSelected { get; set; } 
 
         GraphArea RootGraph { get; }
+
+        void Destruction();
     }
 }

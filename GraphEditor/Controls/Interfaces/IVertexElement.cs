@@ -16,6 +16,8 @@ namespace GraphEditor.Controls.Interfaces
 
         bool AddEdge(IEdgeElement e);
 
+        bool Remove(IEdgeElement e);
+
         IEdgeElement FindEdge(IVertexElement v);
         /// <summary>
         /// Fires when Position property set and object changes its coordinates.

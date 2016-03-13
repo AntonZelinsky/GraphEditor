@@ -9,7 +9,7 @@ using GraphEditor.Controls.Interfaces;
 
 namespace GraphEditor.Controls
 {
-    public class EdgeControl : Control, IEdgeElement
+    public class EdgeControl : Control, IEdgeElement, IDisposable
     {
         #region Properties & Fields
           
@@ -142,9 +142,14 @@ namespace GraphEditor.Controls
             To = to;
             toPoint = new Point(); 
         }
-        
+
         #endregion
-              
+
+        public void Destruction()
+        {
+            Dispose();
+        }
+
         protected override void OnMouseEnter(MouseEventArgs e)
         {
             isMouseOver = true;
@@ -168,6 +173,14 @@ namespace GraphEditor.Controls
                 return;
             drawingContext.DrawLine(new Pen(isMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3), from, to);
             base.OnRender(drawingContext);
+        }
+
+        public void Dispose()
+        {
+            From.Remove(this);
+            To.Remove(this);
+
+            RootGraph.Children.Remove(this);   
         }
     }
 }
