@@ -13,7 +13,7 @@ using GraphEditor.Controls.Interfaces;
 
 namespace GraphEditor.Controls
 {
-    public class VertexControl : Control, IVertexElement
+    public class VertexControl : Control, IVertexElement, IDisposable
     {
         private readonly List<EdgeControl> outcomingEdges;
 
@@ -48,7 +48,7 @@ namespace GraphEditor.Controls
             incomingEdges = new List<EdgeControl>();
             outcomingEdges = new List<EdgeControl>();    
         }
-
+            
         public bool AddEdge(IEdgeElement e)
         {
             if (e.From == this)
@@ -59,10 +59,26 @@ namespace GraphEditor.Controls
                 return false;
             return true;
         }
-                  
+
+        public bool Remove(IEdgeElement e)
+        {
+            if (e.From == this)
+                outcomingEdges.Remove((EdgeControl)e);
+            else if (e.To == this)
+                incomingEdges.Remove((EdgeControl)e);
+            else
+                return false;
+            return true;
+        }
+
         public IEdgeElement FindEdge(IVertexElement v)
         {
             return AllEdges.FirstOrDefault(e => e.To == v);
+        }
+          
+        public void Destruction()
+        {
+            Dispose();
         }
 
         #region Property
@@ -169,5 +185,15 @@ namespace GraphEditor.Controls
         }
 
         #endregion
+
+        public void Dispose()
+        {
+            foreach (var edge in AllEdges)
+            {                   
+                edge.Destruction();
+            }
+
+            RootGraph.Children.Remove(this);
+        }
     }
 }

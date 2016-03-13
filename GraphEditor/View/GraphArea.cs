@@ -195,12 +195,12 @@ namespace GraphEditor.View
         protected override void OnKeyDown(KeyEventArgs e)
         {                        
             if (e.Key == Key.Delete)
-            {
+            {                       
                 foreach (var selectedElement in selectedElements)
-                {
-                    this.Children.Remove((UIElement)selectedElement);
+                {                                                     
+                    selectedElement.Destruction(); 
                 }
-                selectedElements.Clear();
+                selectedElements.Clear();    
             }
             base.OnKeyDown(e);
         }
