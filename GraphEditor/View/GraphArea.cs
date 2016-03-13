@@ -13,7 +13,7 @@ namespace GraphEditor.View
 {
     public class GraphArea : Canvas
     {
-        private bool selection;
+        private bool multiSelection;
         private readonly List<IElement> selectedElements = new List<IElement>();
         public int GetSelectedElements => selectedElements.Count;      
         private Point startPointClick;
@@ -47,27 +47,13 @@ namespace GraphEditor.View
                 }
                 // Мультивыделение   
                 else if (e.ClickCount == 1)
-                {                        
+                {
                     if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
                     {
                         selectedElements.ForEach(s => s.IsSelected = false);
                         selectedElements.Clear();
                     }
-                    selection = true;
-                    selectionRectangle = new Rectangle
-                    {
-                        Width = 0,
-                        Height = 0,
-                        Fill = Brushes.LightCyan,
-                        Stroke = Brushes.Orange,
-                        StrokeThickness = 2,
-                        Opacity = 0.3
-                    };
-
-                    this.Children.Add(selectionRectangle);
-                    Canvas.SetZIndex(selectionRectangle, 200);
-                    Canvas.SetLeft(selectionRectangle, e.GetPosition(this).X);
-                    Canvas.SetTop(selectionRectangle, e.GetPosition(this).Y);
+                    CreateRectangleSelection(startPointClick);
                 }
             }
             // Рисование дуги
@@ -95,23 +81,10 @@ namespace GraphEditor.View
             else if (e.LeftButton == MouseButtonState.Pressed)
             {
                 // мультивыделение              
-                if(selection)
-                {                   
-                    // защита от случайных движений мыши              
-                   if(Math.Max(Math.Abs(startPointClick.X - mousePosition.X), Math.Abs(startPointClick.Y - mousePosition.Y)) < 5)
-                        return;
-                    var x = Math.Min(mousePosition.X, startPointClick.X);
-                    var y = Math.Min(mousePosition.Y, startPointClick.Y);
-
-                    var w = Math.Max(mousePosition.X, startPointClick.X) - x;
-                    var h = Math.Max(mousePosition.Y, startPointClick.Y) - y;
-
-                    selectionRectangle.Width = w;
-                    selectionRectangle.Height = h;
-
-                    Canvas.SetLeft(selectionRectangle, x);
-                    Canvas.SetTop(selectionRectangle, y);                                         
-                }
+                if (multiSelection)
+                {
+                    MoveRectangleSelection(mousePosition);
+                }  
                 // перетаскивание
                 else
                 {
@@ -157,11 +130,7 @@ namespace GraphEditor.View
                 // мультивыделение
                 else if (selectionRectangle != null)
                 {
-                    var geometry = new RectangleGeometry(new Rect(startPointClick, e.GetPosition(this)));
-                    GetElements(geometry);
-                    this.Children.Remove(selectionRectangle);
-                    selectionRectangle = null;
-                    selection = false;
+                    CompleteRectangleSelection(mousePosition);
                 }
                 // еденичное выделение 
                 else if (element != null && !created)
@@ -205,7 +174,57 @@ namespace GraphEditor.View
         }
 
         #endregion
-            
+
+        #region RectangleSelection
+
+        private void CreateRectangleSelection(Point mousePosition)
+        {
+            multiSelection = true;
+            selectionRectangle = new Rectangle
+            {
+                Width = 0,
+                Height = 0,
+                Fill = Brushes.LightCyan,
+                Stroke = Brushes.Orange,
+                StrokeThickness = 2,
+                Opacity = 0.3
+            };
+
+            this.Children.Add(selectionRectangle);
+            Canvas.SetZIndex(selectionRectangle, 200);
+            Canvas.SetLeft(selectionRectangle, mousePosition.X);
+            Canvas.SetTop(selectionRectangle, mousePosition.Y);
+        }
+
+        private void MoveRectangleSelection(Point mousePosition)
+        {
+            // защита от случайных движений мыши              
+            if (Math.Max(Math.Abs(startPointClick.X - mousePosition.X), Math.Abs(startPointClick.Y - mousePosition.Y)) < 5)
+                return;
+            var x = Math.Min(mousePosition.X, startPointClick.X);
+            var y = Math.Min(mousePosition.Y, startPointClick.Y);
+
+            var w = Math.Max(mousePosition.X, startPointClick.X) - x;
+            var h = Math.Max(mousePosition.Y, startPointClick.Y) - y;
+
+            selectionRectangle.Width = w;
+            selectionRectangle.Height = h;
+
+            Canvas.SetLeft(selectionRectangle, x);
+            Canvas.SetTop(selectionRectangle, y);
+        }
+
+        private void CompleteRectangleSelection(Point mousePosition)
+        {
+            var geometry = new RectangleGeometry(new Rect(startPointClick, mousePosition));
+            GetElements(geometry);
+            this.Children.Remove(selectionRectangle);
+            selectionRectangle = null;
+            multiSelection = false;
+        }
+
+        #endregion
+
         #region Attached Dependency Property registrations
 
         public static readonly DependencyProperty XProperty =
