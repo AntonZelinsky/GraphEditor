@@ -41,9 +41,8 @@ namespace GraphEditor.View
             if (element == null)
             {
                 if (e.ClickCount == 2)
-                {                                                    
-                    var vc = CreateVertexControl(startPointClick);
-                    
+                {
+                    graph.CreateVertexControl(startPointClick);
                     created = true;
                 }
                 // Мультивыделение   
@@ -74,7 +73,7 @@ namespace GraphEditor.View
             // Рисование дуги
             else if (e.MouseDevice.RightButton == MouseButtonState.Pressed && element is VertexControl)
             {
-                CreateEdgeControl((VertexControl)element);
+                createEdge = graph.CreateEdgeControl((VertexControl)element);
             }
 
             // Гарантированое получение MouseLeftButtonUp даже если вышли за пределы области
@@ -91,7 +90,7 @@ namespace GraphEditor.View
                 e.RightButton == MouseButtonState.Pressed &&
                 e.LeftButton == MouseButtonState.Pressed)
             {
-                CreatingEdgeControl(mousePosition);
+                graph.CreatingEdgeControl(mousePosition);
             }
             else if (e.LeftButton == MouseButtonState.Pressed)
             {
@@ -147,11 +146,11 @@ namespace GraphEditor.View
                     var v = GetVertexElement(mousePosition);
                     if (v != null && createEdge != v)
                     {
-                        ReleasedEdgeControl((VertexControl) v);
+                        graph.ReleasedEdgeControl((VertexControl) v);
                     }
                     else
                     {
-                        UnreleasedEdgeControl();
+                        graph.UnreleasedEdgeControl();
                     }
                     createEdge = null;
                 }
@@ -206,54 +205,9 @@ namespace GraphEditor.View
         }
 
         #endregion
-
-        #region IElement
-
-        private VertexControl CreateVertexControl(Point p)
-        { 
-            var vc = new VertexControl(this, p);
-            return vc;
-        }
-
-        private EdgeControl CreateEdgeControl(VertexControl from, VertexControl to)
-        {                                                                                                                      
-            var edgeControl = new EdgeControl(this, from, to);      
-            createEdge = edgeControl;
-            return edgeControl;
-        }
-
-        private EdgeControl CreateEdgeControl(VertexControl from)
-        {
-            var edgeControl = new EdgeControl(this, from);
-            createEdge = edgeControl;
-            return edgeControl;
-        }
-
-        private EdgeControl CreatingEdgeControl(Point to)
-        {
-            if (createEdge.To != null)
-                throw new Exception();
-            createEdge.SetToPoint(to);
-            return createEdge;
-        }
-
-        private EdgeControl ReleasedEdgeControl(VertexControl to)
-        {
-            createEdge.SetTo(to);
-            createEdge.From.AddEdge(createEdge);
-            createEdge.To.AddEdge(createEdge);
-            return createEdge;
-        }
-
-        private void UnreleasedEdgeControl()
-        {
-            this.Children.Remove(createEdge);
-            createEdge = null;
-        }
-
-        #endregion
-
+            
         #region Attached Dependency Property registrations
+
         public static readonly DependencyProperty XProperty =
             DependencyProperty.RegisterAttached("X", typeof(double), typeof(GraphArea),
                                                  new FrameworkPropertyMetadata(double.NaN,
@@ -303,9 +257,11 @@ namespace GraphEditor.View
         {
             obj.SetValue(YProperty, value);
         }
+
         #endregion
 
         #region HitTest
+
         public IElement GetElement(Point p)
         {
             HitTestResult hitResult = VisualTreeHelper.HitTest(this, p);
@@ -348,6 +304,7 @@ namespace GraphEditor.View
             }               
             return HitTestResultBehavior.Continue;
         }
+
         #endregion
     }
 }

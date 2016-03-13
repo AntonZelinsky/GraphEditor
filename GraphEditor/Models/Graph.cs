@@ -1,5 +1,7 @@
-﻿using GraphEditor.View;
+﻿using System;
+using GraphEditor.View;
 using System.Collections.Generic;
+using System.Windows;
 using GraphEditor.Controls;
 using GraphEditor.Controls.Interfaces;  
 
@@ -64,7 +66,61 @@ namespace GraphEditor.Models
             edges.Add(e);
             return true;
         }
+               
+        #region Creating IElement Control
 
+        public VertexControl CreateVertexControl(Point p)
+        {
+            var v = new VertexControl(rootArea, p);
+            AddVertex(v);
+            return v;
+        }
+
+        #region Creating Edge
+
+        private EdgeControl createdEdge;
+
+        public EdgeControl CreateEdgeControl(VertexControl from)
+        {
+            var edgeControl = new EdgeControl(rootArea, from);
+            createdEdge = edgeControl;
+            return edgeControl;
+        }
+
+        public EdgeControl CreatingEdgeControl(Point to)
+        {
+            if (createdEdge.To != null)
+                throw new Exception();
+            createdEdge.SetToPoint(to);
+            return createdEdge;
+        }
+
+        public EdgeControl ReleasedEdgeControl(VertexControl to)
+        {
+            createdEdge.SetTo(to);
+            createdEdge.From.AddEdge(createdEdge);
+            createdEdge.To.AddEdge(createdEdge);
+            var e = createdEdge;  
+            createdEdge = null;
+            return e;
+        }
+
+        public void UnreleasedEdgeControl()
+        {
+            rootArea.Children.Remove(createdEdge);
+            createdEdge = null;
+        }
+
+        public EdgeControl CreateEdgeControl(VertexControl from, VertexControl to)
+        {
+            var e = new EdgeControl(rootArea, from, to);
+            AddEdge(e);
+            return e;
+        }
+
+        #endregion
+         
+        #endregion
 
         public bool IsEmpty()
         {
