@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -25,6 +26,8 @@ namespace GraphEditor
         {
             InitializeComponent();
             Loaded += (x, y) => Keyboard.Focus(graphArea);
+            var version = Assembly.GetExecutingAssembly().GetName();
+            Title = $"{version.Name} - v.{version.Version.Major}.{version.Version.Minor}";
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
