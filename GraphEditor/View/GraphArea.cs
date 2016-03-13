@@ -1,13 +1,13 @@
-﻿using System;              
+﻿using System;             
 using System.Windows;   
-using System.Diagnostics; 
+using GraphEditor.Models; 
 using GraphEditor.Controls; 
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Controls;  
 using System.Collections.Generic;
-using GraphEditor.Controls.Interfaces;     
+using GraphEditor.Controls.Interfaces;
 
 namespace GraphEditor.View
 {
@@ -19,44 +19,36 @@ namespace GraphEditor.View
         private Point startPointClick;
         private Rectangle selectionRectangle;
         private bool created;
+        private EdgeControl createEdge;
+        private IElement targetElement;
+
+        private Graph graph;
 
         public GraphArea()
         {
+            graph = new Graph(this);
             Background = Brushes.White;
             MouseLeftButtonDown += OnMouseLeftButtonDown;
-            Focusable = true;
-            MouseEventHandler mouseMove = (sender, args) => {
-                if (selectionRectangle == null && args.LeftButton == MouseButtonState.Pressed)
-                {
-                    var element = (UIElement)sender;
-                    var p2 = args.GetPosition(this);
-                    Canvas.SetLeft(element, p2.X - startPointClick.X);
-                    Canvas.SetTop(element, p2.Y - startPointClick.Y);
-                }
-            };
+            Focusable = true; 
         }
-                 
+
+        #region Override Events  
+               
         private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             startPointClick = e.GetPosition(this);
             var element = GetElement(startPointClick);
-            if (e.ClickCount == 2)
+            if (element == null)
             {
-                // предотвращение создания узлов один на другом   
-                if (element == null)   // TODO: вынести
-                {                                                          
+                if (e.ClickCount == 2)
+                {                                                    
                     var vc = CreateVertexControl(startPointClick);
-                    GraphArea.SetLeft(vc, startPointClick.X);
-                    GraphArea.SetTop(vc, startPointClick.Y);
-                    this.Children.Add(vc);
+                    
                     created = true;
                 }
-            }
-            else if (e.ClickCount == 1)
-            {
-                // Мультивыделение
-                if (element == null)
-                {
+                // Мультивыделение   
+                else if (e.ClickCount == 1)
+                {                        
                     if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
                     {
                         selectedElements.ForEach(s => s.IsSelected = false);
@@ -64,30 +56,45 @@ namespace GraphEditor.View
                     }
                     selection = true;
                     selectionRectangle = new Rectangle
-                        {
-                            Width = 0, Height = 0,
-                            Fill = Brushes.LightCyan,
-                            Stroke = Brushes.Orange,
-                            StrokeThickness = 2,
-                            Opacity = 0.3
-                        };
+                    {
+                        Width = 0,
+                        Height = 0,
+                        Fill = Brushes.LightCyan,
+                        Stroke = Brushes.Orange,
+                        StrokeThickness = 2,
+                        Opacity = 0.3
+                    };
 
                     this.Children.Add(selectionRectangle);
+                    Canvas.SetZIndex(selectionRectangle, 200);
                     Canvas.SetLeft(selectionRectangle, e.GetPosition(this).X);
                     Canvas.SetTop(selectionRectangle, e.GetPosition(this).Y);
-                    // Гарантированое получение MouseLeftButtonUp даже если вышли за пределы области
-                    CaptureMouse();
                 }
             }
+            // Рисование дуги
+            else if (e.MouseDevice.RightButton == MouseButtonState.Pressed)
+            {
+                CreateEdgeControl((VertexControl)element);
+            }
+
+            // Гарантированое получение MouseLeftButtonUp даже если вышли за пределы области
+            CaptureMouse();
             base.OnMouseLeftButtonDown(e);
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {                   
-                Point mousePosition = e.GetPosition(null);
+            Point mousePosition = e.GetPosition(null);
 
+            // Создание дуги
+            if (createEdge != null && 
+                e.RightButton == MouseButtonState.Pressed &&
+                e.LeftButton == MouseButtonState.Pressed)
+            {
+                CreatingEdgeControl(mousePosition);
+            }
+            else if (e.LeftButton == MouseButtonState.Pressed)
+            {
                 // мультивыделение              
                 if(selection)
                 {                   
@@ -114,13 +121,13 @@ namespace GraphEditor.View
 
                     if (selectedElements.Count > 0)
                     {
-                        foreach (var element in selectedElements)
+                        foreach (IElement element in selectedElements)
                         {
-                            var selectedElement = (UIElement)element;
-                            var x = GraphArea.GetLeft(selectedElement);
-                            var y = GraphArea.GetTop(selectedElement);
-                            GraphArea.SetLeft(selectedElement, x - vectorPosition.X);
-                            GraphArea.SetTop(selectedElement, y - vectorPosition.Y);
+                            // отсеиваем не вершины
+                            if (!(element is IVertexElement))
+                                continue;
+                            var currentPosition = ((IVertexElement)element).GetPosition();
+                            ((IVertexElement)element).SetPosition(currentPosition.X - vectorPosition.X, currentPosition.Y - vectorPosition.Y);
                         }                                   
                     }
                 }
@@ -134,8 +141,22 @@ namespace GraphEditor.View
             var element = GetElement(mousePosition);
             if (e.ClickCount == 1)
             {      
+                // Рисование дуги
+                if (e.MouseDevice.RightButton == MouseButtonState.Pressed && createEdge != null)
+                {
+                    var v = GetVertexElement(mousePosition);
+                    if (v != null && createEdge != v)
+                    {
+                        ReleasedEdgeControl((VertexControl) v);
+                    }
+                    else
+                    {
+                        UnreleasedEdgeControl();
+                    }
+                    createEdge = null;
+                }
                 // мультивыделение
-                if (selectionRectangle != null)
+                else if (selectionRectangle != null)
                 {
                     var geometry = new RectangleGeometry(new Rect(startPointClick, e.GetPosition(this)));
                     GetElements(geometry);
@@ -174,21 +195,115 @@ namespace GraphEditor.View
         protected override void OnKeyDown(KeyEventArgs e)
         {                        
             if (e.Key == Key.Delete)
-            {
+            {                       
                 foreach (var selectedElement in selectedElements)
-                {
-                    this.Children.Remove((UIElement)selectedElement);
+                {                                                     
+                    selectedElement.Destruction(); 
                 }
-                selectedElements.Clear();
+                selectedElements.Clear();    
             }
             base.OnKeyDown(e);
         }
 
-        private VertexElement CreateVertexControl(Point p)
-        {                           
-            var vc = new VertexElement(); 
+        #endregion
+
+        #region IElement
+
+        private VertexControl CreateVertexControl(Point p)
+        { 
+            var vc = new VertexControl(this, p);
             return vc;
-        }  
+        }
+
+        private EdgeControl CreateEdgeControl(VertexControl from, VertexControl to)
+        {                                                                                                                      
+            var edgeControl = new EdgeControl(this, from, to);      
+            createEdge = edgeControl;
+            return edgeControl;
+        }
+
+        private EdgeControl CreateEdgeControl(VertexControl from)
+        {
+            var edgeControl = new EdgeControl(this, from);
+            createEdge = edgeControl;
+            return edgeControl;
+        }
+
+        private EdgeControl CreatingEdgeControl(Point to)
+        {
+            if (createEdge.To != null)
+                throw new Exception();
+            createEdge.SetToPoint(to);
+            return createEdge;
+        }
+
+        private EdgeControl ReleasedEdgeControl(VertexControl to)
+        {
+            createEdge.SetTo(to);
+            createEdge.From.AddEdge(createEdge);
+            createEdge.To.AddEdge(createEdge);
+            return createEdge;
+        }
+
+        private void UnreleasedEdgeControl()
+        {
+            this.Children.Remove(createEdge);
+            createEdge = null;
+        }
+
+        #endregion
+
+        #region Attached Dependency Property registrations
+        public static readonly DependencyProperty XProperty =
+            DependencyProperty.RegisterAttached("X", typeof(double), typeof(GraphArea),
+                                                 new FrameworkPropertyMetadata(double.NaN,
+                                                    FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                    FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                    FrameworkPropertyMetadataOptions.AffectsRender |
+                                                    FrameworkPropertyMetadataOptions.AffectsParentMeasure |
+                                                    FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                                                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, x_changed));
+
+        private static void x_changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            d.SetValue(LeftProperty, e.NewValue);
+        }
+
+        public static double GetX(DependencyObject obj)
+        {
+            return (double)obj.GetValue(XProperty);
+        }
+
+        public static void SetX(DependencyObject obj, double value, bool alsoSetFinal = true)
+        {
+            obj.SetValue(XProperty, value);
+        }
+
+        public static readonly DependencyProperty YProperty =
+           DependencyProperty.RegisterAttached("Y", typeof(double), typeof(GraphArea),
+                                                 new FrameworkPropertyMetadata(double.NaN,
+                                                    FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                    FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                    FrameworkPropertyMetadataOptions.AffectsRender |
+                                                    FrameworkPropertyMetadataOptions.AffectsParentMeasure |
+                                                    FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                                                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault
+                                                    , y_changed));
+
+        private static void y_changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            d.SetValue(TopProperty, e.NewValue);
+        }
+        public static double GetY(DependencyObject obj)
+        {
+            return (double)obj.GetValue(YProperty);
+        }
+
+        public static void SetY(DependencyObject obj, double value)
+        {
+            obj.SetValue(YProperty, value);
+        }
+        #endregion
 
         #region HitTest
         public IElement GetElement(Point p)
@@ -197,30 +312,42 @@ namespace GraphEditor.View
             return hitResult.VisualHit as IElement;
         }
 
+        public IElement GetVertexElement(Point p)
+        {
+            targetElement = null;
+            HitTestResultCallback callback = new HitTestResultCallback(HitTestClickCallback);
+            VisualTreeHelper.HitTest(this, null, callback, new PointHitTestParameters(p));
+            return targetElement;
+        }
+
         public List<IElement> GetElements(Geometry region)
         {                  
-            // подготовка параметров для операции проверки попадания
-            var parametrs = new GeometryHitTestParameters(region);
-            HitTestResultCallback callback = new HitTestResultCallback(HitTestCallback);
-
-            VisualTreeHelper.HitTest(this, null, callback, parametrs);
+            VisualTreeHelper.HitTest(this, null, HitTestRectangleCallback, new GeometryHitTestParameters(region));
 
             return selectedElements;
         }
 
-        private HitTestResultBehavior HitTestCallback(HitTestResult result)
+        private HitTestResultBehavior HitTestClickCallback(HitTestResult result)
         {
-            GeometryHitTestResult geometryResult = (GeometryHitTestResult)result; //проверить почему as файлился  
+            var element = result.VisualHit as VertexControl;
+            if (element != null)
+                targetElement = element;
+            return HitTestResultBehavior.Stop;
+        }
+
+        private HitTestResultBehavior HitTestRectangleCallback(HitTestResult result)
+        {
+            var geometryResult = (GeometryHitTestResult) result;
             var element = result.VisualHit as IElement;
             if (element != null &&
                 geometryResult.IntersectionDetail == IntersectionDetail.FullyInside)
             {
                 element.IsSelected = true;
-                if(!selectedElements.Contains(element))
+                if (!selectedElements.Contains(element))
                     selectedElements.Add(element);
-            }
+            }               
             return HitTestResultBehavior.Continue;
-        }     
-        #endregion  
+        }
+        #endregion
     }
 }

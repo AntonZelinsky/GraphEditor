@@ -16,7 +16,5 @@ namespace NGraph.Interfaces
         /// Gets the target vertex
         /// </summary>
         IVertex To { get; }
-
-        bool Oriented { get; set; }
     }
 }

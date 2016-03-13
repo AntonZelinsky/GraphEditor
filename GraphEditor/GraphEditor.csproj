@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -48,8 +49,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\EdgeControl.cs" />
+    <Compile Include="Controls\Interfaces\IEdgeElement.cs" />
     <Compile Include="Controls\Interfaces\IElement.cs" />
-    <Compile Include="Controls\VertexElement.cs" />
+    <Compile Include="Controls\Interfaces\IVertexElement.cs" />
+    <Compile Include="Controls\VertexControl.cs" />
+    <Compile Include="Models\EventType.cs" />
+    <Compile Include="Models\Graph.cs" />
+    <Compile Include="Models\VertexPositionChanged.cs" />
+    <Compile Include="Models\VertexPositionEventArgs.cs" />
     <Compile Include="View\GraphArea.cs" />
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
