@@ -72,7 +72,7 @@ namespace GraphEditor.View
                 }
             }
             // Рисование дуги
-            else if (e.MouseDevice.RightButton == MouseButtonState.Pressed)
+            else if (e.MouseDevice.RightButton == MouseButtonState.Pressed && element is VertexControl)
             {
                 CreateEdgeControl((VertexControl)element);
             }
