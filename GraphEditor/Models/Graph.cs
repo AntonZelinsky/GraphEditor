@@ -12,7 +12,7 @@ namespace GraphEditor.Models
         #region Properties
 
         private GraphArea rootArea;
-
+         
         private List<IEdgeElement> edges;
         public List<IEdgeElement> Edges => edges;
 
@@ -73,6 +73,7 @@ namespace GraphEditor.Models
         {
             var v = new VertexControl(rootArea, p);
             AddVertex(v);
+            GenerateVertexLabel(v);
             return v;
         }
 
@@ -121,6 +122,14 @@ namespace GraphEditor.Models
         #endregion
          
         #endregion
+         
+        public void GenerateVertexLabel(IVertexElement v)
+        {
+            var label = new VertexLabelControl();
+            label.Attach(v);
+            rootArea.AddCustomChildControl(label);
+            label.UpdatePosition();
+        }   
 
         public bool IsEmpty()
         {

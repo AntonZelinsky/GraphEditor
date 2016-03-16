@@ -97,6 +97,27 @@ namespace GraphEditor.Controls
 
         private bool isMouseOver;
 
+        protected internal ILabelControl VertexLabelControl;
+
+        /// <summary>
+        /// Internal method. Attaches label to control
+        /// </summary>
+        /// <param name="ctrl">Label control</param>
+        public void AttachLabel(ILabelControl ctrl)
+        {
+            VertexLabelControl = ctrl;
+        }
+
+        /// <summary>
+        /// Internal method. Detaches label from control.
+        /// </summary>
+        public void DetachLabel()
+        {
+            if (VertexLabelControl != null)
+                VertexLabelControl.Detach();
+            VertexLabelControl = null;
+        }
+
         #endregion
 
         #region Position

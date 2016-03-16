@@ -27,6 +27,8 @@ namespace GraphEditor.Controls
 
         public IList<EdgeControl> AllEdges => (IList<EdgeControl>)incomingEdges.Union(outcomingEdges).ToList().AsReadOnly();
 
+        protected internal ILabelControl VertexLabelControl;
+
         public GraphArea RootGraph { get; }
 
         public VertexControl(object vertexData)
@@ -48,7 +50,9 @@ namespace GraphEditor.Controls
             incomingEdges = new List<EdgeControl>();
             outcomingEdges = new List<EdgeControl>();    
         }
-            
+
+        #region Graph operation
+         
         public bool AddEdge(IEdgeElement e)
         {
             if (e.From == this)
@@ -56,7 +60,7 @@ namespace GraphEditor.Controls
             else if (e.To == this)
                 incomingEdges.Add((EdgeControl)e);
             else
-                return false;  
+                return false;
 
             InvalidateVisual();
 
@@ -81,11 +85,41 @@ namespace GraphEditor.Controls
         {
             return AllEdges.FirstOrDefault(e => e.To == v);
         }
-          
+
+        #endregion
+                   
         public void Destruction()
         {
             Dispose();
         }
+
+        #region Label
+
+        /// <summary>
+        /// Internal method. Attaches label to control
+        /// </summary>
+        /// <param name="ctrl">Label control</param>
+        public void AttachLabel(ILabelControl ctrl)
+        {
+            VertexLabelControl = ctrl;
+        }
+
+        /// <summary>
+        /// Internal method. Detaches label from control.
+        /// </summary>
+        public void DetachLabel()
+        {
+            if (VertexLabelControl != null)
+            {
+                VertexLabelControl.Detach();
+
+                RootGraph.Children.Remove((UIElement) VertexLabelControl);
+
+                VertexLabelControl = null;
+            }
+        }
+
+        #endregion
 
         #region Property
 
@@ -125,9 +159,32 @@ namespace GraphEditor.Controls
 
         public static readonly DependencyProperty VertexProperty =
             DependencyProperty.Register("Vertex", typeof(object), typeof(VertexControl), new PropertyMetadata(null));
+                             
+        public static readonly DependencyProperty ShowLabelProperty =
+         DependencyProperty.Register("ShowLabel", typeof(bool), typeof(VertexControl), new PropertyMetadata(false, ShowLabelChanged));
+
+        private static void ShowLabelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var obj = d as VertexControl;
+            if (obj.VertexLabelControl == null)
+                return;
+            if ((bool)e.NewValue)
+                obj.VertexLabelControl.Show();
+            else
+                obj.VertexLabelControl.Hide();
+        }
+
+        public bool ShowLabel
+        {
+            get { return (bool)GetValue(ShowLabelProperty); }
+            set { SetValue(ShowLabelProperty, value); }
+        }
+
         #endregion
 
         #endregion
+
+        #region Override event
 
         protected override void OnMouseEnter(MouseEventArgs e)
         {
@@ -158,6 +215,8 @@ namespace GraphEditor.Controls
                 new Point(0, 0), 5 + rate, 5 + rate);
         }
 
+        #endregion
+
         #region Position trace feature
 
         public Point GetPosition()
@@ -185,7 +244,7 @@ namespace GraphEditor.Controls
         public event VertexPositionChanged PositionChanged;
 
         protected void OnPositionChanged(Point offset, Point pos)
-        {
+        {     
             if (PositionChanged != null)
                 PositionChanged.Invoke(this, new VertexPositionEventArgs(offset, pos, this));
         }
@@ -198,6 +257,8 @@ namespace GraphEditor.Controls
             {                   
                 edge.Destruction();
             }
+
+            DetachLabel();
 
             RootGraph.Children.Remove(this);
         }

@@ -10,5 +10,8 @@ namespace GraphEditor.Controls.Interfaces
         GraphArea RootGraph { get; }
 
         void Destruction();
+
+        void AttachLabel(ILabelControl vertexLabelControl);
+        void DetachLabel();
     }
 }
