@@ -168,7 +168,7 @@ namespace GraphEditor.View
                 {                                                     
                     selectedElement.Destruction(); 
                 }
-                selectedElements.Clear();    
+                selectedElements.Clear();      
             }
             base.OnKeyDown(e);
         }
@@ -224,14 +224,7 @@ namespace GraphEditor.View
         }
 
         #endregion
-
-        public void AddCustomChildControl(UIElement control)
-        {
-            this.Children.Add(control);
-            GraphArea.SetX(control, 0);
-            GraphArea.SetY(control, 0);
-        }
-
+       
         #region Attached Dependency Property registrations
 
         public static readonly DependencyProperty XProperty =

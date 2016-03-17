@@ -2,11 +2,9 @@
 using System.Linq;
 using System.Windows;
 using GraphEditor.View;
-using GraphEditor.Models;
-using System.Windows.Data;
+using GraphEditor.Models;  
 using System.Windows.Input;
-using System.Windows.Media; 
-using System.Threading.Tasks;
+using System.Windows.Media;    
 using System.Windows.Controls;
 using System.Collections.Generic;
 using GraphEditor.Controls.Interfaces;
@@ -27,7 +25,7 @@ namespace GraphEditor.Controls
 
         public IList<EdgeControl> AllEdges => (IList<EdgeControl>)incomingEdges.Union(outcomingEdges).ToList().AsReadOnly();
 
-        protected internal ILabelControl VertexLabelControl;
+        protected internal ILabelElement LabelElement;
 
         public GraphArea RootGraph { get; }
 
@@ -87,7 +85,7 @@ namespace GraphEditor.Controls
         }
 
         #endregion
-                   
+
         public void Destruction()
         {
             Dispose();
@@ -98,10 +96,10 @@ namespace GraphEditor.Controls
         /// <summary>
         /// Internal method. Attaches label to control
         /// </summary>
-        /// <param name="ctrl">Label control</param>
-        public void AttachLabel(ILabelControl ctrl)
+        /// <param name="element">Label control</param>
+        public void AttachLabel(ILabelElement element)
         {
-            VertexLabelControl = ctrl;
+            LabelElement = element;
         }
 
         /// <summary>
@@ -109,13 +107,11 @@ namespace GraphEditor.Controls
         /// </summary>
         public void DetachLabel()
         {
-            if (VertexLabelControl != null)
+            if (LabelElement != null)
             {
-                VertexLabelControl.Detach();
-
-                RootGraph.Children.Remove((UIElement) VertexLabelControl);
-
-                VertexLabelControl = null;
+                LabelElement.Detach();   
+                RootGraph.Children.Remove((UIElement) LabelElement);   
+                LabelElement = null;
             }
         }
 
@@ -125,8 +121,7 @@ namespace GraphEditor.Controls
 
         private Brush BrushColor = Brushes.Green;
         private Brush BrushColorSelected = Brushes.Orange;
-
-        private bool MouseOver = false;
+                                          
         #region DependencyProperty Content
 
         /// <summary>
@@ -159,27 +154,7 @@ namespace GraphEditor.Controls
 
         public static readonly DependencyProperty VertexProperty =
             DependencyProperty.Register("Vertex", typeof(object), typeof(VertexControl), new PropertyMetadata(null));
-                             
-        public static readonly DependencyProperty ShowLabelProperty =
-         DependencyProperty.Register("ShowLabel", typeof(bool), typeof(VertexControl), new PropertyMetadata(false, ShowLabelChanged));
-
-        private static void ShowLabelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var obj = d as VertexControl;
-            if (obj.VertexLabelControl == null)
-                return;
-            if ((bool)e.NewValue)
-                obj.VertexLabelControl.Show();
-            else
-                obj.VertexLabelControl.Hide();
-        }
-
-        public bool ShowLabel
-        {
-            get { return (bool)GetValue(ShowLabelProperty); }
-            set { SetValue(ShowLabelProperty, value); }
-        }
-
+  
         #endregion
 
         #endregion
@@ -187,15 +162,13 @@ namespace GraphEditor.Controls
         #region Override event
 
         protected override void OnMouseEnter(MouseEventArgs e)
-        {
-            MouseOver = true;
+        {                     
             InvalidateVisual();
             base.OnMouseEnter(e);
         }
 
         protected override void OnMouseLeave(MouseEventArgs e)
-        {
-            MouseOver = false;
+        {                       
             InvalidateVisual();
             base.OnMouseLeave(e);
         }
@@ -205,14 +178,14 @@ namespace GraphEditor.Controls
             var rate = AllEdges.Count / 2;
             drawingContext.DrawEllipse(
                 Brushes.AliceBlue, 
-                new Pen(MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
+                new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
                 new Point(0, 0), 10 + rate, 10 + rate);
 
             rate = AllEdges.Count / 3;    
             drawingContext.DrawEllipse(
-                MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 
-                new Pen(MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
-                new Point(0, 0), 5 + rate, 5 + rate);
+                IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 
+                new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
+                new Point(0, 0), 5 + rate, 5 + rate);  
         }
 
         #endregion
@@ -241,12 +214,12 @@ namespace GraphEditor.Controls
         /// <summary>
         /// Fires when Position property set and object changes its coordinates.
         /// </summary>
-        public event VertexPositionChanged PositionChanged;
+        public event PositionChanged PositionChanged;
 
         protected void OnPositionChanged(Point offset, Point pos)
         {     
             if (PositionChanged != null)
-                PositionChanged.Invoke(this, new VertexPositionEventArgs(offset, pos, this));
+                PositionChanged.Invoke(this, new EventArgs());
         }
 
         #endregion
@@ -257,7 +230,7 @@ namespace GraphEditor.Controls
             {                   
                 edge.Destruction();
             }
-
+                    
             DetachLabel();
 
             RootGraph.Children.Remove(this);

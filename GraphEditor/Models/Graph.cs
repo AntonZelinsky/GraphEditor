@@ -101,6 +101,7 @@ namespace GraphEditor.Models
             createdEdge.SetTo(to);
             createdEdge.From.AddEdge(createdEdge);
             createdEdge.To.AddEdge(createdEdge);
+            GenerateEdgeLabel(createdEdge);
             var e = createdEdge;  
             createdEdge = null;
             return e;
@@ -120,16 +121,22 @@ namespace GraphEditor.Models
         }
 
         #endregion
-         
+
         #endregion
-         
+
         public void GenerateVertexLabel(IVertexElement v)
         {
-            var label = new VertexLabelControl();
-            label.Attach(v);
-            rootArea.AddCustomChildControl(label);
+            var label = new LabelElement(rootArea);
+            label.Attach(v);                       
             label.UpdatePosition();
-        }   
+        }
+
+        public void GenerateEdgeLabel(IEdgeElement e)
+        {
+            var label = new LabelElement(rootArea);
+            label.Attach(e);                       
+            label.UpdatePosition();
+        }
 
         public bool IsEmpty()
         {

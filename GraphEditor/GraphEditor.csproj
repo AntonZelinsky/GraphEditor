@@ -50,16 +50,15 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Controls\EdgeControl.cs" />
-    <Compile Include="Controls\Interfaces\ILabelControl.cs" />
+    <Compile Include="Controls\Interfaces\ILabelElement.cs" />
     <Compile Include="Controls\Interfaces\IEdgeElement.cs" />
     <Compile Include="Controls\Interfaces\IElement.cs" />
     <Compile Include="Controls\Interfaces\IVertexElement.cs" />
     <Compile Include="Controls\VertexControl.cs" />
-    <Compile Include="Controls\VertexLabelControl.cs" />
+    <Compile Include="Controls\LabelElement.cs" />
     <Compile Include="Models\EventType.cs" />
     <Compile Include="Models\Graph.cs" />
-    <Compile Include="Models\VertexPositionChanged.cs" />
-    <Compile Include="Models\VertexPositionEventArgs.cs" />
+    <Compile Include="Models\PositionChanged.cs" />
     <Compile Include="View\GraphArea.cs" />
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

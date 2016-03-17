@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using GraphEditor.View;
+﻿using GraphEditor.View;
+using GraphEditor.Models;
 
 namespace GraphEditor.Controls.Interfaces
 {
@@ -11,7 +11,12 @@ namespace GraphEditor.Controls.Interfaces
 
         void Destruction();
 
-        void AttachLabel(ILabelControl vertexLabelControl);
+        /// <summary>
+        /// Fires when Position property set and object changes its coordinates.
+        /// </summary>
+        event PositionChanged PositionChanged;
+
+        void AttachLabel(ILabelElement element);
         void DetachLabel();
     }
 }

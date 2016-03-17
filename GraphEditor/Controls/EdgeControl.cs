@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Controls;
 using GraphEditor.Controls.Interfaces;
+using GraphEditor.Models;
 
 namespace GraphEditor.Controls
 {
@@ -37,7 +38,7 @@ namespace GraphEditor.Controls
 
         protected void OnFromChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            From.PositionChanged += source_PositionChanged;
+            From.PositionChanged += OnPositionChanged;
             InvalidateVisual();
         }
 
@@ -63,7 +64,7 @@ namespace GraphEditor.Controls
 
         protected void OnToChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            To.PositionChanged += source_PositionChanged;
+            To.PositionChanged += OnPositionChanged;
             InvalidateVisual();
         }
 
@@ -94,18 +95,17 @@ namespace GraphEditor.Controls
         private Brush BrushColorSelected = Brushes.Orange;
 
         public bool IsSelected { get; set; }
+                                      
 
-        private bool isMouseOver;
-
-        protected internal ILabelControl VertexLabelControl;
+        protected internal ILabelElement LabelElement;
 
         /// <summary>
         /// Internal method. Attaches label to control
         /// </summary>
-        /// <param name="ctrl">Label control</param>
-        public void AttachLabel(ILabelControl ctrl)
+        /// <param name="element">Label control</param>
+        public void AttachLabel(ILabelElement element)
         {
-            VertexLabelControl = ctrl;
+            LabelElement = element;
         }
 
         /// <summary>
@@ -113,17 +113,27 @@ namespace GraphEditor.Controls
         /// </summary>
         public void DetachLabel()
         {
-            if (VertexLabelControl != null)
-                VertexLabelControl.Detach();
-            VertexLabelControl = null;
+            if (LabelElement != null)
+            {
+                LabelElement.Detach();
+                RootGraph.Children.Remove((UIElement)LabelElement);
+                LabelElement = null;
+            }
         }
 
         #endregion
 
         #region Position
 
-        private void source_PositionChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Fires when Position property set and object changes its coordinates.
+        /// </summary>
+        public event PositionChanged PositionChanged;
+
+        private void OnPositionChanged(object sender, EventArgs e)
         {
+            if (PositionChanged != null)
+                PositionChanged.Invoke(this, new EventArgs());
             //update edge on any connected vertex position changes
             InvalidateVisual();
         }
@@ -172,15 +182,13 @@ namespace GraphEditor.Controls
         }
 
         protected override void OnMouseEnter(MouseEventArgs e)
-        {
-            isMouseOver = true;
+        {                      
             InvalidateVisual();
             base.OnMouseEnter(e);
         }
 
         protected override void OnMouseLeave(MouseEventArgs e)
-        {
-            isMouseOver = false;
+        {                       
             InvalidateVisual();
             base.OnMouseLeave(e);
         }
@@ -192,15 +200,15 @@ namespace GraphEditor.Controls
             to = To?.GetPosition() ?? toPoint;
             if (to.X == 0 && to.Y == 0)
                 return;
-            drawingContext.DrawLine(new Pen(isMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3), from, to);
+            drawingContext.DrawLine(new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3), from, to);
             base.OnRender(drawingContext);
         }
 
         public void Dispose()
-        {
+        {                        
             From.Remove(this);
             To.Remove(this);
-
+            DetachLabel();
             RootGraph.Children.Remove(this);   
         }
     }

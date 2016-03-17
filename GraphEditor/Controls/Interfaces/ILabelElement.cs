@@ -1,17 +1,17 @@
 ﻿namespace GraphEditor.Controls.Interfaces
 {
     /// <summary>
-    /// Represents attachable control so it can be automaticaly attached to parent entity
+    /// Represents attachable element so it can be automaticaly attached to parent entity
     /// </summary>
-    public interface ILabelControl
+    public interface ILabelElement
     {
         /// <summary>
-        /// Attach control to parent entity
+        /// Attach element to parent entity
         /// </summary>
-        /// <param name="control">Parent entity</param>
-        void Attach(IElement control);
+        /// <param name="element">Parent entity</param>
+        void Attach(IElement element);
         /// <summary>
-        /// Detach label from control
+        /// Detach label from element
         /// </summary>
         void Detach();
 
