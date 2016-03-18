@@ -101,6 +101,11 @@ namespace GraphEditor.Models
 
         public EdgeControl ReleasedEdgeControl(VertexControl to)
         {
+            if (createdEdge.From == to)
+            {
+                UnreleasedEdgeControl();
+                return null;
+            }
             createdEdge.SetTo(to);
             createdEdge.From.AddEdge(createdEdge);
             createdEdge.To.AddEdge(createdEdge);
