@@ -56,25 +56,32 @@ namespace GraphEditor.View
                     CreateRectangleSelection(startPointClick);
                 }
             }
-            // Рисование дуги
-            else if (e.MouseDevice.RightButton == MouseButtonState.Pressed && element is VertexControl)
-            {
-                createEdge = graph.CreateEdgeControl((VertexControl)element);
-            }
 
             // Гарантированое получение MouseLeftButtonUp даже если вышли за пределы области
             CaptureMouse();
             base.OnMouseLeftButtonDown(e);
         }
 
+        protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseRightButtonDown(e);
+
+            startPointClick = e.GetPosition(this);
+            var element = GetElement(startPointClick);
+
+            // Draw edge
+            if ( element is VertexControl)
+            {
+                createEdge = graph.CreateEdgeControl((VertexControl)element);
+            }
+        }
+
         protected override void OnMouseMove(MouseEventArgs e)
         {
             Point mousePosition = e.GetPosition(null);
 
-            // Создание дуги
-            if (createEdge != null && 
-                e.RightButton == MouseButtonState.Pressed &&
-                e.LeftButton == MouseButtonState.Pressed)
+            // Derawing edge
+            if (e.RightButton == MouseButtonState.Pressed && createEdge != null)
             {
                 graph.CreatingEdgeControl(mousePosition);
             }
@@ -112,23 +119,9 @@ namespace GraphEditor.View
             Point mousePosition = e.GetPosition(this);
             var element = GetElement(mousePosition);
             if (e.ClickCount == 1)
-            {      
-                // Рисование дуги
-                if (e.MouseDevice.RightButton == MouseButtonState.Pressed && createEdge != null)
-                {
-                    var v = GetVertexElement(mousePosition);
-                    if (v != null && createEdge != v)
-                    {
-                        graph.ReleasedEdgeControl((VertexControl) v);
-                    }
-                    else
-                    {
-                        graph.UnreleasedEdgeControl();
-                    }
-                    createEdge = null;
-                }
+            {     
                 // мультивыделение
-                else if (selectionRectangle != null)
+                if (selectionRectangle != null)
                 {
                     CompleteRectangleSelection(mousePosition);
                 }
@@ -160,6 +153,28 @@ namespace GraphEditor.View
             base.OnMouseLeftButtonUp(e);
         }
 
+        protected override void OnMouseRightButtonUp(MouseButtonEventArgs e)
+        {
+            base.OnMouseRightButtonUp(e);
+
+            Point mousePosition = e.GetPosition(this);
+
+            // Complete drawed edge
+            if (createEdge != null)
+            {
+                var v = GetVertexElement(mousePosition);
+                if (v != null && createEdge != v)
+                {
+                    graph.ReleasedEdgeControl((VertexControl)v);
+                }
+                else
+                {
+                    graph.UnreleasedEdgeControl();
+                }
+                createEdge = null;
+            }
+        }
+
         protected override void OnKeyDown(KeyEventArgs e)
         {                        
             if (e.Key == Key.Delete)
@@ -169,6 +184,14 @@ namespace GraphEditor.View
                     selectedElement.Destruction(); 
                 }
                 selectedElements.Clear();      
+            }
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+            {
+                if (e.Key == Key.A)
+                {
+                    selectedElements.AddRange(graph.AllElements); 
+                    graph.AllElements.ForEach(s => s.IsSelected = true); 
+                }
             }
             base.OnKeyDown(e);
         }

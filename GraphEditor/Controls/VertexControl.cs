@@ -125,18 +125,18 @@ namespace GraphEditor.Controls
         #region DependencyProperty Content
 
         /// <summary>
-        /// Registers a dependency property as backing store for the Content property
+        /// Registers a dependency property as backing store for the IsSelected property
         /// </summary>
         public static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register(
-                "IsSelected", typeof (bool), typeof (VertexControl),
+                "IsSelectedVertex", typeof (bool), typeof (VertexControl),
                 new FrameworkPropertyMetadata(false,
                   FrameworkPropertyMetadataOptions.AffectsRender));
 
         /// <summary>
         /// Gets or sets the Content.
         /// </summary>
-        /// <value>The Content.</value>
+        /// <value>The IsSelected.</value>
         public bool IsSelected
         {
             get { return (bool)GetValue(VertexControl.IsSelectedProperty); }

@@ -94,9 +94,6 @@ namespace GraphEditor.Controls
         private Brush BrushColor = Brushes.Black;
         private Brush BrushColorSelected = Brushes.Orange;
 
-        public bool IsSelected { get; set; }
-                                      
-
         protected internal ILabelElement LabelElement;
 
         /// <summary>
@@ -121,6 +118,25 @@ namespace GraphEditor.Controls
             }
         }
 
+        /// <summary>
+        /// Registers a dependency property as backing store for the IsSelected property
+        /// </summary>
+        public static readonly DependencyProperty IsSelectedProperty =
+            DependencyProperty.Register(
+                "IsSelectedEdge", typeof(bool), typeof(EdgeControl),
+                new FrameworkPropertyMetadata(false,
+                  FrameworkPropertyMetadataOptions.AffectsRender));
+        
+        /// <summary>
+        /// Gets or sets the Content.
+        /// </summary>
+        /// <value>The IsSelected.</value>
+        public bool IsSelected
+        {
+            get { return (bool)GetValue(EdgeControl.IsSelectedProperty); }
+            set { SetValue(EdgeControl.IsSelectedProperty, value); }
+        }
+                                
         #endregion
 
         #region Position
