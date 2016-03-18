@@ -1,8 +1,9 @@
-﻿using System;
-using GraphEditor.View;
-using System.Collections.Generic;
+﻿using System;    
+using System.Linq;   
 using System.Windows;
-using GraphEditor.Controls;
+using GraphEditor.View;
+using GraphEditor.Controls;    
+using System.Collections.Generic;
 using GraphEditor.Controls.Interfaces;  
 
 namespace GraphEditor.Models
@@ -20,6 +21,8 @@ namespace GraphEditor.Models
         private List<IVertexElement> verticies;
         public List<IVertexElement> Verticies => verticies;
 
+        public List<IElement> AllElements => verticies.Cast<IElement>().Union((edges)).ToList();
+      
         #endregion
 
         public Graph(GraphArea area)
@@ -99,7 +102,8 @@ namespace GraphEditor.Models
         {
             createdEdge.SetTo(to);
             createdEdge.From.AddEdge(createdEdge);
-            createdEdge.To.AddEdge(createdEdge);
+            createdEdge.To.AddEdge(createdEdge);      
+            edges.Add(createdEdge);
             var e = createdEdge;  
             createdEdge = null;
             return e;

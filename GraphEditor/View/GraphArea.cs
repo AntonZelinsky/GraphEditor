@@ -185,6 +185,14 @@ namespace GraphEditor.View
                 }
                 selectedElements.Clear();    
             }
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+            {
+                if (e.Key == Key.A)
+                {
+                    selectedElements.AddRange(graph.AllElements); 
+                    graph.AllElements.ForEach(s => s.IsSelected = true); 
+                }
+            }
             base.OnKeyDown(e);
         }
 
