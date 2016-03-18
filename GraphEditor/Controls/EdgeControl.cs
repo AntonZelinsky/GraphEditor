@@ -93,10 +93,25 @@ namespace GraphEditor.Controls
         private Brush BrushColor = Brushes.Black;
         private Brush BrushColorSelected = Brushes.Orange;
 
-        public bool IsSelected { get; set; }
+        /// <summary>
+        /// Registers a dependency property as backing store for the IsSelected property
+        /// </summary>
+        public static readonly DependencyProperty IsSelectedProperty =
+            DependencyProperty.Register(
+                "IsSelectedEdge", typeof(bool), typeof(EdgeControl),
+                new FrameworkPropertyMetadata(false,
+                  FrameworkPropertyMetadataOptions.AffectsRender));
 
-        private bool isMouseOver;
-
+        /// <summary>
+        /// Gets or sets the Content.
+        /// </summary>
+        /// <value>The IsSelected.</value>
+        public bool IsSelected
+        {
+            get { return (bool)GetValue(EdgeControl.IsSelectedProperty); }
+            set { SetValue(EdgeControl.IsSelectedProperty, value); }
+        }
+                                
         #endregion
 
         #region Position
@@ -151,15 +166,13 @@ namespace GraphEditor.Controls
         }
 
         protected override void OnMouseEnter(MouseEventArgs e)
-        {
-            isMouseOver = true;
+        {                        
             InvalidateVisual();
             base.OnMouseEnter(e);
         }
 
         protected override void OnMouseLeave(MouseEventArgs e)
-        {
-            isMouseOver = false;
+        {                       
             InvalidateVisual();
             base.OnMouseLeave(e);
         }
@@ -171,7 +184,7 @@ namespace GraphEditor.Controls
             to = To?.GetPosition() ?? toPoint;
             if (to.X == 0 && to.Y == 0)
                 return;
-            drawingContext.DrawLine(new Pen(isMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3), from, to);
+            drawingContext.DrawLine(new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3), from, to);
             base.OnRender(drawingContext);
         }
 
