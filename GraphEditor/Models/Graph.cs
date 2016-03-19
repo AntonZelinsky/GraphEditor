@@ -75,8 +75,7 @@ namespace GraphEditor.Models
         public VertexControl CreateVertexControl(Point p)
         {
             var v = new VertexControl(rootArea, p);
-            AddVertex(v);
-            GenerateVertexLabel(v);
+            AddVertex(v);           
             return v;
         }
 
@@ -108,8 +107,7 @@ namespace GraphEditor.Models
             }
             createdEdge.SetTo(to);
             createdEdge.From.AddEdge(createdEdge);
-            createdEdge.To.AddEdge(createdEdge);
-            GenerateEdgeLabel(createdEdge);
+            createdEdge.To.AddEdge(createdEdge);   
             edges.Add(createdEdge);  
             var e = createdEdge;  
             createdEdge = null;
@@ -133,18 +131,21 @@ namespace GraphEditor.Models
 
         #endregion
 
-        public void GenerateVertexLabel(IVertexElement v)
+        public void CreateElementLabel(IElement v, string name)
         {
-            var label = new LabelElement(rootArea);
+            var label = new LabelElement(rootArea, name);
             label.Attach(v);                       
             label.UpdatePosition();
         }
 
-        public void GenerateEdgeLabel(IEdgeElement e)
+        public void UpdeteElementLabel(IElement v, string name)
         {
-            var label = new LabelElement(rootArea);
-            label.Attach(e);                       
-            label.UpdatePosition();
+            v.LabelName = name;
+        }
+
+        public void RemoveElementLabel(IElement v)
+        {
+            v.DetachLabel();
         }
 
         public bool IsEmpty()

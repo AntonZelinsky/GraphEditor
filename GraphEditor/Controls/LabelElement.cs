@@ -16,6 +16,14 @@ namespace GraphEditor.Controls
     {      
         public GraphArea RootGraph { get; }
 
+        public static readonly new DependencyProperty NameProperty = DependencyProperty.Register("Name", typeof(string), typeof(LabelElement));
+
+        public new string Name
+        {
+            get { return (string)GetValue(NameProperty); }
+            set { SetValue(NameProperty, value); }
+        }
+
         /// <summary>
         /// Gets label attach element
         /// </summary>
@@ -31,8 +39,9 @@ namespace GraphEditor.Controls
 
         protected Point PositionLabel;
 
-        public LabelElement(GraphArea rootGraph)
+        public LabelElement(GraphArea rootGraph, string name)
         {
+            Name = name;
             RootGraph = rootGraph;
             DataContext = this; 
             RootGraph.Children.Add(this);
@@ -103,7 +112,7 @@ namespace GraphEditor.Controls
             base.OnRender(drawingContext);
 
             drawingContext.DrawText(
-                new FormattedText("null", CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+                new FormattedText(Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
                 new Typeface(new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
                 16, Brushes.Black), PositionLabel);
         }  

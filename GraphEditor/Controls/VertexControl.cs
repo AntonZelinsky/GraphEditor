@@ -25,8 +25,6 @@ namespace GraphEditor.Controls
 
         public IList<EdgeControl> AllEdges => (IList<EdgeControl>)incomingEdges.Union(outcomingEdges).ToList().AsReadOnly();
 
-        protected internal ILabelElement LabelElement;
-
         public GraphArea RootGraph { get; }
 
         public VertexControl(object vertexData)
@@ -93,6 +91,16 @@ namespace GraphEditor.Controls
 
         #region Label
 
+        protected internal ILabelElement LabelElement;
+
+        public bool IsLabel => LabelElement != null;
+
+        public string LabelName
+        {
+            get { return LabelElement.Name; }
+            set { LabelElement.Name = value; }
+        }
+
         /// <summary>
         /// Internal method. Attaches label to control
         /// </summary>
@@ -107,7 +115,7 @@ namespace GraphEditor.Controls
         /// </summary>
         public void DetachLabel()
         {
-            if (LabelElement != null)
+            if (IsLabel)
             {
                 LabelElement.Detach();   
                 RootGraph.Children.Remove((UIElement) LabelElement);   

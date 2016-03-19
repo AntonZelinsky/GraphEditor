@@ -159,24 +159,51 @@ namespace GraphEditor.View
 
             Point mousePosition = e.GetPosition(this);
 
-            var v = GetElement(mousePosition);  
+            var element = GetElement(mousePosition);  
 
             // Complete drawed edge
-            if (v != null)
+            if (element != null)
             {
                 if (creating)
                 {
-                    graph.ReleasedEdgeControl((VertexControl) v);
+                    graph.ReleasedEdgeControl((VertexControl) element);
                     creating = false;
                 }
                 else
-                {
-                    // TODO: Context menu
+                {                      
+                    ContextMenu cm = new ContextMenu();
+                    var rename = new MenuItem {Header = "Rename", };
+                    rename.Click += (sender, args) => RenameOnClick(element, args);
+                    cm.Items.Add(rename);                
+                    cm.IsOpen = true;
                 }
                 targetElement = null;
             }
         }
-                                    
+
+        private void RenameOnClick(IElement sender, RoutedEventArgs routedEventArgs)
+        {
+          //  Application.Current.MainWindow.IsEnabled = false;
+            string old = "";
+            if (sender.IsLabel)
+                old = sender.LabelName;
+            var rene = new RenameDialog(old);
+            if (rene.ShowDialog() == true)
+            {
+                if (rene.Rename != "")
+                {
+                    if (sender.IsLabel)
+                        graph.UpdeteElementLabel(sender, rene.Rename);
+                    else
+                        graph.CreateElementLabel(sender, rene.Rename);
+                }     
+                else
+                    graph.RemoveElementLabel(sender);
+            }
+
+           // Application.Current.MainWindow.IsEnabled = true;
+        }
+
         protected override void OnKeyDown(KeyEventArgs e)
         {                        
             if (e.Key == Key.Delete)

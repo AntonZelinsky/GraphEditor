@@ -17,6 +17,8 @@ namespace GraphEditor.Controls.Interfaces
         event PositionChanged PositionChanged;
 
         void AttachLabel(ILabelElement element);
-        void DetachLabel();
+        void DetachLabel();             
+        bool IsLabel { get; }
+        string LabelName { get; set; }
     }
 }

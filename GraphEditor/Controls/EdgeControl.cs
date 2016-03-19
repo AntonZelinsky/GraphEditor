@@ -15,7 +15,7 @@ namespace GraphEditor.Controls
         #region Properties & Fields
           
         public GraphArea RootGraph { get; }
-
+        
         /// <summary>
         /// Source visual vertex object
         /// </summary>
@@ -94,7 +94,15 @@ namespace GraphEditor.Controls
         private Brush BrushColor = Brushes.Black;
         private Brush BrushColorSelected = Brushes.Orange;
 
-        protected internal ILabelElement LabelElement;
+        protected internal ILabelElement LabelElement;  
+
+        public bool IsLabel => LabelElement != null;
+
+        public string LabelName
+        {
+            get { return LabelElement.Name; }
+            set { LabelElement.Name = value; }
+        }
 
         /// <summary>
         /// Internal method. Attaches label to control
@@ -110,7 +118,7 @@ namespace GraphEditor.Controls
         /// </summary>
         public void DetachLabel()
         {
-            if (LabelElement != null)
+            if (IsLabel)
             {
                 LabelElement.Detach();
                 RootGraph.Children.Remove((UIElement)LabelElement);

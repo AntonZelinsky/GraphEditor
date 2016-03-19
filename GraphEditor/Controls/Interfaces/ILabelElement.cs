@@ -5,6 +5,8 @@
     /// </summary>
     public interface ILabelElement
     {
+        string Name { get; set; }
+
         /// <summary>
         /// Attach element to parent entity
         /// </summary>
