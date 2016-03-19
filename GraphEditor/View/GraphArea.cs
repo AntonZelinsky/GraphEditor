@@ -18,8 +18,7 @@ namespace GraphEditor.View
         public int GetSelectedElements => selectedElements.Count;      
         private Point startPointClick;
         private Rectangle selectionRectangle;
-        private bool created;
-        private EdgeControl createEdge;
+        private bool creating;
         private IElement targetElement;
 
         private Graph graph;
@@ -29,7 +28,7 @@ namespace GraphEditor.View
             graph = new Graph(this);
             Background = Brushes.White;
             MouseLeftButtonDown += OnMouseLeftButtonDown;
-            Focusable = true; 
+            Focusable = true;               
         }
 
         #region Override Events  
@@ -43,7 +42,7 @@ namespace GraphEditor.View
                 if (e.ClickCount == 2)
                 {
                     graph.CreateVertexControl(startPointClick);
-                    created = true;
+                    creating = true;
                 }
                 // Мультивыделение   
                 else if (e.ClickCount == 1)
@@ -72,7 +71,7 @@ namespace GraphEditor.View
             // Draw edge
             if ( element is VertexControl)
             {
-                createEdge = graph.CreateEdgeControl((VertexControl)element);
+                targetElement = graph.CreateEdgeControl((VertexControl)element);
             }
         }
 
@@ -81,9 +80,10 @@ namespace GraphEditor.View
             Point mousePosition = e.GetPosition(null);
 
             // Derawing edge
-            if (e.RightButton == MouseButtonState.Pressed && createEdge != null)
+            if (e.RightButton == MouseButtonState.Pressed && targetElement != null)
             {
                 graph.CreatingEdgeControl(mousePosition);
+                creating = true;
             }
             else if (e.LeftButton == MouseButtonState.Pressed)
             {
@@ -126,7 +126,7 @@ namespace GraphEditor.View
                     CompleteRectangleSelection(mousePosition);
                 }
                 // еденичное выделение 
-                else if (element != null && !created)
+                else if (element != null && !creating)
                 {   
                     if (!element.IsSelected)
                     {
@@ -148,7 +148,7 @@ namespace GraphEditor.View
                 } 
             }
 
-            created = false;
+            creating = false;
             ReleaseMouseCapture();
             base.OnMouseLeftButtonUp(e);
         }
@@ -159,22 +159,24 @@ namespace GraphEditor.View
 
             Point mousePosition = e.GetPosition(this);
 
+            var v = GetElement(mousePosition);  
+
             // Complete drawed edge
-            if (createEdge != null)
+            if (v != null)
             {
-                var v = GetVertexElement(mousePosition);
-                if (v != null && createEdge != v)
+                if (creating)
                 {
-                    graph.ReleasedEdgeControl((VertexControl)v);
+                    graph.ReleasedEdgeControl((VertexControl) v);
+                    creating = false;
                 }
                 else
                 {
-                    graph.UnreleasedEdgeControl();
+                    // TODO: Context menu
                 }
-                createEdge = null;
+                targetElement = null;
             }
         }
-
+                                    
         protected override void OnKeyDown(KeyEventArgs e)
         {                        
             if (e.Key == Key.Delete)
@@ -310,12 +312,12 @@ namespace GraphEditor.View
             return hitResult.VisualHit as IElement;
         }
 
-        public IElement GetVertexElement(Point p)
+        public IVertexElement GetVertexElement(Point p)
         {
             targetElement = null;
             HitTestResultCallback callback = new HitTestResultCallback(HitTestClickCallback);
             VisualTreeHelper.HitTest(this, null, callback, new PointHitTestParameters(p));
-            return targetElement;
+            return targetElement as IVertexElement;
         }
 
         public List<IElement> GetElements(Geometry region)
