@@ -2,11 +2,9 @@
 using System.Linq;
 using System.Windows;
 using GraphEditor.View;
-using GraphEditor.Models;
-using System.Windows.Data;
+using GraphEditor.Models;  
 using System.Windows.Input;
-using System.Windows.Media; 
-using System.Threading.Tasks;
+using System.Windows.Media;    
 using System.Windows.Controls;
 using System.Collections.Generic;
 using GraphEditor.Controls.Interfaces;
@@ -48,7 +46,9 @@ namespace GraphEditor.Controls
             incomingEdges = new List<EdgeControl>();
             outcomingEdges = new List<EdgeControl>();    
         }
-            
+
+        #region Graph operation
+         
         public bool AddEdge(IEdgeElement e)
         {
             if (e.From == this)
@@ -57,6 +57,9 @@ namespace GraphEditor.Controls
                 incomingEdges.Add((EdgeControl)e);
             else
                 return false;
+
+            InvalidateVisual();
+
             return true;
         }
 
@@ -68,6 +71,9 @@ namespace GraphEditor.Controls
                 incomingEdges.Remove((EdgeControl)e);
             else
                 return false;
+
+            InvalidateVisual();
+
             return true;
         }
 
@@ -75,33 +81,70 @@ namespace GraphEditor.Controls
         {
             return AllEdges.FirstOrDefault(e => e.To == v);
         }
-          
+
+        #endregion
+
         public void Destruction()
         {
             Dispose();
         }
 
+        #region Label
+
+        protected internal ILabelElement LabelElement;
+
+        public bool IsLabel => LabelElement != null;
+
+        public string LabelName
+        {
+            get { return LabelElement.Name; }
+            set { LabelElement.Name = value; }
+        }
+
+        /// <summary>
+        /// Internal method. Attaches label to control
+        /// </summary>
+        /// <param name="element">Label control</param>
+        public void AttachLabel(ILabelElement element)
+        {
+            LabelElement = element;
+        }
+
+        /// <summary>
+        /// Internal method. Detaches label from control.
+        /// </summary>
+        public void DetachLabel()
+        {
+            if (IsLabel)
+            {
+                LabelElement.Detach();   
+                RootGraph.Children.Remove((UIElement) LabelElement);   
+                LabelElement = null;
+            }
+        }
+
+        #endregion
+
         #region Property
 
         private Brush BrushColor = Brushes.Green;
         private Brush BrushColorSelected = Brushes.Orange;
-
-        private bool MouseOver = false;
+                                          
         #region DependencyProperty Content
 
         /// <summary>
-        /// Registers a dependency property as backing store for the Content property
+        /// Registers a dependency property as backing store for the IsSelected property
         /// </summary>
         public static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register(
-                "IsSelected", typeof (bool), typeof (VertexControl),
+                "IsSelectedVertex", typeof (bool), typeof (VertexControl),
                 new FrameworkPropertyMetadata(false,
                   FrameworkPropertyMetadataOptions.AffectsRender));
 
         /// <summary>
         /// Gets or sets the Content.
         /// </summary>
-        /// <value>The Content.</value>
+        /// <value>The IsSelected.</value>
         public bool IsSelected
         {
             get { return (bool)GetValue(VertexControl.IsSelectedProperty); }
@@ -119,20 +162,21 @@ namespace GraphEditor.Controls
 
         public static readonly DependencyProperty VertexProperty =
             DependencyProperty.Register("Vertex", typeof(object), typeof(VertexControl), new PropertyMetadata(null));
+  
         #endregion
 
         #endregion
+
+        #region Override event
 
         protected override void OnMouseEnter(MouseEventArgs e)
-        {
-            MouseOver = true;
+        {                     
             InvalidateVisual();
             base.OnMouseEnter(e);
         }
 
         protected override void OnMouseLeave(MouseEventArgs e)
-        {
-            MouseOver = false;
+        {                       
             InvalidateVisual();
             base.OnMouseLeave(e);
         }
@@ -142,15 +186,17 @@ namespace GraphEditor.Controls
             var rate = AllEdges.Count / 2;
             drawingContext.DrawEllipse(
                 Brushes.AliceBlue, 
-                new Pen(MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
+                new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
                 new Point(0, 0), 10 + rate, 10 + rate);
 
             rate = AllEdges.Count / 3;    
             drawingContext.DrawEllipse(
-                MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 
-                new Pen(MouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
-                new Point(0, 0), 5 + rate, 5 + rate);
+                IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 
+                new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
+                new Point(0, 0), 5 + rate, 5 + rate);  
         }
+
+        #endregion
 
         #region Position trace feature
 
@@ -176,12 +222,12 @@ namespace GraphEditor.Controls
         /// <summary>
         /// Fires when Position property set and object changes its coordinates.
         /// </summary>
-        public event VertexPositionChanged PositionChanged;
+        public event PositionChanged PositionChanged;
 
         protected void OnPositionChanged(Point offset, Point pos)
-        {
+        {     
             if (PositionChanged != null)
-                PositionChanged.Invoke(this, new VertexPositionEventArgs(offset, pos, this));
+                PositionChanged.Invoke(this, new EventArgs());
         }
 
         #endregion
@@ -192,6 +238,8 @@ namespace GraphEditor.Controls
             {                   
                 edge.Destruction();
             }
+                    
+            DetachLabel();
 
             RootGraph.Children.Remove(this);
         }

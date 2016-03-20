@@ -13,13 +13,12 @@ namespace GraphEditor.View
 {
     public class GraphArea : Canvas
     {
-        private bool selection;
+        private bool multiSelection;
         private readonly List<IElement> selectedElements = new List<IElement>();
         public int GetSelectedElements => selectedElements.Count;      
         private Point startPointClick;
         private Rectangle selectionRectangle;
-        private bool created;
-        private EdgeControl createEdge;
+        private bool creating;
         private IElement targetElement;
 
         private Graph graph;
@@ -29,7 +28,7 @@ namespace GraphEditor.View
             graph = new Graph(this);
             Background = Brushes.White;
             MouseLeftButtonDown += OnMouseLeftButtonDown;
-            Focusable = true; 
+            Focusable = true;               
         }
 
         #region Override Events  
@@ -41,40 +40,20 @@ namespace GraphEditor.View
             if (element == null)
             {
                 if (e.ClickCount == 2)
-                {                                                    
-                    var vc = CreateVertexControl(startPointClick);
-                    
-                    created = true;
+                {
+                    graph.CreateVertexControl(startPointClick);
+                    creating = true;
                 }
                 // Мультивыделение   
                 else if (e.ClickCount == 1)
-                {                        
+                {
                     if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
                     {
                         selectedElements.ForEach(s => s.IsSelected = false);
                         selectedElements.Clear();
                     }
-                    selection = true;
-                    selectionRectangle = new Rectangle
-                    {
-                        Width = 0,
-                        Height = 0,
-                        Fill = Brushes.LightCyan,
-                        Stroke = Brushes.Orange,
-                        StrokeThickness = 2,
-                        Opacity = 0.3
-                    };
-
-                    this.Children.Add(selectionRectangle);
-                    Canvas.SetZIndex(selectionRectangle, 200);
-                    Canvas.SetLeft(selectionRectangle, e.GetPosition(this).X);
-                    Canvas.SetTop(selectionRectangle, e.GetPosition(this).Y);
+                    CreateRectangleSelection(startPointClick);
                 }
-            }
-            // Рисование дуги
-            else if (e.MouseDevice.RightButton == MouseButtonState.Pressed && element is VertexControl)
-            {
-                CreateEdgeControl((VertexControl)element);
             }
 
             // Гарантированое получение MouseLeftButtonUp даже если вышли за пределы области
@@ -82,37 +61,37 @@ namespace GraphEditor.View
             base.OnMouseLeftButtonDown(e);
         }
 
+        protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseRightButtonDown(e);
+
+            startPointClick = e.GetPosition(this);
+            var element = GetElement(startPointClick);
+
+            // Draw edge
+            if ( element is VertexControl)
+            {
+                targetElement = graph.CreateEdgeControl((VertexControl)element);
+            }
+        }
+
         protected override void OnMouseMove(MouseEventArgs e)
         {
             Point mousePosition = e.GetPosition(null);
 
-            // Создание дуги
-            if (createEdge != null && 
-                e.RightButton == MouseButtonState.Pressed &&
-                e.LeftButton == MouseButtonState.Pressed)
+            // Derawing edge
+            if (e.RightButton == MouseButtonState.Pressed && targetElement != null)
             {
-                CreatingEdgeControl(mousePosition);
+                graph.CreatingEdgeControl(mousePosition);
+                creating = true;
             }
             else if (e.LeftButton == MouseButtonState.Pressed)
             {
                 // мультивыделение              
-                if(selection)
-                {                   
-                    // защита от случайных движений мыши              
-                   if(Math.Max(Math.Abs(startPointClick.X - mousePosition.X), Math.Abs(startPointClick.Y - mousePosition.Y)) < 5)
-                        return;
-                    var x = Math.Min(mousePosition.X, startPointClick.X);
-                    var y = Math.Min(mousePosition.Y, startPointClick.Y);
-
-                    var w = Math.Max(mousePosition.X, startPointClick.X) - x;
-                    var h = Math.Max(mousePosition.Y, startPointClick.Y) - y;
-
-                    selectionRectangle.Width = w;
-                    selectionRectangle.Height = h;
-
-                    Canvas.SetLeft(selectionRectangle, x);
-                    Canvas.SetTop(selectionRectangle, y);                                         
-                }
+                if (multiSelection)
+                {
+                    MoveRectangleSelection(mousePosition);
+                }  
                 // перетаскивание
                 else
                 {
@@ -140,32 +119,14 @@ namespace GraphEditor.View
             Point mousePosition = e.GetPosition(this);
             var element = GetElement(mousePosition);
             if (e.ClickCount == 1)
-            {      
-                // Рисование дуги
-                if (e.MouseDevice.RightButton == MouseButtonState.Pressed && createEdge != null)
-                {
-                    var v = GetVertexElement(mousePosition);
-                    if (v != null && createEdge != v)
-                    {
-                        ReleasedEdgeControl((VertexControl) v);
-                    }
-                    else
-                    {
-                        UnreleasedEdgeControl();
-                    }
-                    createEdge = null;
-                }
+            {     
                 // мультивыделение
-                else if (selectionRectangle != null)
+                if (selectionRectangle != null)
                 {
-                    var geometry = new RectangleGeometry(new Rect(startPointClick, e.GetPosition(this)));
-                    GetElements(geometry);
-                    this.Children.Remove(selectionRectangle);
-                    selectionRectangle = null;
-                    selection = false;
+                    CompleteRectangleSelection(mousePosition);
                 }
                 // еденичное выделение 
-                else if (element != null && !created)
+                else if (element != null && !creating)
                 {   
                     if (!element.IsSelected)
                     {
@@ -187,9 +148,60 @@ namespace GraphEditor.View
                 } 
             }
 
-            created = false;
+            creating = false;
             ReleaseMouseCapture();
             base.OnMouseLeftButtonUp(e);
+        }
+
+        protected override void OnMouseRightButtonUp(MouseButtonEventArgs e)
+        {
+            base.OnMouseRightButtonUp(e);
+
+            Point mousePosition = e.GetPosition(this);
+
+            var element = GetElement(mousePosition);  
+
+            // Complete drawed edge
+            if (element != null)
+            {
+                if (creating)
+                {
+                    graph.ReleasedEdgeControl((VertexControl) element);
+                    creating = false;
+                }
+                else
+                {                      
+                    ContextMenu cm = new ContextMenu();
+                    var rename = new MenuItem {Header = "Rename", };
+                    rename.Click += (sender, args) => RenameOnClick(element, args);
+                    cm.Items.Add(rename);                
+                    cm.IsOpen = true;
+                }
+                targetElement = null;
+            }
+        }
+
+        private void RenameOnClick(IElement sender, RoutedEventArgs routedEventArgs)
+        {
+          //  Application.Current.MainWindow.IsEnabled = false;
+            string old = "";
+            if (sender.IsLabel)
+                old = sender.LabelName;
+            var rene = new RenameDialog(old);
+            if (rene.ShowDialog() == true)
+            {
+                if (rene.Rename != "")
+                {
+                    if (sender.IsLabel)
+                        graph.UpdeteElementLabel(sender, rene.Rename);
+                    else
+                        graph.CreateElementLabel(sender, rene.Rename);
+                }     
+                else
+                    graph.RemoveElementLabel(sender);
+            }
+
+           // Application.Current.MainWindow.IsEnabled = true;
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -200,60 +212,73 @@ namespace GraphEditor.View
                 {                                                     
                     selectedElement.Destruction(); 
                 }
-                selectedElements.Clear();    
+                selectedElements.Clear();      
+            }
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+            {
+                if (e.Key == Key.A)
+                {
+                    selectedElements.AddRange(graph.AllElements); 
+                    graph.AllElements.ForEach(s => s.IsSelected = true); 
+                }
             }
             base.OnKeyDown(e);
         }
 
         #endregion
 
-        #region IElement
+        #region RectangleSelection
 
-        private VertexControl CreateVertexControl(Point p)
-        { 
-            var vc = new VertexControl(this, p);
-            return vc;
-        }
-
-        private EdgeControl CreateEdgeControl(VertexControl from, VertexControl to)
-        {                                                                                                                      
-            var edgeControl = new EdgeControl(this, from, to);      
-            createEdge = edgeControl;
-            return edgeControl;
-        }
-
-        private EdgeControl CreateEdgeControl(VertexControl from)
+        private void CreateRectangleSelection(Point mousePosition)
         {
-            var edgeControl = new EdgeControl(this, from);
-            createEdge = edgeControl;
-            return edgeControl;
+            multiSelection = true;
+            selectionRectangle = new Rectangle
+            {
+                Width = 0,
+                Height = 0,
+                Fill = Brushes.LightCyan,
+                Stroke = Brushes.Orange,
+                StrokeThickness = 2,
+                Opacity = 0.3
+            };
+
+            this.Children.Add(selectionRectangle);
+            Canvas.SetZIndex(selectionRectangle, 200);
+            Canvas.SetLeft(selectionRectangle, mousePosition.X);
+            Canvas.SetTop(selectionRectangle, mousePosition.Y);
         }
 
-        private EdgeControl CreatingEdgeControl(Point to)
+        private void MoveRectangleSelection(Point mousePosition)
         {
-            if (createEdge.To != null)
-                throw new Exception();
-            createEdge.SetToPoint(to);
-            return createEdge;
+            // защита от случайных движений мыши              
+            if (Math.Max(Math.Abs(startPointClick.X - mousePosition.X), Math.Abs(startPointClick.Y - mousePosition.Y)) < 5)
+                return;
+            var x = Math.Min(mousePosition.X, startPointClick.X);
+            var y = Math.Min(mousePosition.Y, startPointClick.Y);
+
+            var w = Math.Max(mousePosition.X, startPointClick.X) - x;
+            var h = Math.Max(mousePosition.Y, startPointClick.Y) - y;
+
+            selectionRectangle.Width = w;
+            selectionRectangle.Height = h;
+
+            Canvas.SetLeft(selectionRectangle, x);
+            Canvas.SetTop(selectionRectangle, y);
         }
 
-        private EdgeControl ReleasedEdgeControl(VertexControl to)
+        private void CompleteRectangleSelection(Point mousePosition)
         {
-            createEdge.SetTo(to);
-            createEdge.From.AddEdge(createEdge);
-            createEdge.To.AddEdge(createEdge);
-            return createEdge;
-        }
-
-        private void UnreleasedEdgeControl()
-        {
-            this.Children.Remove(createEdge);
-            createEdge = null;
+            var geometry = new RectangleGeometry(new Rect(startPointClick, mousePosition));
+            GetElements(geometry);
+            this.Children.Remove(selectionRectangle);
+            selectionRectangle = null;
+            multiSelection = false;
         }
 
         #endregion
-
+       
         #region Attached Dependency Property registrations
+
         public static readonly DependencyProperty XProperty =
             DependencyProperty.RegisterAttached("X", typeof(double), typeof(GraphArea),
                                                  new FrameworkPropertyMetadata(double.NaN,
@@ -303,21 +328,23 @@ namespace GraphEditor.View
         {
             obj.SetValue(YProperty, value);
         }
+
         #endregion
 
         #region HitTest
+
         public IElement GetElement(Point p)
         {
             HitTestResult hitResult = VisualTreeHelper.HitTest(this, p);
             return hitResult.VisualHit as IElement;
         }
 
-        public IElement GetVertexElement(Point p)
+        public IVertexElement GetVertexElement(Point p)
         {
             targetElement = null;
             HitTestResultCallback callback = new HitTestResultCallback(HitTestClickCallback);
             VisualTreeHelper.HitTest(this, null, callback, new PointHitTestParameters(p));
-            return targetElement;
+            return targetElement as IVertexElement;
         }
 
         public List<IElement> GetElements(Geometry region)
@@ -348,6 +375,7 @@ namespace GraphEditor.View
             }               
             return HitTestResultBehavior.Continue;
         }
+
         #endregion
     }
 }

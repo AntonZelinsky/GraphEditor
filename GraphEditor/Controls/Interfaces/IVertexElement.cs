@@ -19,10 +19,6 @@ namespace GraphEditor.Controls.Interfaces
         bool Remove(IEdgeElement e);
 
         IEdgeElement FindEdge(IVertexElement v);
-        /// <summary>
-        /// Fires when Position property set and object changes its coordinates.
-        /// </summary>
-        event VertexPositionChanged PositionChanged;
 
         Point GetPosition();
         void SetPosition(Point pt);

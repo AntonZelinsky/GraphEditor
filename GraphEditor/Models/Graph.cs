@@ -1,6 +1,9 @@
-﻿using GraphEditor.View;
+﻿using System;
+using System.Linq;   
+using System.Windows;
+using GraphEditor.View;
+using GraphEditor.Controls;    
 using System.Collections.Generic;
-using GraphEditor.Controls;
 using GraphEditor.Controls.Interfaces;  
 
 namespace GraphEditor.Models
@@ -10,7 +13,7 @@ namespace GraphEditor.Models
         #region Properties
 
         private GraphArea rootArea;
-
+         
         private List<IEdgeElement> edges;
         public List<IEdgeElement> Edges => edges;
 
@@ -18,6 +21,8 @@ namespace GraphEditor.Models
         private List<IVertexElement> verticies;
         public List<IVertexElement> Verticies => verticies;
 
+        public List<IElement> AllElements => verticies.Cast<IElement>().Union((edges)).ToList();
+      
         #endregion
 
         public Graph(GraphArea area)
@@ -64,7 +69,84 @@ namespace GraphEditor.Models
             edges.Add(e);
             return true;
         }
+               
+        #region Creating IElement Control
 
+        public VertexControl CreateVertexControl(Point p)
+        {
+            var v = new VertexControl(rootArea, p);
+            AddVertex(v);           
+            return v;
+        }
+
+        #region Creating Edge
+
+        private EdgeControl createdEdge;
+
+        public EdgeControl CreateEdgeControl(VertexControl from)
+        {
+            var edgeControl = new EdgeControl(rootArea, from);
+            createdEdge = edgeControl;
+            return edgeControl;
+        }
+
+        public EdgeControl CreatingEdgeControl(Point to)
+        {
+            if (createdEdge.To != null)
+                throw new Exception();
+            createdEdge.SetToPoint(to);
+            return createdEdge;
+        }
+
+        public EdgeControl ReleasedEdgeControl(VertexControl to)
+        {
+            if (createdEdge.From == to)
+            {
+                UnreleasedEdgeControl();
+                return null;
+            }
+            createdEdge.SetTo(to);
+            createdEdge.From.AddEdge(createdEdge);
+            createdEdge.To.AddEdge(createdEdge);   
+            edges.Add(createdEdge);  
+            var e = createdEdge;  
+            createdEdge = null;
+            return e;
+        }
+
+        public void UnreleasedEdgeControl()
+        {
+            rootArea.Children.Remove(createdEdge);
+            createdEdge = null;
+        }
+
+        public EdgeControl CreateEdgeControl(VertexControl from, VertexControl to)
+        {
+            var e = new EdgeControl(rootArea, from, to);
+            AddEdge(e);
+            return e;
+        }
+
+        #endregion
+
+        #endregion
+
+        public void CreateElementLabel(IElement v, string name)
+        {
+            var label = new LabelElement(rootArea, name);
+            label.Attach(v);                       
+            label.UpdatePosition();
+        }
+
+        public void UpdeteElementLabel(IElement v, string name)
+        {
+            v.LabelName = name;
+        }
+
+        public void RemoveElementLabel(IElement v)
+        {
+            v.DetachLabel();
+        }
 
         public bool IsEmpty()
         {
