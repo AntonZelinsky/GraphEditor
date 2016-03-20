@@ -16,13 +16,19 @@ namespace GraphEditor.Controls
     {      
         public GraphArea RootGraph { get; }
 
-        public static readonly new DependencyProperty NameProperty = DependencyProperty.Register("Name", typeof(string), typeof(LabelElement));
-
+        /// <summary>
+        /// Gets label name
+        /// </summary>    
         public new string Name
         {
-            get { return (string)GetValue(NameProperty); }
-            set { SetValue(NameProperty, value); }
+            get { return name; }
+            set {
+                InvalidateVisual();
+                name = value;
+            }
         }
+
+        private string name;
 
         /// <summary>
         /// Gets label attach element
