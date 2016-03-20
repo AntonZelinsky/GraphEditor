@@ -166,8 +166,11 @@ namespace GraphEditor.Controls
 
         #region Construction Edge
 
-        public EdgeControl(GraphArea rootGraph, VertexControl from, object edge = null)
+        public int Id { get; }
+
+        public EdgeControl(GraphArea rootGraph, int id,  VertexControl from, object edge = null)
         {
+            Id = id;
             Edge = edge;
             From = from;
             DataContext = edge;
@@ -176,7 +179,7 @@ namespace GraphEditor.Controls
             GraphArea.SetZIndex(this, 10);
         }          
 
-        public EdgeControl(GraphArea rootGraph, VertexControl from, VertexControl to, object edge)
+        public EdgeControl(GraphArea rootGraph, int id,  VertexControl from, VertexControl to, object edge)
         {                               
             GraphArea.SetZIndex(this, 10);
             RootGraph.Children.Add(this);
@@ -185,6 +188,7 @@ namespace GraphEditor.Controls
             Edge = edge;
             From = from;
             To = to;
+            Id = id;
         }
 
         public void SetFrom(VertexControl from)
@@ -226,6 +230,11 @@ namespace GraphEditor.Controls
                 return;
             drawingContext.DrawLine(new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3), from, to);
             base.OnRender(drawingContext);
+        }
+
+        public override string ToString()
+        {
+            return $"{Id} - {LabelName}";
         }
 
         public void Dispose()

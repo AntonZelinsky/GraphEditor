@@ -49,7 +49,7 @@ namespace GraphEditor.Models
         /// <returns>status</returns>
         public bool AddEdge(IVertexElement from, IVertexElement to)
         {
-            return AddEdge(new EdgeControl(rootArea, (VertexControl)from, (VertexControl)to));
+            return AddEdge(new EdgeControl(rootArea, GetNextUniqueId(), (VertexControl)from, (VertexControl)to));
         }
 
         /// <summary>
@@ -69,14 +69,19 @@ namespace GraphEditor.Models
             edges.Add(e);
             return true;
         }
-               
+
+        public bool IsEmpty()
+        {
+            return verticies.Count == 0;
+        }
+
         #region IElement Control 
 
         #region Creating IElement
 
         public VertexControl CreateVertexControl(Point p)
         {
-            var v = new VertexControl(rootArea, p);
+            var v = new VertexControl(rootArea, GetNextUniqueId(), p);
             AddVertex(v);           
             return v;
         }
@@ -85,7 +90,7 @@ namespace GraphEditor.Models
 
         public EdgeControl CreateEdgeControl(VertexControl from)
         {
-            var edgeControl = new EdgeControl(rootArea, from);
+            var edgeControl = new EdgeControl(rootArea, GetNextUniqueId(), from);
             createdEdge = edgeControl;
             return edgeControl;
         }
@@ -122,7 +127,7 @@ namespace GraphEditor.Models
 
         public EdgeControl CreateEdgeControl(VertexControl from, VertexControl to)
         {
-            var e = new EdgeControl(rootArea, from, to);
+            var e = new EdgeControl(rootArea, GetNextUniqueId(), from, to);
             AddEdge(e);
             return e;
         }
@@ -177,9 +182,17 @@ namespace GraphEditor.Models
 
         #endregion
 
-        public bool IsEmpty()
+        private int idCounter = 0;
+        private HashSet<int> IdCollection = new HashSet<int>();
+         
+        public int GetNextUniqueId()
         {
-            return verticies.Count == 0;
+            while (IdCollection.Contains(idCounter))
+            {       
+                idCounter++;
+            }
+            IdCollection.Add(idCounter);
+            return idCounter;
         }
 
         public bool ContainsVertex(IVertexElement v)

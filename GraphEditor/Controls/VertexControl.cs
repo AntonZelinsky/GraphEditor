@@ -27,6 +27,8 @@ namespace GraphEditor.Controls
 
         public GraphArea RootGraph { get; }
 
+        public int Id { get; }
+
         public VertexControl(object vertexData)
         {
             DataContext = vertexData;
@@ -36,8 +38,9 @@ namespace GraphEditor.Controls
             outcomingEdges = new List<EdgeControl>();
         }
 
-        public VertexControl(GraphArea rootGraph, Point coordinate)
-        {                          
+        public VertexControl(GraphArea rootGraph, int id, Point coordinate)
+        {
+            Id = id;         
             RootGraph = rootGraph;
             SetPosition(coordinate);
             RootGraph.Children.Add(this);
@@ -242,6 +245,11 @@ namespace GraphEditor.Controls
             DetachLabel();
 
             RootGraph.Children.Remove(this);
+        }
+
+        public override string ToString()
+        {
+            return $"{Id} - {LabelName}";
         }
     }
 }
