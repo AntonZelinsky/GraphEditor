@@ -182,9 +182,8 @@ namespace GraphEditor.View
         }
 
         private void RenameOnClick(IElement sender, RoutedEventArgs routedEventArgs)
-        {
-          //  Application.Current.MainWindow.IsEnabled = false;
-            string old = "";
+        {                                                      
+            string old = String.Empty;
             if (sender.IsLabel)
                 old = sender.LabelName;
             var rene = new RenameDialog(old);
@@ -199,9 +198,7 @@ namespace GraphEditor.View
                 }     
                 else
                     graph.RemoveElementLabel(sender);
-            }
-
-           // Application.Current.MainWindow.IsEnabled = true;
+            }                                                
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
