@@ -166,7 +166,10 @@ namespace GraphEditor.View
             {
                 if (creating)
                 {
-                    graph.ReleasedEdgeControl((VertexControl) element);
+                    if(element is IVertexElement)
+                        graph.ReleasedEdgeControl((VertexControl) element);
+                    else
+                        graph.UnreleasedEdgeControl();
                     creating = false;
                 }
                 else
