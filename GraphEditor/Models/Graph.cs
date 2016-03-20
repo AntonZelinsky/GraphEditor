@@ -138,8 +138,15 @@ namespace GraphEditor.Models
 
         public void RemoveElement(IElement element)
         {
-            if (element is VertexControl) 
-                Verticies.Remove(element as IVertexElement);         
+            if (element is IVertexElement)
+            {
+                var e = element as IVertexElement;
+                Verticies.Remove(e);
+                foreach (var edge in e.AllEdges)
+                {
+                    RemoveElement(edge);        
+                }   
+            }         
             else
                 Edges.Remove(element as IEdgeElement);
             element.Destruction();
