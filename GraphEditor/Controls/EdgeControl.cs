@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Controls;
 using GraphEditor.Controls.Interfaces;
+using GraphEditor.Models;
 
 namespace GraphEditor.Controls
 {
@@ -14,7 +15,7 @@ namespace GraphEditor.Controls
         #region Properties & Fields
           
         public GraphArea RootGraph { get; }
-
+        
         /// <summary>
         /// Source visual vertex object
         /// </summary>
@@ -37,7 +38,7 @@ namespace GraphEditor.Controls
 
         protected void OnFromChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            From.PositionChanged += source_PositionChanged;
+            From.PositionChanged += OnPositionChanged;
             InvalidateVisual();
         }
 
@@ -63,7 +64,7 @@ namespace GraphEditor.Controls
 
         protected void OnToChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            To.PositionChanged += source_PositionChanged;
+            To.PositionChanged += OnPositionChanged;
             InvalidateVisual();
         }
 
@@ -93,6 +94,38 @@ namespace GraphEditor.Controls
         private Brush BrushColor = Brushes.Black;
         private Brush BrushColorSelected = Brushes.Orange;
 
+        protected internal ILabelElement LabelElement;  
+
+        public bool IsLabel => LabelElement != null;
+
+        public string LabelName
+        {
+            get { return LabelElement.Name; }
+            set { LabelElement.Name = value; }
+        }
+
+        /// <summary>
+        /// Internal method. Attaches label to control
+        /// </summary>
+        /// <param name="element">Label control</param>
+        public void AttachLabel(ILabelElement element)
+        {
+            LabelElement = element;
+        }
+
+        /// <summary>
+        /// Internal method. Detaches label from control.
+        /// </summary>
+        public void DetachLabel()
+        {
+            if (IsLabel)
+            {
+                LabelElement.Detach();
+                RootGraph.Children.Remove((UIElement)LabelElement);
+                LabelElement = null;
+            }
+        }
+
         /// <summary>
         /// Registers a dependency property as backing store for the IsSelected property
         /// </summary>
@@ -101,7 +134,7 @@ namespace GraphEditor.Controls
                 "IsSelectedEdge", typeof(bool), typeof(EdgeControl),
                 new FrameworkPropertyMetadata(false,
                   FrameworkPropertyMetadataOptions.AffectsRender));
-
+        
         /// <summary>
         /// Gets or sets the Content.
         /// </summary>
@@ -116,8 +149,15 @@ namespace GraphEditor.Controls
 
         #region Position
 
-        private void source_PositionChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Fires when Position property set and object changes its coordinates.
+        /// </summary>
+        public event PositionChanged PositionChanged;
+
+        private void OnPositionChanged(object sender, EventArgs e)
         {
+            if (PositionChanged != null)
+                PositionChanged.Invoke(this, new EventArgs());
             //update edge on any connected vertex position changes
             InvalidateVisual();
         }
@@ -166,7 +206,7 @@ namespace GraphEditor.Controls
         }
 
         protected override void OnMouseEnter(MouseEventArgs e)
-        {                        
+        {                      
             InvalidateVisual();
             base.OnMouseEnter(e);
         }
@@ -189,10 +229,10 @@ namespace GraphEditor.Controls
         }
 
         public void Dispose()
-        {
+        {                        
             From.Remove(this);
             To.Remove(this);
-
+            DetachLabel();
             RootGraph.Children.Remove(this);   
         }
     }

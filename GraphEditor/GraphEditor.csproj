@@ -50,15 +50,19 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Controls\EdgeControl.cs" />
+    <Compile Include="Controls\Interfaces\ILabelElement.cs" />
     <Compile Include="Controls\Interfaces\IEdgeElement.cs" />
     <Compile Include="Controls\Interfaces\IElement.cs" />
     <Compile Include="Controls\Interfaces\IVertexElement.cs" />
     <Compile Include="Controls\VertexControl.cs" />
+    <Compile Include="Controls\LabelElement.cs" />
     <Compile Include="Models\EventType.cs" />
     <Compile Include="Models\Graph.cs" />
-    <Compile Include="Models\VertexPositionChanged.cs" />
-    <Compile Include="Models\VertexPositionEventArgs.cs" />
+    <Compile Include="Models\PositionChanged.cs" />
     <Compile Include="View\GraphArea.cs" />
+    <Compile Include="View\RenameDialog.xaml.cs">
+      <DependentUpon>RenameDialog.xaml</DependentUpon>
+    </Compile>
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -71,6 +75,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="View\RenameDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

@@ -1,4 +1,4 @@
-﻿using System;    
+﻿using System;
 using System.Linq;   
 using System.Windows;
 using GraphEditor.View;
@@ -13,7 +13,7 @@ namespace GraphEditor.Models
         #region Properties
 
         private GraphArea rootArea;
-
+         
         private List<IEdgeElement> edges;
         public List<IEdgeElement> Edges => edges;
 
@@ -75,7 +75,7 @@ namespace GraphEditor.Models
         public VertexControl CreateVertexControl(Point p)
         {
             var v = new VertexControl(rootArea, p);
-            AddVertex(v);
+            AddVertex(v);           
             return v;
         }
 
@@ -100,10 +100,15 @@ namespace GraphEditor.Models
 
         public EdgeControl ReleasedEdgeControl(VertexControl to)
         {
+            if (createdEdge.From == to)
+            {
+                UnreleasedEdgeControl();
+                return null;
+            }
             createdEdge.SetTo(to);
             createdEdge.From.AddEdge(createdEdge);
-            createdEdge.To.AddEdge(createdEdge);      
-            edges.Add(createdEdge);
+            createdEdge.To.AddEdge(createdEdge);   
+            edges.Add(createdEdge);  
             var e = createdEdge;  
             createdEdge = null;
             return e;
@@ -123,8 +128,25 @@ namespace GraphEditor.Models
         }
 
         #endregion
-         
+
         #endregion
+
+        public void CreateElementLabel(IElement v, string name)
+        {
+            var label = new LabelElement(rootArea, name);
+            label.Attach(v);                       
+            label.UpdatePosition();
+        }
+
+        public void UpdeteElementLabel(IElement v, string name)
+        {
+            v.LabelName = name;
+        }
+
+        public void RemoveElementLabel(IElement v)
+        {
+            v.DetachLabel();
+        }
 
         public bool IsEmpty()
         {

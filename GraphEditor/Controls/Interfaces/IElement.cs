@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using GraphEditor.View;
+﻿using GraphEditor.View;
+using GraphEditor.Models;
 
 namespace GraphEditor.Controls.Interfaces
 {
@@ -10,5 +10,15 @@ namespace GraphEditor.Controls.Interfaces
         GraphArea RootGraph { get; }
 
         void Destruction();
+
+        /// <summary>
+        /// Fires when Position property set and object changes its coordinates.
+        /// </summary>
+        event PositionChanged PositionChanged;
+
+        void AttachLabel(ILabelElement element);
+        void DetachLabel();             
+        bool IsLabel { get; }
+        string LabelName { get; set; }
     }
 }
