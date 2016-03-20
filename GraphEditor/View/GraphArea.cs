@@ -205,11 +205,8 @@ namespace GraphEditor.View
         {                        
             if (e.Key == Key.Delete)
             {                       
-                foreach (var selectedElement in selectedElements)
-                {                                                     
-                    selectedElement.Destruction(); 
-                }
-                selectedElements.Clear();      
+                graph.RemoveElements(selectedElements);
+                selectedElements.Clear();     
             }
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
             {

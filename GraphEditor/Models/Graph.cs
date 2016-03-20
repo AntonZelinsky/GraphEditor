@@ -70,7 +70,9 @@ namespace GraphEditor.Models
             return true;
         }
                
-        #region Creating IElement Control
+        #region IElement Control 
+
+        #region Creating IElement
 
         public VertexControl CreateVertexControl(Point p)
         {
@@ -78,8 +80,6 @@ namespace GraphEditor.Models
             AddVertex(v);           
             return v;
         }
-
-        #region Creating Edge
 
         private EdgeControl createdEdge;
 
@@ -129,7 +129,27 @@ namespace GraphEditor.Models
 
         #endregion
 
+        #region Remove IElement
+
+        public void RemoveElements(List<IElement> elements)
+        {
+            elements.ForEach(RemoveElement);  
+        }
+
+        public void RemoveElement(IElement element)
+        {
+            if (element is VertexControl) 
+                Verticies.Remove(element as IVertexElement);         
+            else
+                Edges.Remove(element as IEdgeElement);
+            element.Destruction();
+        }
+
         #endregion
+
+        #endregion
+
+        #region Label Control
 
         public void CreateElementLabel(IElement v, string name)
         {
@@ -146,7 +166,9 @@ namespace GraphEditor.Models
         public void RemoveElementLabel(IElement v)
         {
             v.DetachLabel();
-        }
+        }           
+
+        #endregion
 
         public bool IsEmpty()
         {
