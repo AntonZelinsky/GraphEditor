@@ -18,7 +18,7 @@ namespace GraphEditor.View
         public int GetSelectedElements => selectedElements.Count;      
         private Point startPointClick;
         private Rectangle selectionRectangle;
-        private bool creating;
+        private bool isCreatedNMoved;
         private IElement targetElement;
 
         private Graph graph;
@@ -42,7 +42,7 @@ namespace GraphEditor.View
                 if (e.ClickCount == 2)
                 {
                     graph.CreateVertexControl(startPointClick);
-                    creating = true;
+                    isCreatedNMoved = true;
                 }
                 // Мультивыделение   
                 else if (e.ClickCount == 1)
@@ -83,7 +83,7 @@ namespace GraphEditor.View
             if (e.RightButton == MouseButtonState.Pressed && targetElement != null)
             {
                 graph.CreatingEdgeControl(mousePosition);
-                creating = true;
+                isCreatedNMoved = true;
             }
             else if (e.LeftButton == MouseButtonState.Pressed)
             {
@@ -98,6 +98,7 @@ namespace GraphEditor.View
                     var vectorPosition = startPointClick - mousePosition;     
                     startPointClick = mousePosition;
 
+                    isCreatedNMoved = true;
                     if (selectedElements.Count > 0)
                     {
                         foreach (IElement element in selectedElements)
@@ -126,7 +127,7 @@ namespace GraphEditor.View
                     CompleteRectangleSelection(mousePosition);
                 }
                 // еденичное выделение 
-                else if (element != null && !creating)
+                else if (element != null && !isCreatedNMoved)
                 {   
                     if (!element.IsSelected)
                     {
@@ -148,7 +149,7 @@ namespace GraphEditor.View
                 } 
             }
 
-            creating = false;
+            isCreatedNMoved = false;
             ReleaseMouseCapture();
             base.OnMouseLeftButtonUp(e);
         }
@@ -164,13 +165,13 @@ namespace GraphEditor.View
             // Complete drawed edge
             if (element != null)
             {
-                if (creating)
+                if (isCreatedNMoved)
                 {
                     if(element is IVertexElement)
                         graph.ReleasedEdgeControl((VertexControl) element);
                     else
                         graph.UnreleasedEdgeControl();
-                    creating = false;
+                    isCreatedNMoved = false;
                 }
                 else
                 {                      
