@@ -14,12 +14,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using GraphEditor.ViewModels;
 
 namespace GraphEditor
-{
-    /// <summary>
-    /// Логика взаимодействия для MainWindow.xaml
-    /// </summary>
+{                
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -35,7 +33,7 @@ namespace GraphEditor
             var p1 = e.GetPosition(null);
             var p = e.GetPosition(graphArea);
             Coordinates.Text = $"X: {p.X}, Y: {p.Y}";
-            Counter.Text = $"Elements: {graphArea.Children.Count}, Selected Elements: {graphArea.GetSelectedElements}";
+            Counter.Text = $"Elements: {graphArea.Children.Count}, Selected Elements: {((GraphViewModel)graphArea.DataContext).SelectedElementsCount}";
             base.OnMouseMove(e);
         }
     }

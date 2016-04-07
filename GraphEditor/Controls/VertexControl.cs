@@ -11,53 +11,44 @@ using GraphEditor.Controls.Interfaces;
 
 namespace GraphEditor.Controls
 {
-    public class VertexControl : Control, IVertexElement, IDisposable
+    public class VertexControl : Control, IVertexElement
     {
-        private readonly List<EdgeControl> outcomingEdges;
+        private readonly List<EdgeControl> _outcomingEdges;
 
-        private readonly List<EdgeControl> incomingEdges;
+        private readonly List<EdgeControl> _incomingEdges;
                                    
-        public List<EdgeControl> IncommingEdges => incomingEdges;
+        public List<EdgeControl> IncommingEdges => _incomingEdges;
                                    
-        public List<EdgeControl> OutcommingEdges => outcomingEdges;
+        public List<EdgeControl> OutcommingEdges => _outcomingEdges;
 
-        public IList<EdgeControl> UndirectedEdges => (IList<EdgeControl>)incomingEdges.Intersect(outcomingEdges).ToList().AsReadOnly();
+        public IList<EdgeControl> UndirectedEdges => _incomingEdges.Intersect(_outcomingEdges).ToList().AsReadOnly();
 
-        public IList<EdgeControl> AllEdges => (IList<EdgeControl>)incomingEdges.Union(outcomingEdges).ToList().AsReadOnly();
+        public IList<EdgeControl> AllEdges => _incomingEdges.Union(_outcomingEdges).ToList().AsReadOnly();
 
         public GraphArea RootGraph { get; }
 
         public int Id { get; }
 
-        public VertexControl(object vertexData)
+        public VertexControl(GraphArea rootGraph, int id, Point p) 
         {
-            DataContext = vertexData;
-            Vertex = vertexData;
-
-            incomingEdges = new List<EdgeControl>();
-            outcomingEdges = new List<EdgeControl>();
-        }
-
-        public VertexControl(GraphArea rootGraph, int id, Point coordinate)
-        {
-            Id = id;         
+            Id = id;
             RootGraph = rootGraph;
-            SetPosition(coordinate);
+            SetPosition(p);
             RootGraph.Children.Add(this);
             GraphArea.SetZIndex(this, 100);
 
-            incomingEdges = new List<EdgeControl>();
-            outcomingEdges = new List<EdgeControl>();    
-        }
+            _incomingEdges = new List<EdgeControl>();
+            _outcomingEdges = new List<EdgeControl>();   
+        }  
 
         #region Graph operation
-         
-        public bool AddEdge(IEdgeElement e)
+
+        public bool AddEdge(IEdgeUiElement e)
         {
-            if (e.From == this)
-                outcomingEdges.Add((EdgeControl)e);
+            if (Equals(e.From, this))
+                _outcomingEdges.Add((EdgeControl)e);
             else if (e.To == this)
-                incomingEdges.Add((EdgeControl)e);
+                _incomingEdges.Add((EdgeControl)e);
             else
                 return false;
 
@@ -66,12 +57,12 @@ namespace GraphEditor.Controls
             return true;
         }
 
-        public bool Remove(IEdgeElement e)
+        public bool Remove(IEdgeUiElement e)
         {
             if (e.From == this)
-                outcomingEdges.Remove((EdgeControl)e);
+                _outcomingEdges.Remove((EdgeControl)e);
             else if (e.To == this)
-                incomingEdges.Remove((EdgeControl)e);
+                _incomingEdges.Remove((EdgeControl)e);
             else
                 return false;
 
@@ -80,7 +71,7 @@ namespace GraphEditor.Controls
             return true;
         }
 
-        public IEdgeElement FindEdge(IVertexElement v)
+        public IEdgeUiElement FindEdge(IVertexElement v)
         {
             return AllEdges.FirstOrDefault(e => e.To == v);
         }
@@ -89,19 +80,21 @@ namespace GraphEditor.Controls
 
         public void Destruction()
         {
-            Dispose();
+            DetachLabel();
+
+            RootGraph.Children.Remove(this);
         }
 
         #region Label
 
-        protected internal ILabelElement LabelElement;
+        private ILabelElement _labelElement;
 
-        public bool IsLabel => LabelElement != null;
+        public bool IsLabel => _labelElement != null;
 
         public string LabelName
         {
-            get { return LabelElement.Name; }
-            set { LabelElement.Name = value; }
+            get { return _labelElement.Name; }
+            set { _labelElement.Name = value; }
         }
 
         /// <summary>
@@ -110,7 +103,7 @@ namespace GraphEditor.Controls
         /// <param name="element">Label control</param>
         public void AttachLabel(ILabelElement element)
         {
-            LabelElement = element;
+            _labelElement = element;
         }
 
         /// <summary>
@@ -120,9 +113,9 @@ namespace GraphEditor.Controls
         {
             if (IsLabel)
             {
-                LabelElement.Detach();   
-                RootGraph.Children.Remove((UIElement) LabelElement);   
-                LabelElement = null;
+                _labelElement.Detach();   
+                RootGraph.Children.Remove((UIElement) _labelElement);   
+                _labelElement = null;
             }
         }
 
@@ -150,22 +143,10 @@ namespace GraphEditor.Controls
         /// <value>The IsSelected.</value>
         public bool IsSelected
         {
-            get { return (bool)GetValue(VertexControl.IsSelectedProperty); }
-            set { SetValue(VertexControl.IsSelectedProperty, value); }
+            get { return (bool)GetValue(IsSelectedProperty); }
+            set { SetValue(IsSelectedProperty, value); }
         }
-
-        /// <summary>
-        /// Gets or sets vertex data object
-        /// </summary>
-        public object Vertex
-        {
-            get { return GetValue(VertexProperty); }
-            set { SetValue(VertexProperty, value); }
-        }
-
-        public static readonly DependencyProperty VertexProperty =
-            DependencyProperty.Register("Vertex", typeof(object), typeof(VertexControl), new PropertyMetadata(null));
-  
+       
         #endregion
 
         #endregion
@@ -234,19 +215,7 @@ namespace GraphEditor.Controls
         }
 
         #endregion
-
-        public void Dispose()
-        {
-            foreach (var edge in AllEdges)
-            {                   
-                edge.Destruction();
-            }
-                    
-            DetachLabel();
-
-            RootGraph.Children.Remove(this);
-        }
-
+             
         public override string ToString()
         {
             return $"{Id} - {LabelName}";
