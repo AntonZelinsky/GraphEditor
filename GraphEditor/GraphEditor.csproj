@@ -38,10 +38,12 @@
   <ItemGroup>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.XML" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -63,6 +65,7 @@
     <Compile Include="Models\IElement.cs" />
     <Compile Include="Models\GraphModel.cs" />
     <Compile Include="Models\PositionChanged.cs" />
+    <Compile Include="Helper\GraphSerialization.cs" />
     <Compile Include="ViewModels\GraphViewModel.cs" />
     <Compile Include="Models\Vertex.cs" />
     <Compile Include="View\GraphArea.cs" />

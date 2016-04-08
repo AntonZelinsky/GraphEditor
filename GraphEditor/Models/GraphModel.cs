@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GraphEditor.Controls.Interfaces;
+using System.Runtime.Serialization;    
 
 namespace GraphEditor.Models
 {
+    [DataContract]
     public class GraphModel
     {
+        [DataMember]
         public Dictionary<int, Edge> Edges { get; set; }
+
+        [DataMember]
         public Dictionary<int, Vertex> Verticies { get; set; }  
+
         public Dictionary<int, List<int>> VertexOfEdgesById { get; set; }
 
         public GraphModel() : this(
