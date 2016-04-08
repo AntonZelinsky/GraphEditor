@@ -6,12 +6,48 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Controls;
 using GraphEditor.Controls.Interfaces;
+using GraphEditor.Helper;
 using GraphEditor.Models;
 
 namespace GraphEditor.Controls
 {
-    public class EdgeControl : Control, IEdgeElement, IDisposable
+    public class EdgeControl : Control, IEdgeUiElement
     {
+        #region Construction Edge
+
+        public int Id => GetHashCode();
+
+        public EdgeControl(GraphArea rootGraph, VertexControl from)
+        {
+            From = from;
+            RootGraph = rootGraph;
+            RootGraph.Children.Add(this);
+            GraphArea.SetZIndex(this, 10);
+        }
+
+        public EdgeControl(GraphArea rootGraph, VertexControl from, VertexControl to)
+        {           
+            To = to;
+            From = from;
+            RootGraph = rootGraph;
+            RootGraph.Children.Add(this);
+            GraphArea.SetZIndex(this, 10);
+        }
+
+        public void SetFrom(VertexControl from)
+        {
+            From = from;
+        }
+
+        public void SetTo(VertexControl to)
+        {
+            if(To == null)
+                To = to;
+            toPoint = new Point();
+        }
+
+        #endregion
+
         #region Properties & Fields
           
         public GraphArea RootGraph { get; }
@@ -77,31 +113,18 @@ namespace GraphEditor.Controls
                 InvalidateVisual();
             }
         }
-        
-        /// <summary>
-        /// Data edge object
-        /// </summary>
-        public object Edge
-        {
-            get { return GetValue(EdgeProperty); }
-            set { SetValue(EdgeProperty, value); }
-        }
-
-        public static readonly DependencyProperty EdgeProperty = DependencyProperty.Register("Edge", typeof(object),
-            typeof(EdgeControl),
-            new PropertyMetadata(null));
-
+     
         private Brush BrushColor = Brushes.Black;
         private Brush BrushColorSelected = Brushes.Orange;
 
-        protected internal ILabelElement LabelElement;  
+        private ILabelElement _labelElement;  
 
-        public bool IsLabel => LabelElement != null;
+        public bool IsLabel => _labelElement != null;
 
         public string LabelName
         {
-            get { return LabelElement.Name; }
-            set { LabelElement.Name = value; }
+            get { return _labelElement.Name; }
+            set { _labelElement.Name = value; }
         }
 
         /// <summary>
@@ -110,7 +133,7 @@ namespace GraphEditor.Controls
         /// <param name="element">Label control</param>
         public void AttachLabel(ILabelElement element)
         {
-            LabelElement = element;
+            _labelElement = element;
         }
 
         /// <summary>
@@ -120,9 +143,9 @@ namespace GraphEditor.Controls
         {
             if (IsLabel)
             {
-                LabelElement.Detach();
-                RootGraph.Children.Remove((UIElement)LabelElement);
-                LabelElement = null;
+                _labelElement.Detach();
+                RootGraph.Children.Remove((UIElement)_labelElement);
+                _labelElement = null;
             }
         }
 
@@ -131,7 +154,7 @@ namespace GraphEditor.Controls
         /// </summary>
         public static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register(
-                "IsSelectedEdge", typeof(bool), typeof(EdgeControl),
+                "IsSelected", typeof(bool), typeof(EdgeControl),
                 new FrameworkPropertyMetadata(false,
                   FrameworkPropertyMetadataOptions.AffectsRender));
         
@@ -141,8 +164,8 @@ namespace GraphEditor.Controls
         /// <value>The IsSelected.</value>
         public bool IsSelected
         {
-            get { return (bool)GetValue(EdgeControl.IsSelectedProperty); }
-            set { SetValue(EdgeControl.IsSelectedProperty, value); }
+            get { return (bool)GetValue(IsSelectedProperty); }
+            set { SetValue(IsSelectedProperty, value); }
         }
                                 
         #endregion
@@ -156,53 +179,20 @@ namespace GraphEditor.Controls
 
         private void OnPositionChanged(object sender, EventArgs e)
         {
-            if (PositionChanged != null)
-                PositionChanged.Invoke(this, new EventArgs());
+            PositionChanged?.Invoke(this, new EventArgs());
             //update edge on any connected vertex position changes
             InvalidateVisual();
         }
 
-        #endregion
-
-        #region Construction Edge
-
-        public EdgeControl(GraphArea rootGraph, VertexControl from, object edge = null)
-        {
-            Edge = edge;
-            From = from;
-            DataContext = edge;
-            RootGraph = rootGraph;
-            RootGraph.Children.Add(this);
-            GraphArea.SetZIndex(this, 10);
-        }          
-
-        public EdgeControl(GraphArea rootGraph, VertexControl from, VertexControl to, object edge)
-        {                               
-            GraphArea.SetZIndex(this, 10);
-            RootGraph.Children.Add(this);
-            RootGraph = rootGraph;
-            DataContext = edge;
-            Edge = edge;
-            From = from;
-            To = to;
-        }
-
-        public void SetFrom(VertexControl from)
-        {
-            From = from;
-        }
-
-        public void SetTo(VertexControl to)
-        {
-            To = to;
-            toPoint = new Point(); 
-        }
-
-        #endregion
+        #endregion      
 
         public void Destruction()
         {
-            Dispose();
+            From.Remove(this);
+            To.Remove(this);
+
+            DetachLabel();
+            RootGraph.Children.Remove(this);     
         }
 
         protected override void OnMouseEnter(MouseEventArgs e)
@@ -220,20 +210,21 @@ namespace GraphEditor.Controls
         protected override void OnRender(DrawingContext drawingContext)
         {
             Point from = From.GetPosition();
-            Point to;
-            to = To?.GetPosition() ?? toPoint;
+            var to = To?.GetPosition() ?? toPoint;
             if (to.X == 0 && to.Y == 0)
                 return;
             drawingContext.DrawLine(new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3), from, to);
             base.OnRender(drawingContext);
         }
 
-        public void Dispose()
-        {                        
-            From.Remove(this);
-            To.Remove(this);
-            DetachLabel();
-            RootGraph.Children.Remove(this);   
+        public override string ToString()
+        {
+            return $"{Id} - {LabelName}";
         }
+
+        private new int GetHashCode()
+        {
+            return HashCode.GetHashCode(From.Id, To.Id);  
+        }   
     }
 }

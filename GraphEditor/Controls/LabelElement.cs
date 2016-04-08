@@ -1,20 +1,18 @@
 ﻿using System;
-using System.Windows; 
-using GraphEditor.View;   
-using GraphEditor.Models;
+using System.Windows;  
 using System.Globalization;     
 using System.Windows.Media;  
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows.Controls;     
 using System.Runtime.CompilerServices;
+using GraphEditor.View;   
 using GraphEditor.Controls.Interfaces;
 
 namespace GraphEditor.Controls
 {
-    public class LabelElement : ContentControl, ILabelElement, INotifyPropertyChanged
-    {      
-        public GraphArea RootGraph { get; }
+    public sealed class LabelElement : ContentControl, ILabelElement, INotifyPropertyChanged
+    {
+        private GraphArea RootGraph { get; }
 
         /// <summary>
         /// Gets label name
@@ -33,44 +31,39 @@ namespace GraphEditor.Controls
         /// <summary>
         /// Gets label attach element
         /// </summary>
-        public IElement AttachElement
+        public IUiElement AttachUiElement
         {
-            get { return (IElement)GetValue(AttachElementProperty); }
-            private set { SetValue(AttachElementProperty, value); OnPropertyChanged("AttachElement"); }
+            get { return (IUiElement)GetValue(AttachUiElementProperty); }
+            private set { SetValue(AttachUiElementProperty, value); OnPropertyChanged("AttachUiElement"); }
         }
 
-        public static readonly DependencyProperty AttachElementProperty = 
-            DependencyProperty.Register("AttachElement", typeof(IElement), typeof(LabelElement),
+        public static readonly DependencyProperty AttachUiElementProperty = 
+            DependencyProperty.Register("AttachUiElement", typeof(IUiElement), typeof(LabelElement),
             new PropertyMetadata(null));
 
-        protected Point PositionLabel;
-
+        private Point PositionLabel;
+                                     
         public LabelElement(GraphArea rootGraph, string name)
-        {
+        {                                    
             Name = name;
-            RootGraph = rootGraph;
-            DataContext = this; 
+            RootGraph = rootGraph;  
             RootGraph.Children.Add(this);
             GraphArea.SetZIndex(this, 5);
-        }
-        ~LabelElement()
-        {
-            Debug.WriteLine("Delete Label");
-        }
+        }  
 
-        public void Attach(IElement element)
+        public void Attach(IUiElement uiElement)
         {
-            AttachElement = element;
-            element.AttachLabel(this);   
-            ((IElement)AttachElement).PositionChanged += OnPositionChanged;
+            AttachUiElement = uiElement;
+            uiElement.AttachLabel(this);   
+            AttachUiElement.PositionChanged += OnPositionChanged;
         }
           
         public void Detach()
         {
-            if (AttachElement != null)
+            if (AttachUiElement != null)
             {
-                ((IElement)AttachElement).PositionChanged -= OnPositionChanged;
-                AttachElement = null;
+                AttachUiElement.PositionChanged -= OnPositionChanged;
+                AttachUiElement = null;
             }
         }
 
@@ -79,36 +72,26 @@ namespace GraphEditor.Controls
             UpdatePosition();
         }
 
-        public virtual void UpdatePosition()
+        public void UpdatePosition()
         {                                            
-            if (AttachElement is IVertexElement)
+            if (AttachUiElement is IVertexElement)
             {                   
-                var vcPos = ((IVertexElement) AttachElement).GetPosition();
+                var vcPos = ((IVertexElement) AttachUiElement).GetPosition();
                 PositionLabel = new Point(vcPos.X - 10, vcPos.Y + 10);
             }
-            if (AttachElement is IEdgeElement)
+            if (AttachUiElement is IEdgeUiElement)
             {
-                var from = (AttachElement as IEdgeElement).From.GetPosition();
-                var to = (AttachElement as IEdgeElement).To.GetPosition();      
+                var from = (AttachUiElement as IEdgeUiElement).From.GetPosition();
+                var to = (AttachUiElement as IEdgeUiElement).To.GetPosition();      
                 PositionLabel = new Point(( from.X + to.X ) / 2, ( from.Y + to.Y ) / 2);
             }    
 
             InvalidateVisual();
         }
-
-        public void Hide()
-        {               
-            SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);   
-        }
-
-        public void Show()
-        {    
-            SetCurrentValue(UIElement.VisibilityProperty, Visibility.Visible);     
-        }
-
+           
         public event PropertyChangedEventHandler PropertyChanged;
-                                          
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

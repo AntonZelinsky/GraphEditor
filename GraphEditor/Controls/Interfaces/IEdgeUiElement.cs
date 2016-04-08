@@ -1,6 +1,6 @@
 ﻿namespace GraphEditor.Controls.Interfaces
 {
-    public interface IEdgeElement : IElement
+    public interface IEdgeUiElement : IUiElement
     {
         /// <summary>
         /// Gets the source vertex

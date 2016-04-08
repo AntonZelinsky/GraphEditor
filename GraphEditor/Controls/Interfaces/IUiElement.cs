@@ -3,8 +3,10 @@ using GraphEditor.Models;
 
 namespace GraphEditor.Controls.Interfaces
 {
-    public interface IElement
+    public interface IUiElement
     {
+        int Id { get; }
+
         bool IsSelected { get; set; } 
 
         GraphArea RootGraph { get; }
@@ -15,10 +17,10 @@ namespace GraphEditor.Controls.Interfaces
         /// Fires when Position property set and object changes its coordinates.
         /// </summary>
         event PositionChanged PositionChanged;
-
-        void AttachLabel(ILabelElement element);
-        void DetachLabel();             
+                                    
         bool IsLabel { get; }
+        void AttachLabel(ILabelElement element);
+        void DetachLabel();    
         string LabelName { get; set; }
     }
 }

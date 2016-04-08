@@ -36,7 +36,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Expression.Interactions, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
@@ -51,14 +53,18 @@
     </ApplicationDefinition>
     <Compile Include="Controls\EdgeControl.cs" />
     <Compile Include="Controls\Interfaces\ILabelElement.cs" />
-    <Compile Include="Controls\Interfaces\IEdgeElement.cs" />
-    <Compile Include="Controls\Interfaces\IElement.cs" />
+    <Compile Include="Controls\Interfaces\IEdgeUiElement.cs" />
+    <Compile Include="Controls\Interfaces\IUiElement.cs" />
     <Compile Include="Controls\Interfaces\IVertexElement.cs" />
     <Compile Include="Controls\VertexControl.cs" />
     <Compile Include="Controls\LabelElement.cs" />
-    <Compile Include="Models\EventType.cs" />
-    <Compile Include="Models\Graph.cs" />
+    <Compile Include="Helper\HashCode.cs" />
+    <Compile Include="Models\Edge.cs" />
+    <Compile Include="Models\IElement.cs" />
+    <Compile Include="Models\GraphModel.cs" />
     <Compile Include="Models\PositionChanged.cs" />
+    <Compile Include="ViewModels\GraphViewModel.cs" />
+    <Compile Include="Models\Vertex.cs" />
     <Compile Include="View\GraphArea.cs" />
     <Compile Include="View\RenameDialog.xaml.cs">
       <DependentUpon>RenameDialog.xaml</DependentUpon>
@@ -113,6 +119,7 @@
       <Name>NGraph</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

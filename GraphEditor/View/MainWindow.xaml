@@ -11,25 +11,25 @@
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Ui:GraphArea x:Name="graphArea" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2"></Ui:GraphArea>
+        <Ui:GraphArea x:Name="graphArea" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Background="White" Focusable="True"/>
         <StatusBar Grid.Row="1">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"></ColumnDefinition>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                     </Grid>
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
             <StatusBarItem Grid.Column="0">
-                <TextBlock x:Name="Coordinates"></TextBlock>
+                <TextBlock x:Name="Coordinates"/>
             </StatusBarItem>
             <Separator Grid.Column="1"/>
             <StatusBarItem Grid.Column="2">
-                <TextBlock x:Name="Counter"></TextBlock>
+                <TextBlock x:Name="Counter"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>

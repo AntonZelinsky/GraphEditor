@@ -4,21 +4,15 @@ using GraphEditor.Models;
 
 namespace GraphEditor.Controls.Interfaces
 {
-    public interface IVertexElement : IElement
-    {
-        List<EdgeControl> IncommingEdges { get; }
+    public interface IVertexElement : IUiElement
+    {                                       
+        Dictionary<int, IEdgeUiElement> Edges { get; }      
 
-        List<EdgeControl> OutcommingEdges { get; }
-                          
-        IList<EdgeControl> UndirectedEdges { get; }
+        void AddEdge(IEdgeUiElement e);
 
-        IList<EdgeControl> AllEdges { get; }
+        void Remove(IEdgeUiElement e);
 
-        bool AddEdge(IEdgeElement e);
-
-        bool Remove(IEdgeElement e);
-
-        IEdgeElement FindEdge(IVertexElement v);
+        IEdgeUiElement FindEdge(IVertexElement v);
 
         Point GetPosition();
         void SetPosition(Point pt);

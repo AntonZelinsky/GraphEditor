@@ -10,8 +10,8 @@
         /// <summary>
         /// Attach element to parent entity
         /// </summary>
-        /// <param name="element">Parent entity</param>
-        void Attach(IElement element);
+        /// <param name="uiElement">Parent entity</param>
+        void Attach(IUiElement uiElement);
         /// <summary>
         /// Detach label from element
         /// </summary>
@@ -21,8 +21,5 @@
         /// Automaticaly update vertex label position
         /// </summary>
         void UpdatePosition();
-
-        void Hide();
-        void Show();
     }
 }

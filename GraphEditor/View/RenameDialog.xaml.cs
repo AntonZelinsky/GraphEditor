@@ -14,7 +14,7 @@ namespace GraphEditor.View
 
         private void Rename_OkClick(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = true;
+            DialogResult = true;
         }
 
         public string Rename => rename.Text;
