@@ -8,10 +8,10 @@ using GraphEditor.Models;
 
 namespace GraphEditor.ViewModels
 {
-    public sealed class GraphViewModel : INotifyPropertyChanged
     {
         #region Properties          
 
+    public sealed class GraphViewModel 
         private readonly GraphModel _graphModel;
 
         public delegate void AddedElement(IElement el);
@@ -183,12 +183,5 @@ namespace GraphEditor.ViewModels
         }
         
         #endregion
-         
-        public event PropertyChangedEventHandler PropertyChanged;
-                                           
-        private void OnPropertyChanged(string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }
