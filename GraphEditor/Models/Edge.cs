@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GraphEditor.Helper;
 
 namespace GraphEditor.Models
 {
@@ -24,11 +20,7 @@ namespace GraphEditor.Models
 
         public override int GetHashCode()
         {
-            int salt = 100;   
-            unchecked
-            {
-                return FromId * ToId + salt;
-            } 
+            return HashCode.GetHashCode(FromId, ToId);
         }
     }
 }

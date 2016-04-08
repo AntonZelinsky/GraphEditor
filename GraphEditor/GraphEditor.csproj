@@ -58,6 +58,7 @@
     <Compile Include="Controls\Interfaces\IVertexElement.cs" />
     <Compile Include="Controls\VertexControl.cs" />
     <Compile Include="Controls\LabelElement.cs" />
+    <Compile Include="Helper\HashCode.cs" />
     <Compile Include="Models\Edge.cs" />
     <Compile Include="Models\IElement.cs" />
     <Compile Include="Models\GraphModel.cs" />

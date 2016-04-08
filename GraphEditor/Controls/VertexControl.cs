@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Controls;
 using System.Collections.Generic;
 using GraphEditor.Controls.Interfaces;
+using GraphEditor.Helper;
 
 namespace GraphEditor.Controls
 {
