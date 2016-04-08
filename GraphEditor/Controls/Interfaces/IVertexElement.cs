@@ -5,18 +5,12 @@ using GraphEditor.Models;
 namespace GraphEditor.Controls.Interfaces
 {
     public interface IVertexElement : IUiElement
-    {
-        List<EdgeControl> IncommingEdges { get; }
+    {                                       
+        Dictionary<int, IEdgeUiElement> Edges { get; }      
 
-        List<EdgeControl> OutcommingEdges { get; }
-                          
-        IList<EdgeControl> UndirectedEdges { get; }
+        void AddEdge(IEdgeUiElement e);
 
-        IList<EdgeControl> AllEdges { get; }
-
-        bool AddEdge(IEdgeUiElement e);
-
-        bool Remove(IEdgeUiElement e);
+        void Remove(IEdgeUiElement e);
 
         IEdgeUiElement FindEdge(IVertexElement v);
 
