@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Controls;
 using GraphEditor.Controls.Interfaces;
+using GraphEditor.Helper;
 using GraphEditor.Models;
 
 namespace GraphEditor.Controls
@@ -153,7 +154,7 @@ namespace GraphEditor.Controls
         /// </summary>
         public static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register(
-                "IsSelectedEdge", typeof(bool), typeof(EdgeControl),
+                "IsSelected", typeof(bool), typeof(EdgeControl),
                 new FrameworkPropertyMetadata(false,
                   FrameworkPropertyMetadataOptions.AffectsRender));
         
@@ -223,11 +224,7 @@ namespace GraphEditor.Controls
 
         private new int GetHashCode()
         {
-            int salt = 100;
-            unchecked
-            {
-                return From.Id * To.Id + salt;
-            }
-        }
+            return HashCode.GetHashCode(From.Id, To.Id);  
+        }   
     }
 }

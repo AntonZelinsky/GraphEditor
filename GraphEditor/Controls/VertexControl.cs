@@ -8,22 +8,15 @@ using System.Windows.Media;
 using System.Windows.Controls;
 using System.Collections.Generic;
 using GraphEditor.Controls.Interfaces;
+using GraphEditor.Helper;
 
 namespace GraphEditor.Controls
 {
     public class VertexControl : Control, IVertexElement
     {
-        private readonly List<EdgeControl> _outcomingEdges;
+        private readonly Dictionary<int, IEdgeUiElement> _edges;          
 
-        private readonly List<EdgeControl> _incomingEdges;
-                                   
-        public List<EdgeControl> IncommingEdges => _incomingEdges;
-                                   
-        public List<EdgeControl> OutcommingEdges => _outcomingEdges;
-
-        public IList<EdgeControl> UndirectedEdges => _incomingEdges.Intersect(_outcomingEdges).ToList().AsReadOnly();
-
-        public IList<EdgeControl> AllEdges => _incomingEdges.Union(_outcomingEdges).ToList().AsReadOnly();
+        public Dictionary<int, IEdgeUiElement> Edges => _edges;                                                
 
         public GraphArea RootGraph { get; }
 
@@ -36,44 +29,35 @@ namespace GraphEditor.Controls
             SetPosition(p);
             RootGraph.Children.Add(this);
             GraphArea.SetZIndex(this, 100);
-
-            _incomingEdges = new List<EdgeControl>();
-            _outcomingEdges = new List<EdgeControl>();   
+                                                      
+            _edges = new Dictionary<int, IEdgeUiElement>();   
         }  
 
         #region Graph operation
 
-        public bool AddEdge(IEdgeUiElement e)
+        public void AddEdge(IEdgeUiElement e)
         {
-            if (Equals(e.From, this))
-                _outcomingEdges.Add((EdgeControl)e);
-            else if (e.To == this)
-                _incomingEdges.Add((EdgeControl)e);
-            else
-                return false;
+           if(!_edges.ContainsKey(e.Id))
+                _edges.Add(e.Id, e);
 
-            InvalidateVisual();
-
-            return true;
+            InvalidateVisual();   
         }
 
-        public bool Remove(IEdgeUiElement e)
+        public void Remove(IEdgeUiElement e)
         {
-            if (e.From == this)
-                _outcomingEdges.Remove((EdgeControl)e);
-            else if (e.To == this)
-                _incomingEdges.Remove((EdgeControl)e);
-            else
-                return false;
+            if (_edges.ContainsKey(e.Id))
+                _edges.Remove(e.Id);
 
-            InvalidateVisual();
-
-            return true;
+            InvalidateVisual(); 
         }
 
         public IEdgeUiElement FindEdge(IVertexElement v)
         {
-            return AllEdges.FirstOrDefault(e => e.To == v);
+            var idEdge = HashCode.GetHashCode(Id, v.Id);
+            if (_edges.ContainsKey(idEdge))
+                return _edges[idEdge];
+            else
+                return null;
         }
 
         #endregion
@@ -133,7 +117,7 @@ namespace GraphEditor.Controls
         /// </summary>
         public static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register(
-                "IsSelectedVertex", typeof (bool), typeof (VertexControl),
+                "IsSelected", typeof (bool), typeof (VertexControl),
                 new FrameworkPropertyMetadata(false,
                   FrameworkPropertyMetadataOptions.AffectsRender));
 
@@ -167,13 +151,13 @@ namespace GraphEditor.Controls
         
         protected override void OnRender(DrawingContext drawingContext)
         {            
-            var rate = AllEdges.Count / 2;
+            var rate = _edges.Count / 2;
             drawingContext.DrawEllipse(
                 Brushes.AliceBlue, 
                 new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
                 new Point(0, 0), 10 + rate, 10 + rate);
 
-            rate = AllEdges.Count / 3;    
+            rate = _edges.Count / 3;    
             drawingContext.DrawEllipse(
                 IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 
                 new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
@@ -208,10 +192,9 @@ namespace GraphEditor.Controls
         /// </summary>
         public event PositionChanged PositionChanged;
 
-        protected void OnPositionChanged(Point offset, Point pos)
-        {     
-            if (PositionChanged != null)
-                PositionChanged.Invoke(this, new EventArgs());
+        private void OnPositionChanged(Point offset, Point pos)
+        {
+            PositionChanged?.Invoke(this, new EventArgs());
         }
 
         #endregion
