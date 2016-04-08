@@ -117,7 +117,7 @@ namespace GraphEditor.Controls
         /// </summary>
         public static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register(
-                "IsSelectedVertex", typeof (bool), typeof (VertexControl),
+                "IsSelected", typeof (bool), typeof (VertexControl),
                 new FrameworkPropertyMetadata(false,
                   FrameworkPropertyMetadataOptions.AffectsRender));
 
@@ -192,10 +192,9 @@ namespace GraphEditor.Controls
         /// </summary>
         public event PositionChanged PositionChanged;
 
-        protected void OnPositionChanged(Point offset, Point pos)
-        {     
-            if (PositionChanged != null)
-                PositionChanged.Invoke(this, new EventArgs());
+        private void OnPositionChanged(Point offset, Point pos)
+        {
+            PositionChanged?.Invoke(this, new EventArgs());
         }
 
         #endregion

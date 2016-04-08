@@ -154,7 +154,7 @@ namespace GraphEditor.Controls
         /// </summary>
         public static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register(
-                "IsSelectedEdge", typeof(bool), typeof(EdgeControl),
+                "IsSelected", typeof(bool), typeof(EdgeControl),
                 new FrameworkPropertyMetadata(false,
                   FrameworkPropertyMetadataOptions.AffectsRender));
         
