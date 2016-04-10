@@ -1,25 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;    
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;                  
 
 namespace GraphEditor.Models
-{
-    [DataContract]
+{                
     public class GraphModel
-    {
-        [DataMember]
+    {              
         public Dictionary<int, Edge> Edges { get; set; }
-
-        [DataMember]
+                     
         public Dictionary<int, Vertex> Verticies { get; set; }  
 
         public Dictionary<int, List<int>> VertexOfEdgesById { get; set; }
 
+        public bool Changed;
         public GraphModel() : this(
             new Dictionary<int, Vertex>(),
-            new Dictionary<int, Edge>(), 
+            new Dictionary<int, Edge>(),
             new Dictionary<int, List<int>>()) { }
-
+         
         public GraphModel(
             Dictionary<int, Vertex> verticies, 
             Dictionary<int, Edge> edges,
@@ -28,8 +26,9 @@ namespace GraphEditor.Models
             Verticies = verticies;
             Edges = edges;
             VertexOfEdgesById = veIds;
+            Changed = true;
         }
-              
+                              
         public Vertex GetVertex(int id)
         {
             return Verticies[id];
@@ -49,7 +48,7 @@ namespace GraphEditor.Models
 
         public List<IElement> GetAllElements()
         {
-            return Verticies.ToList().Cast<IElement>().Union(Edges.Values).ToList();
+            return Verticies.Values.ToList().Cast<IElement>().Union(Edges.Values).ToList();
         }
 
         public List<int> GetAllElementsById()
@@ -59,7 +58,8 @@ namespace GraphEditor.Models
 
         public void AddVertex(Vertex v)
         {
-            Verticies.Add(v.Id, v);                          
+            Verticies.Add(v.Id, v);
+            Changed = true;
         }
 
         public void AddEdge(Edge e)
@@ -67,6 +67,7 @@ namespace GraphEditor.Models
             Edges.Add(e.Id, e);
             AddVertexOfEdgesById(e.FromId, e.Id);
             AddVertexOfEdgesById(e.ToId, e.Id);
+            Changed = true;
 
         }
 
@@ -75,7 +76,8 @@ namespace GraphEditor.Models
             if (VertexOfEdgesById.ContainsKey(vertexId))
                 VertexOfEdgesById[vertexId].Add(edgeId);
             else    
-                VertexOfEdgesById.Add(vertexId, new List<int> {edgeId}); 
+                VertexOfEdgesById.Add(vertexId, new List<int> {edgeId});
+            Changed = true;
         }
 
         public void RemoveById(int id)
@@ -86,6 +88,7 @@ namespace GraphEditor.Models
                 Verticies.Remove(id);
             if (Edges.ContainsKey(id))
                 Edges.Remove(id);
+            Changed = true;
         }
 
         public bool Contains(int id)

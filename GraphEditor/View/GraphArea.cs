@@ -83,7 +83,7 @@ namespace GraphEditor.View
         {
             base.OnMouseRightButtonDown(e);
 
-            _startPointClick = e.GetPosition(this);
+            _startPointClick = e.GetPosition(this);      
             var element = GetElement(_startPointClick);
 
             // Draw edge
@@ -178,9 +178,11 @@ namespace GraphEditor.View
 
         protected override void OnKeyDown(KeyEventArgs e)
         {                        
+            base.OnKeyDown(e);  
+                     
             if (e.Key == Key.Delete)
             {                                                
-                _graphViewModel.RemoveElements();   
+                _graphViewModel.RemoveSelectedElements();   
             }
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
             {
@@ -190,7 +192,6 @@ namespace GraphEditor.View
                     _elementsGraph.Values.ToList().ForEach(el => el.IsSelected = true);
                 }
             }
-            base.OnKeyDown(e);
         }
 
         #endregion
@@ -236,8 +237,6 @@ namespace GraphEditor.View
             ((IVertexElement)_elementsGraph[id]).SetPosition(p);
         }
 
-        #region Label update
-
         private void OnLabelUpdate(int id, string name)
         {
             var uiElement = _elementsGraph[id];
@@ -269,8 +268,6 @@ namespace GraphEditor.View
                 _graphViewModel.UpdeteElementLabel(sender.Id, dialog.Rename);
             }
         }
-
-        #endregion Label update
 
         #endregion Ui events
 
@@ -321,6 +318,7 @@ namespace GraphEditor.View
         private void UnreleasedEdgeControl()
         {
             this.Children.Remove(_createdEdge);  
+            _createdEdge = null;
         }
 
         private void OnCreateEdge(IElement el)
