@@ -84,13 +84,6 @@ namespace GraphEditor.View
             base.OnMouseRightButtonDown(e);
 
             _startPointClick = e.GetPosition(this);      
-            var element = GetElement(_startPointClick);
-
-            // Draw edge
-            if (element is VertexControl)
-            {
-                CreateEdgeControl((VertexControl)element);
-            }
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -100,6 +93,17 @@ namespace GraphEditor.View
             // Derawing edge
             if (e.RightButton == MouseButtonState.Pressed)
             {
+                if(_createdEdge == null & Math.Abs(( _startPointClick - mousePosition ).X) > 3 &&
+                    Math.Abs(( _startPointClick - mousePosition ).Y) > 3)
+                {
+                    var element = GetElement(_startPointClick);
+
+                    // Draw edge
+                    if (element is VertexControl)
+                    {
+                        CreateEdgeControl((VertexControl)element);
+                    }
+                }
                 if (_createdEdge != null)
                 {
                     CreatingEdgeControl(mousePosition);
@@ -153,7 +157,7 @@ namespace GraphEditor.View
         {
             base.OnMouseRightButtonUp(e);
                                                         
-            var element = GetVertexElement(e.GetPosition(this));
+            var element = GetElement(e.GetPosition(this));
 
             // Complete drawed edge
             if (_createdEdge != null)
@@ -165,6 +169,8 @@ namespace GraphEditor.View
             }
             else
             {
+                if(element == null)
+                    return;
                 ContextMenu cm = new ContextMenu();
                 var rename = new MenuItem { Header = "Rename", };
                 rename.Click += (sender, args) => RenameOnClick(element);
