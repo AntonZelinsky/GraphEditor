@@ -10,18 +10,20 @@ namespace GraphEditor.Helper
     {
         private static readonly DataContractJsonSerializer JsonFormatter = new DataContractJsonSerializer(typeof(GraphModelSerialization));
 
-        public static void Serialization(GraphModelSerialization model, string path)
+        public static bool Serialization(GraphModelSerialization model, string path)
         {
             try
             {
                 using (var fs = new FileStream(path, FileMode.Create))
                 {
                     JsonFormatter.WriteObject(fs, model);
+                    return true;
                 }
             }
             catch (Exception e)
             {
                 MessageBox.Show("Error: Invalid file", e.Message, MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
             }
         }
 

@@ -6,19 +6,20 @@ namespace GraphEditor.Helper
 {
     public static class FileOperation
     {
-        private static string _pathFile;
+        private static string _initialDirectory;
 
         public static GraphModelSerialization Load()
         {
             var loadDialog = new OpenFileDialog
             {
-                Filter = "Graph file (*.ge) | *.ge | All files (*.*)|*.*",
-                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+                Filter = "Graph file (*.ge)|*.ge| All files (*.*)|*.*",
+                InitialDirectory = _initialDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
             };
             if (loadDialog.ShowDialog() == true)
             {
-                var model = GraphSerializer.Deserialization(loadDialog.FileName);     
-                _pathFile = loadDialog.InitialDirectory;
+                var model = GraphSerializer.Deserialization(loadDialog.FileName);
+                _initialDirectory = loadDialog.FileName;
+                model.FileName = loadDialog.FileName;
                 return model;
             }
             return null;
@@ -26,22 +27,23 @@ namespace GraphEditor.Helper
 
         public static void Save(GraphModelSerialization model)
         {       
-            if(string.IsNullOrEmpty(_pathFile))
+            if(string.IsNullOrEmpty(model.FileName))
                 SaveAs(model);
-            GraphSerializer.Serialization(model, _pathFile);
-            model.Changed = false; 
+            else if(GraphSerializer.Serialization(model, model.FileName))
+                model.Changed = false;    
         }
 
         public static void SaveAs(GraphModelSerialization model)
         {
             var saveDialog = new SaveFileDialog
             {
-                Filter = "Graph file (*.ge) | *.ge | All files (*.*)|*.*",
-                InitialDirectory = _pathFile ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+                Filter = "Graph file (*.ge)|*.ge| All files (*.*)|*.*",
+                InitialDirectory = model.FileName ?? _initialDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
             };
             if (saveDialog.ShowDialog() == true)
-            {                                       
-                _pathFile = saveDialog.FileName;
+            {
+                _initialDirectory = saveDialog.FileName;
+                model.FileName = saveDialog.FileName;
                 Save(model);
             }
         }

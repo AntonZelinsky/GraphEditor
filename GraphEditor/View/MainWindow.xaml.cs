@@ -1,40 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows;   
+using System.Reflection;      
+using System.Windows.Input;  
 using GraphEditor.ViewModels;
 
 namespace GraphEditor
 {                
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private readonly GraphViewModel _model;
+
+        public MainWindow(GraphViewModel model)
         {
             InitializeComponent();
-            Loaded += (x, y) => Keyboard.Focus(graphArea);
-            var version = Assembly.GetExecutingAssembly().GetName();
-            Title = $"{version.Name} - v.{version.Version.Major}.{version.Version.Minor}";
+            Loaded += (x, y) => Keyboard.Focus(graphArea);  
+            _model = model; 
+            _model.ModelChanged += UpdateTitle;
+            UpdateTitle();
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            var p1 = e.GetPosition(null);
+            base.OnMouseMove(e);
+
             var p = e.GetPosition(graphArea);
             Coordinates.Text = $"X: {p.X}, Y: {p.Y}";
             Counter.Text = $"Elements: {graphArea.Children.Count}, Selected Elements: {((GraphViewModel)graphArea.DataContext).SelectedElementsCount}";
-            base.OnMouseMove(e);
+        }
+           
+        private void UpdateTitle()
+        {                                    
+            var version = Assembly.GetExecutingAssembly().GetName();    
+            var ch = _model.Changed ? "*" : "";
+            Title = $"{version.Name} - v.{version.Version.Major}.{version.Version.Minor}  {_model.FileName}{ch}";
         }
     }
 }

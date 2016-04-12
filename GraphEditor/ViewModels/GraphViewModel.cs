@@ -1,18 +1,17 @@
-﻿using System;
-using System.Linq;   
+﻿using System.Linq;   
 using System.Windows;  
 using GraphEditor.Helper;
 using GraphEditor.Models; 
 using System.Windows.Input;       
-using System.Collections.Generic;    
+using System.Collections.Generic;        
 
 namespace GraphEditor.ViewModels
 {
-    public sealed class GraphViewModel 
+    public sealed class GraphViewModel
     {           
         private GraphModel _graphModel;
 
-        public CommandBindingCollection CommandBindings;
+        public readonly CommandBindingCollection CommandBindings;
 
         public GraphViewModel(GraphModel graphModel)
         {
@@ -23,6 +22,8 @@ namespace GraphEditor.ViewModels
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Open, Load));
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, Save, IsChanged));
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, Exit));
+
+            RegisterChangedEvent();
         }
 
         public void CreateGraph(List<Vertex> verticies, List<Edge> edges)
@@ -30,7 +31,46 @@ namespace GraphEditor.ViewModels
             verticies.ForEach(v => AddVertex(v));
             edges.ForEach(e => AddEdge(e));
         }
-         
+
+        #region Change Model
+
+        public delegate void Change();
+
+        public event Change ModelChanged;
+
+        public string FileName
+        {
+            get { return _graphModel.FileName; }
+            private set
+            {
+                _graphModel.FileName = value;
+                ModelChanged?.Invoke();
+            }
+        }
+
+        public bool Changed
+        {
+            get { return _graphModel.Changed; }
+            private set
+            {
+                _graphModel.Changed = value;
+                ModelChanged?.Invoke();
+            }
+        }                                  
+
+        private void RegisterChangedEvent()
+        {
+            AddedVertex += delegate { Changed = true; };
+            AddedEdge += delegate { Changed = true; };
+            ChangedPositionVertex += delegate { Changed = true; };
+            RemovedElement += delegate { Changed = true; };
+            UpdateLabel += delegate { Changed = true; };
+        }
+
+        #endregion ChangeModel
+
+        #region Add element
+
         public delegate void AddedElement(IElement el);
         public event AddedElement AddedVertex;
         public event AddedElement AddedEdge;
@@ -47,7 +87,7 @@ namespace GraphEditor.ViewModels
                 return false;
 
             _graphModel.AddVertex(v);
-            AddedVertex?.Invoke(v);
+            AddedVertex?.Invoke(v);  
             return true;
         } 
 
@@ -80,8 +120,10 @@ namespace GraphEditor.ViewModels
             return true;
         }
 
+        #endregion Add element
+
         #region Selected elements
-                 
+
         private List<int> SelectedElements = new List<int>();
 
         public int SelectedElementsCount => SelectedElements.Count;
@@ -144,7 +186,7 @@ namespace GraphEditor.ViewModels
        
         #region Remove Element
 
-        public SelectElement RemovedElement;
+        public event SelectElement RemovedElement;
 
         public void RemoveSelectedElements()
         {
@@ -207,16 +249,22 @@ namespace GraphEditor.ViewModels
         public void Load(object obj, ExecutedRoutedEventArgs e)
         {                  
             var model = FileOperation.Load();
+            if(model ==null)
+                return;
             RemoveAllElements();
             _graphModel = new GraphModel();
             model.Verticies.ForEach(v => AddVertex(v));
             model.Edges.ForEach(es => AddEdge(es));
+            Changed = model.Changed;
+            FileName = model.FileName;
         }
 
         public void Save(object obj, ExecutedRoutedEventArgs e)
         {
-            var ms = new GraphModelSerialization(_graphModel);
-            FileOperation.Save(ms);
+            var model = new GraphModelSerialization(_graphModel);
+            FileOperation.Save(model);
+            Changed = model.Changed;
+            FileName = model.FileName;   
         }
 
         public void IsChanged(object sender, CanExecuteRoutedEventArgs e)
@@ -229,6 +277,6 @@ namespace GraphEditor.ViewModels
             Application.Current.Shutdown();
         }
 
-        #endregion Commands
+        #endregion Commands        
     }
 }

@@ -42,7 +42,24 @@ namespace GraphEditor.Models
         private readonly GraphModel _model;
 
         public bool Changed { get; set; }  
-                                   
+              
+        public string FileName {
+            get
+            {
+                if (_model == null)
+                    return _fileName;
+                return _model.FileName;
+            }
+            set
+            {
+                if (_model != null)
+                    _model.FileName = value;
+                _fileName = value;  
+            }
+        }
+
+        private string _fileName;
+
         public GraphModelSerialization()
         {                    
         }

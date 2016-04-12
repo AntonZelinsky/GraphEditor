@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;                  
+using System.Collections.Generic;  
+using System.Linq;  
 
 namespace GraphEditor.Models
 {                
@@ -12,7 +12,10 @@ namespace GraphEditor.Models
 
         public Dictionary<int, List<int>> VertexOfEdgesById { get; set; }
 
-        public bool Changed;
+        public bool Changed { get; set; } 
+
+        public string FileName { get; set; }
+
         public GraphModel() : this(
             new Dictionary<int, Vertex>(),
             new Dictionary<int, Edge>(),
@@ -58,16 +61,14 @@ namespace GraphEditor.Models
 
         public void AddVertex(Vertex v)
         {
-            Verticies.Add(v.Id, v);
-            Changed = true;
+            Verticies.Add(v.Id, v);    
         }
 
         public void AddEdge(Edge e)
         {
             Edges.Add(e.Id, e);
             AddVertexOfEdgesById(e.FromId, e.Id);
-            AddVertexOfEdgesById(e.ToId, e.Id);
-            Changed = true;
+            AddVertexOfEdgesById(e.ToId, e.Id);    
 
         }
 
@@ -76,8 +77,7 @@ namespace GraphEditor.Models
             if (VertexOfEdgesById.ContainsKey(vertexId))
                 VertexOfEdgesById[vertexId].Add(edgeId);
             else    
-                VertexOfEdgesById.Add(vertexId, new List<int> {edgeId});
-            Changed = true;
+                VertexOfEdgesById.Add(vertexId, new List<int> {edgeId});   
         }
 
         public void RemoveById(int id)
@@ -87,8 +87,7 @@ namespace GraphEditor.Models
             if (Verticies.ContainsKey(id))
                 Verticies.Remove(id);
             if (Edges.ContainsKey(id))
-                Edges.Remove(id);
-            Changed = true;
+                Edges.Remove(id);     
         }
 
         public bool Contains(int id)
@@ -104,6 +103,6 @@ namespace GraphEditor.Models
         public bool ContainsEdges(int id)
         {
             return Edges.ContainsKey(id);
-        }
+        } 
     }
 }
