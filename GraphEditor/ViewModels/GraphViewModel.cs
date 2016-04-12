@@ -231,8 +231,8 @@ namespace GraphEditor.ViewModels
         #endregion
 
         #region Commands
-    
-        public void New(object obj, ExecutedRoutedEventArgs e)
+
+        private void New(object obj, ExecutedRoutedEventArgs e)
         {
             if (_graphModel.Changed)
             {
@@ -246,7 +246,7 @@ namespace GraphEditor.ViewModels
             _graphModel = new GraphModel();
         }
 
-        public void Load(object obj, ExecutedRoutedEventArgs e)
+        private void Load(object obj, ExecutedRoutedEventArgs e)
         {                  
             var model = FileOperation.Load();
             if(model ==null)
@@ -259,7 +259,7 @@ namespace GraphEditor.ViewModels
             FileName = model.FileName;
         }
 
-        public void Save(object obj, ExecutedRoutedEventArgs e)
+        private void Save(object obj, ExecutedRoutedEventArgs e)
         {
             var model = new GraphModelSerialization(_graphModel);
             FileOperation.Save(model);
@@ -267,7 +267,7 @@ namespace GraphEditor.ViewModels
             FileName = model.FileName;   
         }
 
-        public void IsChanged(object sender, CanExecuteRoutedEventArgs e)
+        private void IsChanged(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = _graphModel.Changed;
         }
