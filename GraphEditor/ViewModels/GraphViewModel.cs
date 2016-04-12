@@ -18,10 +18,10 @@ namespace GraphEditor.ViewModels
             _graphModel = graphModel;
 
             CommandBindings = new CommandBindingCollection();
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.New, New));
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.Open, Load));
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, Save, IsChanged));
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, Exit));
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.New, NewCommand));
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Open, LoadCommand));
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, SaveCommand, IsChangedCommand));
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, ExitCommand));
 
             RegisterChangedEvent();
         }
@@ -232,13 +232,13 @@ namespace GraphEditor.ViewModels
 
         #region Commands
 
-        private void New(object obj, ExecutedRoutedEventArgs e)
+        private void NewCommand(object obj, ExecutedRoutedEventArgs e)
         {
             if (_graphModel.Changed)
             {
                 var result = MessageBox.Show("Save changed?", "Save?", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
                 if(result == MessageBoxResult.Yes)
-                    Save(null, null);
+                    SaveCommand(null, null);
                 if (result == MessageBoxResult.Cancel)
                     return;
             }
@@ -246,7 +246,7 @@ namespace GraphEditor.ViewModels
             _graphModel = new GraphModel();
         }
 
-        private void Load(object obj, ExecutedRoutedEventArgs e)
+        private void LoadCommand(object obj, ExecutedRoutedEventArgs e)
         {                  
             var model = FileOperation.Load();
             if(model ==null)
@@ -259,7 +259,7 @@ namespace GraphEditor.ViewModels
             FileName = model.FileName;
         }
 
-        private void Save(object obj, ExecutedRoutedEventArgs e)
+        private void SaveCommand(object obj, ExecutedRoutedEventArgs e)
         {
             var model = new GraphModelSerialization(_graphModel);
             FileOperation.Save(model);
@@ -267,12 +267,12 @@ namespace GraphEditor.ViewModels
             FileName = model.FileName;   
         }
 
-        private void IsChanged(object sender, CanExecuteRoutedEventArgs e)
+        private void IsChangedCommand(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = _graphModel.Changed;
         }
 
-        private void Exit(object obj, ExecutedRoutedEventArgs e)
+        private void ExitCommand(object obj, ExecutedRoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
