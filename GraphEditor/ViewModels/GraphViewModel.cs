@@ -1,35 +1,79 @@
-﻿using System;
-using System.Linq;   
-using System.Windows;        
-using System.ComponentModel;
-using System.Collections.Generic;  
-using System.Runtime.CompilerServices;         
-using GraphEditor.Models;       
+﻿using System.Linq;   
+using System.Windows;  
+using GraphEditor.Helper;
+using GraphEditor.Models; 
+using System.Windows.Input;       
+using System.Collections.Generic;        
 
 namespace GraphEditor.ViewModels
 {
-    public sealed class GraphViewModel : INotifyPropertyChanged
-    {
-        #region Properties          
+    public sealed class GraphViewModel
+    {           
+        private GraphModel _graphModel;
 
-        private readonly GraphModel _graphModel;
+        public readonly CommandBindingCollection CommandBindings;
+
+        public GraphViewModel(GraphModel graphModel)
+        {
+            _graphModel = graphModel;
+
+            CommandBindings = new CommandBindingCollection();
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.New, New));
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Open, Load));
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, Save, IsChanged));
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, Exit));
+
+            RegisterChangedEvent();
+        }
+
+        public void CreateGraph(List<Vertex> verticies, List<Edge> edges)
+        {
+            verticies.ForEach(v => AddVertex(v));
+            edges.ForEach(e => AddEdge(e));
+        }
+
+        #region Change Model
+
+        public delegate void Change();
+
+        public event Change ModelChanged;
+
+        public string FileName
+        {
+            get { return _graphModel.FileName; }
+            private set
+            {
+                _graphModel.FileName = value;
+                ModelChanged?.Invoke();
+            }
+        }
+
+        public bool Changed
+        {
+            get { return _graphModel.Changed; }
+            private set
+            {
+                _graphModel.Changed = value;
+                ModelChanged?.Invoke();
+            }
+        }                                  
+
+        private void RegisterChangedEvent()
+        {
+            AddedVertex += delegate { Changed = true; };
+            AddedEdge += delegate { Changed = true; };
+            ChangedPositionVertex += delegate { Changed = true; };
+            RemovedElement += delegate { Changed = true; };
+            UpdateLabel += delegate { Changed = true; };
+        }
+
+        #endregion ChangeModel
+
+        #region Add element
 
         public delegate void AddedElement(IElement el);
         public event AddedElement AddedVertex;
         public event AddedElement AddedEdge;
-      
-        #endregion
-
-        public GraphViewModel(GraphModel graphModel)
-        {
-            _graphModel = graphModel;                                                       
-        }
-
-        public void CreateGraph(List<Vertex> verticies, List<Edge> edges)
-        {                                                   
-            verticies.ForEach(v => AddVertex(v));
-            edges.ForEach(e => AddEdge(e));                                                     
-        }
 
         public bool AddVertex(Point p)
         {                      
@@ -43,9 +87,9 @@ namespace GraphEditor.ViewModels
                 return false;
 
             _graphModel.AddVertex(v);
-            AddedVertex?.Invoke(v);
+            AddedVertex?.Invoke(v);  
             return true;
-        }
+        } 
 
         /// <summary>
         /// Insert a Edge into the graph
@@ -76,8 +120,10 @@ namespace GraphEditor.ViewModels
             return true;
         }
 
+        #endregion Add element
+
         #region Selected elements
-                 
+
         private List<int> SelectedElements = new List<int>();
 
         public int SelectedElementsCount => SelectedElements.Count;
@@ -137,16 +183,12 @@ namespace GraphEditor.ViewModels
         }
 
         #endregion
+       
+        #region Remove Element
 
-        #region IElement Control 
+        public event SelectElement RemovedElement;
 
-  
-
-        #region Remove IElement
-
-        public SelectElement RemovedElement;
-
-        public void RemoveElements()
+        public void RemoveSelectedElements()
         {
             if(SelectedElementsCount < 0)
                 return;
@@ -160,13 +202,17 @@ namespace GraphEditor.ViewModels
             if (_graphModel.VertexOfEdgesById.ContainsKey(id))
             {       
                 _graphModel.VertexOfEdgesById[id].ForEach(RemoveElement);   
-            }
-
+            }     
 
             _graphModel.RemoveById(id);    
         }
 
-        #endregion
+        public void RemoveAllElements()
+        {
+            _graphModel.Verticies.Keys.ToList().ForEach(RemoveElement);
+            _graphModel.Edges.Keys.ToList().ForEach(RemoveElement);
+            SelectedElements.Clear();
+        }
 
         #endregion
 
@@ -181,14 +227,56 @@ namespace GraphEditor.ViewModels
             _graphModel.GetElement(id).LabelName = name;
             UpdateLabel?.Invoke(id, name);
         }
-        
+
         #endregion
-         
-        public event PropertyChangedEventHandler PropertyChanged;
-                                           
-        private void OnPropertyChanged(string propertyName = null)
+
+        #region Commands
+    
+        public void New(object obj, ExecutedRoutedEventArgs e)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            if (_graphModel.Changed)
+            {
+                var result = MessageBox.Show("Save changed?", "Save?", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                if(result == MessageBoxResult.Yes)
+                    Save(null, null);
+                if (result == MessageBoxResult.Cancel)
+                    return;
+            }
+            RemoveAllElements();
+            _graphModel = new GraphModel();
         }
+
+        public void Load(object obj, ExecutedRoutedEventArgs e)
+        {                  
+            var model = FileOperation.Load();
+            if(model ==null)
+                return;
+            RemoveAllElements();
+            _graphModel = new GraphModel();
+            model.Verticies.ForEach(v => AddVertex(v));
+            model.Edges.ForEach(es => AddEdge(es));
+            Changed = model.Changed;
+            FileName = model.FileName;
+        }
+
+        public void Save(object obj, ExecutedRoutedEventArgs e)
+        {
+            var model = new GraphModelSerialization(_graphModel);
+            FileOperation.Save(model);
+            Changed = model.Changed;
+            FileName = model.FileName;   
+        }
+
+        public void IsChanged(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = _graphModel.Changed;
+        }
+
+        private void Exit(object obj, ExecutedRoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
+        #endregion Commands        
     }
 }

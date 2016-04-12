@@ -8,11 +8,21 @@
         Title="MainWindow" Height="350" Width="525">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Ui:GraphArea x:Name="graphArea" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Background="White" Focusable="True"/>
-        <StatusBar Grid.Row="1">
+        <Menu VerticalAlignment="Top" Grid.Row="0">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" Command="ApplicationCommands.New"/>
+                <MenuItem Header="_Open" Command="ApplicationCommands.Open"/>
+                <MenuItem Header="_Save" Command="ApplicationCommands.Save" />
+                <Separator />
+                <MenuItem Header="_Exit" Command="ApplicationCommands.Close"/>
+            </MenuItem>
+        </Menu>
+        <Ui:GraphArea x:Name="graphArea" Grid.Column="0" Grid.Row="1" Grid.RowSpan="2" Background="White" Focusable="True"/>
+        <StatusBar Grid.Row="2">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
