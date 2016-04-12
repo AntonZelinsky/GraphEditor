@@ -18,10 +18,10 @@ namespace GraphEditor.ViewModels
             _graphModel = graphModel;
 
             CommandBindings = new CommandBindingCollection();
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.New, New));
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.Open, Load));
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, Save, IsChanged));
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, Exit));
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.New, NewCommand));
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Open, LoadCommand));
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, SaveCommand, IsChangedCommand));
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, ExitCommand));
 
             RegisterChangedEvent();
         }
@@ -81,7 +81,7 @@ namespace GraphEditor.ViewModels
             return AddVertex(v);
         }
 
-        public bool AddVertex(Vertex v)
+        private bool AddVertex(Vertex v)
         {                                         
             if (_graphModel.ContainsVerticies(v.Id))
                 return false;
@@ -107,7 +107,7 @@ namespace GraphEditor.ViewModels
         /// </summary>
         /// <param name="e">the Edge</param>
         /// <returns>status</returns>
-        public bool AddEdge(Edge e)
+        private bool AddEdge(Edge e)
         {
             if(_graphModel.ContainsEdges(e.Id))
                 return false; 
@@ -124,9 +124,9 @@ namespace GraphEditor.ViewModels
 
         #region Selected elements
 
-        private List<int> SelectedElements = new List<int>();
+        private readonly List<int> _selectedElements = new List<int>();
 
-        public int SelectedElementsCount => SelectedElements.Count;
+        public int SelectedElementsCount => _selectedElements.Count;
 
         public delegate void SelectElement(int id);
         public event SelectElement SelectedElement; 
@@ -136,30 +136,30 @@ namespace GraphEditor.ViewModels
         {
             if(SelectedElementsCount != 0 & !multi && !ctrl) 
                 UnselectElements();
-            if(SelectedElements.Contains(id))
+            if(_selectedElements.Contains(id))
             {
-                SelectedElements.Remove(id);
+                _selectedElements.Remove(id);
                 UnselectedElement?.Invoke(id);
             }
             else
             {
-                SelectedElements.Add(id);
+                _selectedElements.Add(id);
                 SelectedElement?.Invoke(id);
             }        
         }
                   
         public void SelectAll()
         {
-            SelectedElements.AddRange(_graphModel.GetAllElements().Select(e => e.Id)); 
+            _selectedElements.AddRange(_graphModel.GetAllElements().Select(e => e.Id)); 
         }
 
         public void UnselectElements()
         {                     
-            SelectedElements.ForEach(id =>
+            _selectedElements.ForEach(id =>
             {                                   
                 UnselectedElement?.Invoke(id);
             });
-            SelectedElements.Clear();  
+            _selectedElements.Clear();  
         }
 
 
@@ -167,7 +167,7 @@ namespace GraphEditor.ViewModels
         public event ChangePositionVertex ChangedPositionVertex;
         public void ChangePosition(Point p)
         {
-            SelectedElements.ForEach(v =>
+            _selectedElements.ForEach(v =>
             {
                 if (!_graphModel.ContainsVerticies(v)) 
                     return;
@@ -192,11 +192,11 @@ namespace GraphEditor.ViewModels
         {
             if(SelectedElementsCount < 0)
                 return;
-            SelectedElements.ForEach(RemoveElement);
-            SelectedElements.Clear();
+            _selectedElements.ForEach(RemoveElement);
+            _selectedElements.Clear();
         }
 
-        public void RemoveElement(int id)
+        private void RemoveElement(int id)
         {
             RemovedElement?.Invoke(id);
             if (_graphModel.VertexOfEdgesById.ContainsKey(id))
@@ -207,11 +207,11 @@ namespace GraphEditor.ViewModels
             _graphModel.RemoveById(id);    
         }
 
-        public void RemoveAllElements()
+        private void RemoveAllElements()
         {
             _graphModel.Verticies.Keys.ToList().ForEach(RemoveElement);
             _graphModel.Edges.Keys.ToList().ForEach(RemoveElement);
-            SelectedElements.Clear();
+            _selectedElements.Clear();
         }
 
         #endregion
@@ -232,21 +232,21 @@ namespace GraphEditor.ViewModels
 
         #region Commands
 
-        private void New(object obj, ExecutedRoutedEventArgs e)
+        private void NewCommand(object obj, ExecutedRoutedEventArgs e)    
         {
             if (_graphModel.Changed)
             {
                 var result = MessageBox.Show("Save changed?", "Save?", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
                 if(result == MessageBoxResult.Yes)
-                    Save(null, null);
+                    SaveCommand(null, null);
                 if (result == MessageBoxResult.Cancel)
                     return;
             }
             RemoveAllElements();
             _graphModel = new GraphModel();
         }
-
-        private void Load(object obj, ExecutedRoutedEventArgs e)
+             
+        private void LoadCommand(object obj, ExecutedRoutedEventArgs e)    
         {                  
             var model = FileOperation.Load();
             if(model ==null)
@@ -258,21 +258,21 @@ namespace GraphEditor.ViewModels
             Changed = model.Changed;
             FileName = model.FileName;
         }
-
-        private void Save(object obj, ExecutedRoutedEventArgs e)
+                          
+        private void SaveCommand(object obj, ExecutedRoutedEventArgs e)   
         {
             var model = new GraphModelSerialization(_graphModel);
             FileOperation.Save(model);
             Changed = model.Changed;
             FileName = model.FileName;   
         }
-
-        private void IsChanged(object sender, CanExecuteRoutedEventArgs e)
+                                     
+        private void IsChangedCommand(object sender, CanExecuteRoutedEventArgs e)    
         {
             e.CanExecute = _graphModel.Changed;
         }
 
-        private void Exit(object obj, ExecutedRoutedEventArgs e)
+        private void ExitCommand(object obj, ExecutedRoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
