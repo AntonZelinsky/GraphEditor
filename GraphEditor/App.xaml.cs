@@ -10,9 +10,10 @@ namespace GraphEditor
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);  
-            var view = new MainWindow();
             var model = new GraphModel();
-            var viewModel = new GraphViewModel(model);   
+            var viewModel = new GraphViewModel(model);
+            var view = new MainWindow(viewModel);
+            view.CommandBindings.AddRange(viewModel.CommandBindings);
             view.graphArea.DataContext = viewModel;
             view.graphArea.SubscribeEvents();
 

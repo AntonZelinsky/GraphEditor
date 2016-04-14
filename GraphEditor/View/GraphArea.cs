@@ -83,14 +83,7 @@ namespace GraphEditor.View
         {
             base.OnMouseRightButtonDown(e);
 
-            _startPointClick = e.GetPosition(this);
-            var element = GetElement(_startPointClick);
-
-            // Draw edge
-            if (element is VertexControl)
-            {
-                CreateEdgeControl((VertexControl)element);
-            }
+            _startPointClick = e.GetPosition(this);      
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -100,6 +93,17 @@ namespace GraphEditor.View
             // Derawing edge
             if (e.RightButton == MouseButtonState.Pressed)
             {
+                if(_createdEdge == null & Math.Abs(( _startPointClick - mousePosition ).X) > 3 &&
+                    Math.Abs(( _startPointClick - mousePosition ).Y) > 3)
+                {
+                    var element = GetElement(_startPointClick);
+
+                    // Draw edge
+                    if (element is VertexControl)
+                    {
+                        CreateEdgeControl((VertexControl)element);
+                    }
+                }
                 if (_createdEdge != null)
                 {
                     CreatingEdgeControl(mousePosition);
@@ -153,7 +157,7 @@ namespace GraphEditor.View
         {
             base.OnMouseRightButtonUp(e);
                                                         
-            var element = GetVertexElement(e.GetPosition(this));
+            var element = GetElement(e.GetPosition(this));
 
             // Complete drawed edge
             if (_createdEdge != null)
@@ -165,6 +169,8 @@ namespace GraphEditor.View
             }
             else
             {
+                if(element == null)
+                    return;
                 ContextMenu cm = new ContextMenu();
                 var rename = new MenuItem { Header = "Rename", };
                 rename.Click += (sender, args) => RenameOnClick(element);
@@ -178,9 +184,11 @@ namespace GraphEditor.View
 
         protected override void OnKeyDown(KeyEventArgs e)
         {                        
+            base.OnKeyDown(e);  
+                     
             if (e.Key == Key.Delete)
             {                                                
-                _graphViewModel.RemoveElements();   
+                _graphViewModel.RemoveSelectedElements();   
             }
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
             {
@@ -190,7 +198,6 @@ namespace GraphEditor.View
                     _elementsGraph.Values.ToList().ForEach(el => el.IsSelected = true);
                 }
             }
-            base.OnKeyDown(e);
         }
 
         #endregion
@@ -236,8 +243,6 @@ namespace GraphEditor.View
             ((IVertexElement)_elementsGraph[id]).SetPosition(p);
         }
 
-        #region Label update
-
         private void OnLabelUpdate(int id, string name)
         {
             var uiElement = _elementsGraph[id];
@@ -269,8 +274,6 @@ namespace GraphEditor.View
                 _graphViewModel.UpdeteElementLabel(sender.Id, dialog.Rename);
             }
         }
-
-        #endregion Label update
 
         #endregion Ui events
 
@@ -321,6 +324,7 @@ namespace GraphEditor.View
         private void UnreleasedEdgeControl()
         {
             this.Children.Remove(_createdEdge);  
+            _createdEdge = null;
         }
 
         private void OnCreateEdge(IElement el)
