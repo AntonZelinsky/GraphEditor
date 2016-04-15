@@ -17,12 +17,6 @@ namespace GraphEditor.ViewModels
         {
             _graphModel = graphModel;
 
-            CommandBindings = new CommandBindingCollection();
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.New, NewCommand));
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.Open, LoadCommand));
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, SaveCommand, IsChangedCommand));
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, ExitCommand));
-
             RegisterChangedEvent();
         }
 
