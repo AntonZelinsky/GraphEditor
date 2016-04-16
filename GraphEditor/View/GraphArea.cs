@@ -88,7 +88,7 @@ namespace GraphEditor.View
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            Point mousePosition = e.GetPosition(null);
+            Point mousePosition = e.GetPosition(this);   
 
             // Derawing edge
             if (e.RightButton == MouseButtonState.Pressed)
