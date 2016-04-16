@@ -60,16 +60,16 @@ namespace GraphEditor.View
                     return;                 
                 }
                
-                _graphViewModel.UnselectElements();
-
-                if (!Keyboard.IsKeyDown(Key.RightCtrl) || !Keyboard.IsKeyDown(Key.LeftCtrl))
-                {
-                    _graphViewModel.UnselectElements();  
-                }             
+                _graphViewModel.UnselectElements();  
             }
             // Select element
             else
-            {       
+            {
+                if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
+                {
+                    _graphViewModel.UnselectElements();
+                }
+
                 AddSelectedElement(element, false);
                 _targetUiElement = element;  
             }
@@ -88,7 +88,7 @@ namespace GraphEditor.View
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            Point mousePosition = e.GetPosition(null);
+            Point mousePosition = e.GetPosition(this);   
 
             // Derawing edge
             if (e.RightButton == MouseButtonState.Pressed)
