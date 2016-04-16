@@ -60,16 +60,16 @@ namespace GraphEditor.View
                     return;                 
                 }
                
-                _graphViewModel.UnselectElements();
-
-                if (!Keyboard.IsKeyDown(Key.RightCtrl) || !Keyboard.IsKeyDown(Key.LeftCtrl))
-                {
-                    _graphViewModel.UnselectElements();  
-                }             
+                _graphViewModel.UnselectElements();  
             }
             // Select element
             else
-            {       
+            {
+                if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
+                {
+                    _graphViewModel.UnselectElements();
+                }
+
                 AddSelectedElement(element, false);
                 _targetUiElement = element;  
             }
