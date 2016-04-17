@@ -20,6 +20,7 @@ namespace GraphEditor.View
         private Point _startPointClick;
         private Rectangle _selectionRectangle;    
         private IUiElement _targetUiElement;
+        private bool _changePosition;
 
         private GraphViewModel _graphViewModel;
         private readonly Dictionary<int, IUiElement> _elementsGraph;
@@ -38,8 +39,7 @@ namespace GraphEditor.View
                 _graphViewModel.AddedEdge += OnCreateEdge;
                 _graphViewModel.RemovedElement += OnRemoveElement;
                 _graphViewModel.SelectedElement += OnSelectedElement;  
-                _graphViewModel.UnselectedElement += OnUnselectedElement; 
-                _graphViewModel.ChangedPositionVertex += OnChangedPositionVertex;
+                _graphViewModel.UnselectedElement += OnUnselectedElement;        
                 _graphViewModel.UpdateLabel += OnLabelUpdate;
             }
         }
@@ -59,17 +59,15 @@ namespace GraphEditor.View
                     _graphViewModel.AddVertex(_startPointClick);
                     return;                 
                 }
-               
-                _graphViewModel.UnselectElements();  
-            }
-            // Select element
-            else
-            {
+
                 if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
                 {
                     _graphViewModel.UnselectElements();
                 }
-
+            }
+            // Select element
+            else
+            {           if(!_graphViewModel.SelectedElements.Contains(element.Id))
                 AddSelectedElement(element, false);
                 _targetUiElement = element;  
             }
@@ -125,10 +123,24 @@ namespace GraphEditor.View
                 }
                 // Drugging
                 else
-                {   
-                    if (_graphViewModel.SelectedElementsCount > 0)  
-                    {                     
-                        _graphViewModel.ChangePosition(mousePosition);  
+                {
+                    if (_graphViewModel.SelectedElementsCount > 0)
+                    {
+                        var vectorPosition = _startPointClick - mousePosition;
+                        if(vectorPosition.Length == 0)
+                            return;
+                        _startPointClick = mousePosition;
+                        _changePosition = true;
+                                                                     
+                        foreach (int idElement in _graphViewModel.SelectedElements)
+                        {
+                            var element = _elementsGraph[idElement];        
+                            if (!( element is IVertexElement ))
+                                continue;
+
+                            var currentPosition = ( (IVertexElement)element ).GetPosition();
+                            ( (IVertexElement)element ).SetPosition(currentPosition.X - vectorPosition.X, currentPosition.Y - vectorPosition.Y);
+                        }
                     }
                 }
             }
@@ -139,8 +151,8 @@ namespace GraphEditor.View
         {
             base.OnMouseLeftButtonUp(e);
 
-            Point mousePosition = e.GetPosition(this);     
-                   
+            Point mousePosition = e.GetPosition(this);
+
             if (_multiSelection)
             {
                 CompleteRectangleSelection(mousePosition);
@@ -148,7 +160,14 @@ namespace GraphEditor.View
                 _multiSelectedElements.Clear();
                 _multiSelection = false;
             }
-
+            else
+            {
+                if (_graphViewModel.SelectedElementsCount > 0 & _changePosition)   
+                {
+                    _changePosition = false;
+                    _graphViewModel.ChangePosition(mousePosition);     
+                }   
+            }
             _targetUiElement = null;   
             ReleaseMouseCapture();
         }
@@ -237,12 +256,7 @@ namespace GraphEditor.View
             _elementsGraph[id].Destruction();
             _elementsGraph.Remove(id);
         }
-
-        private void OnChangedPositionVertex(int id, Point p)
-        {
-            ((IVertexElement)_elementsGraph[id]).SetPosition(p);
-        }
-
+         
         private void OnLabelUpdate(int id, string name)
         {
             var uiElement = _elementsGraph[id];
