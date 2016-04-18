@@ -3,19 +3,20 @@ using System.Windows;
 using GraphEditor.Helper;
 using GraphEditor.Models; 
 using System.Windows.Input;       
-using System.Collections.Generic;        
+using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace GraphEditor.ViewModels
 {
     public sealed class GraphViewModel
-    {           
+    {
         private GraphModel _graphModel;
 
         public readonly CommandBindingCollection CommandBindings;
 
         public GraphViewModel(GraphModel graphModel)
         {
-            _graphModel = graphModel;
+            _graphModel = graphModel;      
 
             RegisterChangedEvent();
         }
@@ -226,51 +227,52 @@ namespace GraphEditor.ViewModels
 
         #region Commands
 
-        private void NewCommand(object obj, ExecutedRoutedEventArgs e)    
+        public void NewFile()
         {
-            if (_graphModel.Changed)
-            {
-                var result = MessageBox.Show("Save changed?", "Save?", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-                if(result == MessageBoxResult.Yes)
-                    SaveCommand(null, null);
-                if (result == MessageBoxResult.Cancel)
-                    return;
-            }
             RemoveAllElements();
             _graphModel = new GraphModel();
         }
-             
-        private void LoadCommand(object obj, ExecutedRoutedEventArgs e)    
-        {                  
-            var model = FileOperation.Load();
-            if(model ==null)
-                return;
-            RemoveAllElements();
-            _graphModel = new GraphModel();
+
+        public void LoadFile(GraphModelSerialization model)
+        {
+            NewFile();
             model.Verticies.ForEach(v => AddVertex(v));
             model.Edges.ForEach(es => AddEdge(es));
             Changed = model.Changed;
             FileName = model.FileName;
         }
-                          
-        private void SaveCommand(object obj, ExecutedRoutedEventArgs e)   
+
+        public GraphModel GetModel()
         {
-            var model = new GraphModelSerialization(_graphModel);
-            FileOperation.Save(model);
-            Changed = model.Changed;
-            FileName = model.FileName;   
-        }
-                                     
-        private void IsChangedCommand(object sender, CanExecuteRoutedEventArgs e)    
-        {
-            e.CanExecute = _graphModel.Changed;
+            return _graphModel;
         }
 
-        private void ExitCommand(object obj, ExecutedRoutedEventArgs e)
+        public void SaveFile(GraphModelSerialization model)
         {
-            Application.Current.Shutdown();
+            Changed = model.Changed;
+            FileName = model.FileName;
         }
 
         #endregion Commands        
+
+        #region Algoritm command
+
+        public delegate Color ChangeColorElement(int id, Color color);
+        public event ChangeColorElement ChangedColor;
+
+        public Color? ChangeColor(int idElement, Color color)
+        {
+            return ChangedColor?.Invoke(idElement, color);     
+        }
+
+        public delegate void ResetColorElement();
+        public event ResetColorElement ResetedColors;
+
+        public void ResetColor()
+        {
+            ResetedColors?.Invoke();  
+        }
+
+        #endregion
     }
 }

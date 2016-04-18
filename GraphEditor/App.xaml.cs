@@ -13,8 +13,10 @@ namespace GraphEditor
             var model = new GraphModel();
             var graphViewModel = new GraphViewModel(model);
             var windowViewModel = new WindowViewModel(graphViewModel);
-            var view = new MainWindow(graphViewModel);
+            var algorithmViewModel = new AlgorithmViewModel(graphViewModel);
+            var view = new MainWindow(graphViewModel);       
             view.CommandBindings.AddRange(windowViewModel.CommandBindings);
+            view.CommandBindings.AddRange(algorithmViewModel.CommandBindings);
             view.graphArea.DataContext = graphViewModel;
             view.graphArea.SubscribeEvents();
 

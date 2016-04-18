@@ -1,7 +1,7 @@
 ﻿using System.Windows;
-using System.Windows.Input;
+using System.Windows.Input;          
 using GraphEditor.Helper;
-using GraphEditor.Models;
+using GraphEditor.Models;                      
 
 namespace GraphEditor.ViewModels
 {
@@ -20,10 +20,10 @@ namespace GraphEditor.ViewModels
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Open, LoadCommand));
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, SaveCommand, IsChangedCommand));
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, ExitCommand));
-
+                                                                      
         }
 
-        #region Commands
+        #region Commands File menu
 
         private void NewCommand(object obj, ExecutedRoutedEventArgs e)
         {
@@ -36,6 +36,7 @@ namespace GraphEditor.ViewModels
                     return;
             }
             _graphViewModel.NewFile();
+            ((MainWindow)obj).StopAlgorithm.Command.Execute(null);
         }
 
         private void LoadCommand(object obj, ExecutedRoutedEventArgs e)
@@ -44,11 +45,12 @@ namespace GraphEditor.ViewModels
             if (model == null)
                 return;
            _graphViewModel.LoadFile(model);
+           ((MainWindow)obj).StopAlgorithm.Command.Execute(null);
         }
 
         private void SaveCommand(object obj, ExecutedRoutedEventArgs e)
         {
-            var model = new GraphModelSerialization(_graphViewModel.GetModelForSave());
+            var model = new GraphModelSerialization(_graphViewModel.GetModel());
             FileOperation.Save(model);
             _graphViewModel.SaveFile(model);
         }
@@ -63,6 +65,7 @@ namespace GraphEditor.ViewModels
             Application.Current.Shutdown();
         }
 
-        #endregion Commands  
+        #endregion Commands File menu       
+      
     }
 }

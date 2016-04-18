@@ -30,7 +30,8 @@ namespace GraphEditor.Controls
             RootGraph.Children.Add(this);
             GraphArea.SetZIndex(this, 100);
                                                       
-            _edges = new Dictionary<int, IEdgeUiElement>();   
+            _edges = new Dictionary<int, IEdgeUiElement>();
+            Color = Colors.Green;
         }  
 
         #region Graph operation
@@ -130,10 +131,26 @@ namespace GraphEditor.Controls
             get { return (bool)GetValue(IsSelectedProperty); }
             set { SetValue(IsSelectedProperty, value); }
         }
-       
-        #endregion
 
         #endregion
+
+        #endregion         
+
+        public Color Color { get; set; }
+
+        private Brush _colorAlgorithm => new RadialGradientBrush(Color, Colors.White);
+
+        public void ChangeColor(Color color)
+        {
+            Color = color;
+            InvalidateVisual();
+        }
+
+        public void ResetColor()
+        {
+            Color = Colors.Green;
+            InvalidateVisual();
+        }
 
         #region Override event
 
@@ -151,17 +168,25 @@ namespace GraphEditor.Controls
         
         protected override void OnRender(DrawingContext drawingContext)
         {            
-            var rate = _edges.Count / 2;
+            var rate = _edges.Count / 2;                   
             drawingContext.DrawEllipse(
-                Brushes.AliceBlue, 
+                Brushes.White, 
                 new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
-                new Point(0, 0), 10 + rate, 10 + rate);
+                new Point(0, 0), 10 + rate, 10 + rate);   
 
-            rate = _edges.Count / 3;    
-            drawingContext.DrawEllipse(
-                IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 
-                new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
-                new Point(0, 0), 5 + rate, 5 + rate);  
+            rate = _edges.Count / 3;
+            if (Color != Colors.Green)
+            {
+                drawingContext.DrawEllipse(
+                 _colorAlgorithm,
+                 new Pen(null, 0),
+                 new Point(0, 0), 8 + rate, 8 + rate);
+            }
+            else  
+                drawingContext.DrawEllipse(
+                    IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor,
+                    new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
+                    new Point(0, 0), 5 + rate, 5 + rate);
         }
 
         #endregion

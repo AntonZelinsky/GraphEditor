@@ -36,10 +36,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Expression.Interactions, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
@@ -53,6 +51,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Algorithms\AlgorithmBase.cs" />
+    <Compile Include="Algorithms\HistoryItemAlgorithm.cs" />
+    <Compile Include="Algorithms\IAlgorithm.cs" />
+    <Compile Include="Algorithms\Search\DepthFirstSearchAlgorithm.cs" />
     <Compile Include="Controls\EdgeControl.cs" />
     <Compile Include="Controls\Interfaces\ILabelElement.cs" />
     <Compile Include="Controls\Interfaces\IEdgeUiElement.cs" />
@@ -68,6 +70,7 @@
     <Compile Include="Models\GraphModel.cs" />
     <Compile Include="Models\PositionChanged.cs" />
     <Compile Include="Helper\GraphSerializer.cs" />
+    <Compile Include="ViewModels\AlgorithmViewModel.cs" />
     <Compile Include="ViewModels\GraphViewModel.cs" />
     <Compile Include="Models\Vertex.cs" />
     <Compile Include="ViewModels\WindowViewModel.cs" />

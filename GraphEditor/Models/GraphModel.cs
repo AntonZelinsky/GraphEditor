@@ -37,11 +37,27 @@ namespace GraphEditor.Models
             return Verticies[id];
         }
 
+        public int GetVertexIdByEdge(int edgeId, int vertexId)
+        {
+            return Edges[edgeId].OtherId(vertexId);
+        }
+
+        public List<int> GetAdjacentVerticies(int id)
+        {
+            var v = new List<int>();
+            VertexOfEdgesById[id].ForEach(edge => v.Add(GetVertexIdByEdge(edge, id)));
+            return v;
+        }
+
         public Edge GetEdge(int id)
         {
             return Edges[id];
         }
 
+        public List<int> GetEdgesForVertex(int vertexId)
+        {
+            return VertexOfEdgesById[vertexId];
+        }
         public IElement GetElement(int id)
         {
             if (ContainsEdges(id))
@@ -89,7 +105,7 @@ namespace GraphEditor.Models
             if (Edges.ContainsKey(id))
                 Edges.Remove(id);     
         }
-
+        
         public bool Contains(int id)
         {
             return GetAllElementsById().Contains(id);

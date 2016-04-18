@@ -23,6 +23,7 @@ namespace GraphEditor.Controls
             RootGraph = rootGraph;
             RootGraph.Children.Add(this);
             GraphArea.SetZIndex(this, 10);
+            Color = Colors.Black;
         }
 
         public EdgeControl(GraphArea rootGraph, VertexControl from, VertexControl to)
@@ -32,6 +33,7 @@ namespace GraphEditor.Controls
             RootGraph = rootGraph;
             RootGraph.Children.Add(this);
             GraphArea.SetZIndex(this, 10);
+            Color = Colors.Black;
         }
 
         public void SetFrom(VertexControl from)
@@ -184,7 +186,23 @@ namespace GraphEditor.Controls
             InvalidateVisual();
         }
 
-        #endregion      
+        #endregion
+
+        public Color Color { get; set; }
+
+        private Brush ColorAlgorithm => new RadialGradientBrush(Color, Colors.White);
+
+        public void ChangeColor(Color color)
+        {
+            Color = color;
+            InvalidateVisual();
+        }
+
+        public void ResetColor()
+        {
+            Color = Colors.Black;
+            InvalidateVisual();
+        }
 
         public void Destruction()
         {
@@ -213,7 +231,9 @@ namespace GraphEditor.Controls
             var to = To?.GetPosition() ?? toPoint;
             if (to.X == 0 && to.Y == 0)
                 return;
-            drawingContext.DrawLine(new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3), from, to);
+            if (Color != Colors.Black) 
+                drawingContext.DrawLine(new Pen(ColorAlgorithm, 6), from, to);                                                    
+            drawingContext.DrawLine(new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, Color != Colors.Black ? 2 : 3), from, to);
             base.OnRender(drawingContext);
         }
 
