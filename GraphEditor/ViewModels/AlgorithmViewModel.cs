@@ -28,6 +28,7 @@ namespace GraphEditor.ViewModels
                 new CommandBinding(SkipBackCommand, SkipBack, CanSkipBack),
 
                 new CommandBinding(DFSCommand, DFSAlgorithm),
+                new CommandBinding(BFSCommand, BFSAlgorithm),
             };   
         }
 
@@ -35,7 +36,7 @@ namespace GraphEditor.ViewModels
                                          
         private LinkedListNode<HistoryItemAlgorithm> _historyItem;
 
-        #region Commands Algorithm
+        #region Commands
 
         #region Manage Command
 
@@ -43,6 +44,7 @@ namespace GraphEditor.ViewModels
 
         private void Start(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
+            Clear(null, null);
             _algorithm.Compute();
 
             _historyItem = _algorithm.History.First;
@@ -59,6 +61,7 @@ namespace GraphEditor.ViewModels
 
         private void Stop(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
+            Clear(null, null);
             _algorithm = null;                                                       
         }
 
@@ -201,18 +204,25 @@ namespace GraphEditor.ViewModels
         #endregion Back
 
         #endregion Manage Command
-            
+
         #region Search algorithms
 
         public readonly static ICommand DFSCommand = new RoutedCommand();
 
         private void DFSAlgorithm(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
-        {                                            
-            _algorithm = new DepthFirstSearchAlgorithm(_graphViewModel.GetModel());     
+        {
+            _algorithm = new DepthFirstSearchAlgorithm(_graphViewModel.GetModel());
+        }
+
+        public readonly static ICommand BFSCommand = new RoutedCommand();
+
+        private void BFSAlgorithm(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
+        {
+            _algorithm = new BreadthFirstSearchAlgorithm(_graphViewModel.GetModel());
         }
 
         #endregion Search algorithms
 
-        #endregion Commands Algorithm
+        #endregion Commands
     }
 }

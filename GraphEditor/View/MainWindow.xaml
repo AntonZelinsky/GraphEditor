@@ -25,6 +25,7 @@
             <MenuItem Header="_Algorithms">
                 <MenuItem Header="_Search">
                     <MenuItem Header="Depth-first search" Command="VM:AlgorithmViewModel.DFSCommand" CommandParameter="{Binding Path=DataContext}"></MenuItem>
+                    <MenuItem Header="Breadth-first search" Command="VM:AlgorithmViewModel.BFSCommand" CommandParameter="{Binding Path=DataContext}"></MenuItem>
                 </MenuItem>
             </MenuItem>
         </Menu>

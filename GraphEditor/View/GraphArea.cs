@@ -50,7 +50,8 @@ namespace GraphEditor.View
         private HashSet<int> _coloredElements; 
         private void OnResetedColor()
         {     
-            _coloredElements.ToList().ForEach(id => _elementsGraph[id].ResetColor());       
+            _coloredElements.ToList().ForEach(id => _elementsGraph[id].ResetColor());   
+            _coloredElements.Clear();    
         }
 
         private Color OnChangedColor(int id, Color color)
@@ -84,8 +85,9 @@ namespace GraphEditor.View
             }
             // Select element
             else
-            {           if(!_graphViewModel.SelectedElements.Contains(element.Id))
-                AddSelectedElement(element, false);
+            {
+                if (!_graphViewModel.SelectedElements.Contains(element.Id))
+                    AddSelectedElement(element, false);
                 _targetUiElement = element;  
             }
                                                                                          

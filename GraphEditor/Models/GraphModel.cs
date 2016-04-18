@@ -97,13 +97,20 @@ namespace GraphEditor.Models
         }
 
         public void RemoveById(int id)
-        {
-            if (VertexOfEdgesById.ContainsKey(id)) 
-                VertexOfEdgesById.Remove(id);     
+        {             
             if (Verticies.ContainsKey(id))
+            {
                 Verticies.Remove(id);
+                if (VertexOfEdgesById.ContainsKey(id))
+                    VertexOfEdgesById.Remove(id);
+            }
             if (Edges.ContainsKey(id))
-                Edges.Remove(id);     
+            {
+                var e = Edges[id];
+                VertexOfEdgesById.Remove(e.FromId);
+                VertexOfEdgesById.Remove(e.ToId);
+                Edges.Remove(id);
+            }     
         }
         
         public bool Contains(int id)
