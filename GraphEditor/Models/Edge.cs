@@ -1,5 +1,5 @@
 ﻿using GraphEditor.Helper;
-using System.Runtime.Serialization;
+using System.Runtime.Serialization;  
 
 namespace GraphEditor.Models
 {
@@ -30,13 +30,18 @@ namespace GraphEditor.Models
 
         [DataMember]
         public string LabelName { get; set; }
-
+                      
         public Edge() { }
 
         public Edge(int fromId, int toId)
         {
             FromId = fromId;
             ToId = toId;                    
+        }
+
+        public int OtherId(int id)
+        {
+            return FromId == id ? ToId : ToId == id ? FromId : 0;
         }
 
         public override int GetHashCode()
