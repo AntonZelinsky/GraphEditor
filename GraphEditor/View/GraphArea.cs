@@ -28,6 +28,7 @@ namespace GraphEditor.View
         public GraphArea()
         {
             _elementsGraph = new Dictionary<int, IUiElement>();  
+            _coloredElements = new HashSet<int>();
         }
 
         public void SubscribeEvents()
@@ -41,7 +42,24 @@ namespace GraphEditor.View
                 _graphViewModel.SelectedElement += OnSelectedElement;  
                 _graphViewModel.UnselectedElement += OnUnselectedElement;        
                 _graphViewModel.UpdateLabel += OnLabelUpdate;
+                _graphViewModel.ChangedColor += OnChangedColor;
+                _graphViewModel.ResetedColors += OnResetedColor;
             }
+        }
+
+        private HashSet<int> _coloredElements; 
+        private void OnResetedColor()
+        {     
+            _coloredElements.ToList().ForEach(id => _elementsGraph[id].ResetColor());   
+            _coloredElements.Clear();    
+        }
+
+        private Color OnChangedColor(int id, Color color)
+        {
+            _coloredElements.Add(id);
+            var col = _elementsGraph[id].Color;
+            _elementsGraph[id].ChangeColor(color);
+            return col;
         }
 
         #region Override Events  
@@ -67,8 +85,9 @@ namespace GraphEditor.View
             }
             // Select element
             else
-            {           if(!_graphViewModel.SelectedElements.Contains(element.Id))
-                AddSelectedElement(element, false);
+            {
+                if (!_graphViewModel.SelectedElements.Contains(element.Id))
+                    AddSelectedElement(element, false);
                 _targetUiElement = element;  
             }
                                                                                          

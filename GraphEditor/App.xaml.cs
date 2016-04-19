@@ -11,10 +11,13 @@ namespace GraphEditor
         {
             base.OnStartup(e);  
             var model = new GraphModel();
-            var viewModel = new GraphViewModel(model);
-            var view = new MainWindow(viewModel);
-            view.CommandBindings.AddRange(viewModel.CommandBindings);
-            view.graphArea.DataContext = viewModel;
+            var graphViewModel = new GraphViewModel(model);
+            var windowViewModel = new WindowViewModel(graphViewModel);
+            var algorithmViewModel = new AlgorithmViewModel(graphViewModel);
+            var view = new MainWindow(graphViewModel);       
+            view.CommandBindings.AddRange(windowViewModel.CommandBindings);
+            view.CommandBindings.AddRange(algorithmViewModel.CommandBindings);
+            view.graphArea.DataContext = graphViewModel;
             view.graphArea.SubscribeEvents();
 
             var v1 = new Vertex(100, 100);
@@ -23,7 +26,7 @@ namespace GraphEditor
             var v = new List<Vertex> {v1, v2, v3};
             var es = new List<Edge> { new Edge(v1.Id, v2.Id), new Edge(v1.Id, v3.Id), new Edge(v2.Id, v3.Id) };
 
-            viewModel.CreateGraph(v, es);
+            graphViewModel.CreateGraph(v, es);
             Application.Current.MainWindow = view;
             view.Show();
         }

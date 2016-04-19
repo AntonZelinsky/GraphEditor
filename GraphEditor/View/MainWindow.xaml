@@ -4,25 +4,45 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Ui="clr-namespace:GraphEditor.View"
+        xmlns:VM="clr-namespace:GraphEditor.ViewModels"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <Menu VerticalAlignment="Top" Grid.Row="0">
+    <DockPanel>
+        <Menu VerticalAlignment="Top" DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_New" Command="ApplicationCommands.New"/>
-                <MenuItem Header="_Open" Command="ApplicationCommands.Open"/>
-                <MenuItem Header="_Save" Command="ApplicationCommands.Save" />
+                <MenuItem Command="ApplicationCommands.New"/>
+                <MenuItem Command="ApplicationCommands.Open"/>
+                <MenuItem Command="ApplicationCommands.Save" />
+                <MenuItem Command="ApplicationCommands.SaveAs" />
                 <Separator />
-                <MenuItem Header="_Exit" Command="ApplicationCommands.Close"/>
+                <MenuItem Command="ApplicationCommands.Close"/>
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Command ="ApplicationCommands.Copy"/>
+                <MenuItem Command ="ApplicationCommands.Cut"/>
+                <MenuItem Command ="ApplicationCommands.Paste"/>
+            </MenuItem>
+            <MenuItem Header="_Algorithms">
+                <MenuItem Header="_Search">
+                    <MenuItem Header="Depth-first search" Command="VM:AlgorithmViewModel.DFSCommand" CommandParameter="{Binding Path=DataContext}"></MenuItem>
+                    <MenuItem Header="Breadth-first search" Command="VM:AlgorithmViewModel.BFSCommand" CommandParameter="{Binding Path=DataContext}"></MenuItem>
+                </MenuItem>
             </MenuItem>
         </Menu>
-        <Ui:GraphArea x:Name="graphArea" Grid.Column="0" Grid.Row="1" Grid.RowSpan="2" Background="White" Focusable="True"/>
-        <StatusBar Grid.Row="2">
+        <ToolBarTray DockPanel.Dock="Top">
+            <ToolBar Band="0" BandIndex="0">
+                <Button Command="VM:AlgorithmViewModel.FromCommand" ToolTip="Select starting vertex">Starting</Button>
+                <Button Command="VM:AlgorithmViewModel.ToCommand" ToolTip="Select finishing vertex">Finishing</Button>
+                <Button Command="VM:AlgorithmViewModel.StartCommand">Start</Button>
+                <Button Command="VM:AlgorithmViewModel.StopCommand" Name="StopAlgorithm">Stop</Button>
+                <Button Command="VM:AlgorithmViewModel.SkipBackCommand">Skip Back</Button>
+                <Button Command="VM:AlgorithmViewModel.StepBackCommand">Step Back</Button>
+                <Button Command="VM:AlgorithmViewModel.StepForwardCommand">Step Forward</Button>
+                <Button Command="VM:AlgorithmViewModel.SkipForwardCommand">Skip Forward</Button>
+                <Button Command="VM:AlgorithmViewModel.ClearCommand">Clear</Button>
+            </ToolBar>
+        </ToolBarTray>
+        <StatusBar DockPanel.Dock="Bottom">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
@@ -42,5 +62,6 @@
                 <TextBlock x:Name="Counter"/>
             </StatusBarItem>
         </StatusBar>
-    </Grid>
+        <Ui:GraphArea x:Name="graphArea" Background="White" Focusable="True"/>
+    </DockPanel>
 </Window>

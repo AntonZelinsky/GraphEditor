@@ -16,17 +16,16 @@ namespace GraphEditor
             _model = model; 
             _model.ModelChanged += UpdateTitle;
             UpdateTitle();
+            graphArea.MouseMove += GraphAreaOnMouseMove;
         }
 
-        protected override void OnMouseMove(MouseEventArgs e)
-        {
-            base.OnMouseMove(e);
-
+        private void GraphAreaOnMouseMove(object sender, MouseEventArgs e)
+        {        
             var p = e.GetPosition(graphArea);
             Coordinates.Text = $"X: {p.X}, Y: {p.Y}";
             Counter.Text = $"Elements: {graphArea.Children.Count}, Selected Elements: {((GraphViewModel)graphArea.DataContext).SelectedElementsCount}";
         }
-           
+ 
         private void UpdateTitle()
         {                                    
             var version = Assembly.GetExecutingAssembly().GetName();    
