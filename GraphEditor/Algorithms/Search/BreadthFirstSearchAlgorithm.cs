@@ -34,14 +34,14 @@ namespace GraphEditor.Algorithms.Search
             queue.Enqueue(root);
             Visited.Add(root);
             while (queue.Count > 0)
-            {    
-                int v1 = queue.Dequeue();
-                if (queue.ToList().Exists(d => d == TargetId) || v1 == TargetId)
+            {
+                if (queue.ToList().Exists(d => d == TargetId))
                 {
                     ChangeColor(TargetId.Value, Colors.Red);
                     BuildPath();
                     return;
-                }   
+                }
+                int v1 = queue.Dequeue(); 
                 foreach (var v2 in _model.GetAdjacentVerticies(v1))
                 {
                     if (!Visited.Contains(v2))
