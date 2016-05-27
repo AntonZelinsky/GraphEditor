@@ -1,7 +1,7 @@
-﻿using System.Windows;   
+﻿using System.Windows;
 
 namespace GraphEditor.View
-{               
+{
     public partial class RenameDialog : Window
     {
         public RenameDialog(string name = "")
@@ -12,11 +12,11 @@ namespace GraphEditor.View
             rename.SelectAll();
         }
 
+        public string Rename => rename.Text;
+
         private void Rename_OkClick(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
         }
-
-        public string Rename => rename.Text;
     }
 }

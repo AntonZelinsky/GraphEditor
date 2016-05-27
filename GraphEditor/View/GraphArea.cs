@@ -1,33 +1,33 @@
-﻿using System;             
-using System.Linq;                   
-using System.Windows;   
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Windows.Controls;  
-using System.Collections.Generic;
-using GraphEditor.Models; 
-using GraphEditor.Controls; 
-using GraphEditor.ViewModels;             
+using GraphEditor.Controls;
 using GraphEditor.Controls.Interfaces;
+using GraphEditor.Models;
+using GraphEditor.ViewModels;
 
 namespace GraphEditor.View
 {
     public class GraphArea : Canvas
     {
-        private bool _multiSelection;
-        private readonly List<IUiElement> _multiSelectedElements = new List<IUiElement>();       
-        private Point _startPointClick;
-        private Rectangle _selectionRectangle;    
-        private IUiElement _targetUiElement;
-        private bool _changePosition;
-
-        private GraphViewModel _graphViewModel;
+        private readonly HashSet<int> _coloredElements;
         private readonly Dictionary<int, IUiElement> _elementsGraph;
-                                      
+        private readonly List<IUiElement> _multiSelectedElements = new List<IUiElement>();
+        private bool _changePosition;
+        private GraphViewModel _graphViewModel;
+        private bool _multiSelection;
+        private Rectangle _selectionRectangle;
+        private Point _startPointClick;
+        private IUiElement _targetUiElement;
+
         public GraphArea()
         {
-            _elementsGraph = new Dictionary<int, IUiElement>();  
+            _elementsGraph = new Dictionary<int, IUiElement>();
             _coloredElements = new HashSet<int>();
         }
 
@@ -39,19 +39,27 @@ namespace GraphEditor.View
                 _graphViewModel.AddedVertex += OnCreateVertex;
                 _graphViewModel.AddedEdge += OnCreateEdge;
                 _graphViewModel.RemovedElement += OnRemoveElement;
-                _graphViewModel.SelectedElement += OnSelectedElement;  
-                _graphViewModel.UnselectedElement += OnUnselectedElement;        
+                _graphViewModel.SelectedElement += OnSelectedElement;
+                _graphViewModel.UnselectedElement += OnUnselectedElement;
                 _graphViewModel.UpdateLabel += OnLabelUpdate;
                 _graphViewModel.ChangedColor += OnChangedColor;
                 _graphViewModel.ResetedColors += OnResetedColor;
             }
         }
 
-        private HashSet<int> _coloredElements; 
         private void OnResetedColor()
-        {     
-            _coloredElements.ToList().ForEach(id => _elementsGraph[id].ResetColor());   
-            _coloredElements.Clear();    
+        {
+            foreach (var id in _coloredElements.ToList())
+            {
+                try
+                {
+                    _elementsGraph[id].ResetColor();
+                }
+                catch
+                {
+                }
+            }
+            _coloredElements.Clear();
         }
 
         private Color OnChangedColor(int id, Color color)
@@ -75,7 +83,7 @@ namespace GraphEditor.View
                 if (e.ClickCount == 2)
                 {
                     _graphViewModel.AddVertex(_startPointClick);
-                    return;                 
+                    return;
                 }
 
                 if (!Keyboard.IsKeyDown(Key.RightCtrl) && !Keyboard.IsKeyDown(Key.LeftCtrl))
@@ -88,9 +96,9 @@ namespace GraphEditor.View
             {
                 if (!_graphViewModel.SelectedElements.Contains(element.Id))
                     AddSelectedElement(element, false);
-                _targetUiElement = element;  
+                _targetUiElement = element;
             }
-                                                                                         
+
             CaptureMouse();
             base.OnMouseLeftButtonDown(e);
         }
@@ -100,39 +108,39 @@ namespace GraphEditor.View
         {
             base.OnMouseRightButtonDown(e);
 
-            _startPointClick = e.GetPosition(this);      
+            _startPointClick = e.GetPosition(this);
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            Point mousePosition = e.GetPosition(this);   
+            var mousePosition = e.GetPosition(this);
 
             // Derawing edge
             if (e.RightButton == MouseButtonState.Pressed)
             {
-                if(_createdEdge == null & Math.Abs(( _startPointClick - mousePosition ).X) > 3 &&
-                    Math.Abs(( _startPointClick - mousePosition ).Y) > 3)
+                if (_createdEdge == null & Math.Abs((_startPointClick - mousePosition).X) > 3 &&
+                    Math.Abs((_startPointClick - mousePosition).Y) > 3)
                 {
                     var element = GetElement(_startPointClick);
 
                     // Draw edge
                     if (element is VertexControl)
                     {
-                        CreateEdgeControl((VertexControl)element);
+                        CreateEdgeControl((VertexControl) element);
                     }
                 }
                 if (_createdEdge != null)
                 {
                     CreatingEdgeControl(mousePosition);
-                }                      
+                }
             }
             else if (e.LeftButton == MouseButtonState.Pressed)
             {
-                if (_targetUiElement == null & !_multiSelection & 
+                if (_targetUiElement == null & !_multiSelection &
                     Math.Abs((_startPointClick - mousePosition).X) > 3 &
                     Math.Abs((_startPointClick - mousePosition).Y) > 3)
                 {
-                    CreateRectangleSelection(_startPointClick);  
+                    CreateRectangleSelection(_startPointClick);
                     _multiSelection = true;
                 }
                 // Multiselection              
@@ -146,19 +154,20 @@ namespace GraphEditor.View
                     if (_graphViewModel.SelectedElementsCount > 0)
                     {
                         var vectorPosition = _startPointClick - mousePosition;
-                        if(vectorPosition.Length == 0)
+                        if (vectorPosition.Length == 0)
                             return;
                         _startPointClick = mousePosition;
                         _changePosition = true;
-                                                                     
-                        foreach (int idElement in _graphViewModel.SelectedElements)
+
+                        foreach (var idElement in _graphViewModel.SelectedElements)
                         {
-                            var element = _elementsGraph[idElement];        
-                            if (!( element is IVertexElement ))
+                            var element = _elementsGraph[idElement];
+                            if (!(element is IVertexElement))
                                 continue;
 
-                            var currentPosition = ( (IVertexElement)element ).GetPosition();
-                            ( (IVertexElement)element ).SetPosition(currentPosition.X - vectorPosition.X, currentPosition.Y - vectorPosition.Y);
+                            var currentPosition = ((IVertexElement) element).GetPosition();
+                            ((IVertexElement) element).SetPosition(currentPosition.X - vectorPosition.X,
+                                currentPosition.Y - vectorPosition.Y);
                         }
                     }
                 }
@@ -170,7 +179,7 @@ namespace GraphEditor.View
         {
             base.OnMouseLeftButtonUp(e);
 
-            Point mousePosition = e.GetPosition(this);
+            var mousePosition = e.GetPosition(this);
 
             if (_multiSelection)
             {
@@ -181,52 +190,52 @@ namespace GraphEditor.View
             }
             else
             {
-                if (_graphViewModel.SelectedElementsCount > 0 & _changePosition)   
+                if (_graphViewModel.SelectedElementsCount > 0 & _changePosition)
                 {
                     _changePosition = false;
-                    _graphViewModel.ChangePosition(mousePosition);     
-                }   
+                    _graphViewModel.ChangePosition(mousePosition);
+                }
             }
-            _targetUiElement = null;   
+            _targetUiElement = null;
             ReleaseMouseCapture();
         }
 
         protected override void OnMouseRightButtonUp(MouseButtonEventArgs e)
         {
             base.OnMouseRightButtonUp(e);
-                                                        
+
             var element = GetElement(e.GetPosition(this));
 
             // Complete drawed edge
             if (_createdEdge != null)
             {
                 if (element is IVertexElement)
-                    CreatedEdgeControl((VertexControl)element);
+                    CreatedEdgeControl((VertexControl) element);
                 else
                     UnreleasedEdgeControl();
             }
             else
             {
-                if(element == null)
+                if (element == null)
                     return;
-                ContextMenu cm = new ContextMenu();
-                var rename = new MenuItem { Header = "Rename", };
+                var cm = new ContextMenu();
+                var rename = new MenuItem {Header = "Rename"};
                 rename.Click += (sender, args) => RenameOnClick(element);
                 cm.Items.Add(rename);
                 cm.IsOpen = true;
             }
 
             _createdEdge = null;
-            _targetUiElement = null;   
+            _targetUiElement = null;
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
-        {                        
-            base.OnKeyDown(e);  
-                     
+        {
+            base.OnKeyDown(e);
+
             if (e.Key == Key.Delete)
-            {                                                
-                _graphViewModel.RemoveSelectedElements();   
+            {
+                _graphViewModel.RemoveSelectedElements();
             }
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
             {
@@ -244,9 +253,16 @@ namespace GraphEditor.View
 
         #region Selection event
 
+        private void AddSelectedElement(IUiElement uiElement, bool multi)
+        {
+            var ctrl = Keyboard.IsKeyDown(Key.RightCtrl) || Keyboard.IsKeyDown(Key.LeftCtrl);
+
+            _graphViewModel.AddSelectedElement(uiElement.Id, ctrl, multi);
+        }
+
         private void OnSelectedElement(int id)
-        {     
-            _elementsGraph[id].IsSelected = true;          
+        {
+            _elementsGraph[id].IsSelected = true;
         }
 
         private void OnUnselectedElement(int id)
@@ -265,17 +281,18 @@ namespace GraphEditor.View
             {
                 DataContext = v
             };
-            _elementsGraph.Add(v.Id, vertex);           
+            _elementsGraph.Add(v.Id, vertex);
         }
 
         private void OnRemoveElement(int id)
         {
-            if(!_elementsGraph.ContainsKey(id))
+            if (!_elementsGraph.ContainsKey(id))
                 return;
             _elementsGraph[id].Destruction();
             _elementsGraph.Remove(id);
+            _coloredElements.Remove(id);
         }
-         
+
         private void OnLabelUpdate(int id, string name)
         {
             var uiElement = _elementsGraph[id];
@@ -285,7 +302,7 @@ namespace GraphEditor.View
                 {
                     var label = new LabelElement(this, name);
                     label.Attach(uiElement);
-                    label.UpdatePosition();     
+                    label.UpdatePosition();
                 }
                 else
                 {
@@ -298,7 +315,7 @@ namespace GraphEditor.View
 
         private void RenameOnClick(IUiElement sender)
         {
-            string oldName = string.Empty;
+            var oldName = string.Empty;
             if (sender.IsLabel)
                 oldName = sender.LabelName;
             var dialog = new RenameDialog(oldName);
@@ -311,18 +328,6 @@ namespace GraphEditor.View
         #endregion Ui events
 
         #endregion Events
-
-
-        #region Add
-
-        private void AddSelectedElement(IUiElement uiElement, bool multi)
-        {
-            var ctrl = Keyboard.IsKeyDown(Key.RightCtrl) || Keyboard.IsKeyDown(Key.LeftCtrl);
-
-            _graphViewModel.AddSelectedElement(uiElement.Id, ctrl, multi);  
-        }
-
-        #endregion
 
         #region Creating edge control
 
@@ -338,7 +343,7 @@ namespace GraphEditor.View
         {
             if (_createdEdge.To != null)
                 throw new Exception();
-            _createdEdge.SetToPoint(to); 
+            _createdEdge.SetToPoint(to);
         }
 
         private void CreatedEdgeControl(VertexControl to)
@@ -356,7 +361,7 @@ namespace GraphEditor.View
 
         private void UnreleasedEdgeControl()
         {
-            this.Children.Remove(_createdEdge);  
+            Children.Remove(_createdEdge);
             _createdEdge = null;
         }
 
@@ -364,14 +369,14 @@ namespace GraphEditor.View
         {
             if (_createdEdge != null) // Created edge on canvas
             {
-                _createdEdge.DataContext = el;  
+                _createdEdge.DataContext = el;
                 _elementsGraph.Add(el.Id, _createdEdge);
             }
             else
             {
                 var e = el as Edge;
-                var edge = new EdgeControl(this, (VertexControl)_elementsGraph[e.FromId],
-                    (VertexControl)_elementsGraph[e.ToId])
+                var edge = new EdgeControl(this, (VertexControl) _elementsGraph[e.FromId],
+                    (VertexControl) _elementsGraph[e.ToId])
                 {
                     DataContext = e
                 };
@@ -395,16 +400,17 @@ namespace GraphEditor.View
                 Opacity = 0.3
             };
 
-            this.Children.Add(_selectionRectangle);
-            Canvas.SetZIndex(_selectionRectangle, 200);
-            Canvas.SetLeft(_selectionRectangle, mousePosition.X);
-            Canvas.SetTop(_selectionRectangle, mousePosition.Y);
+            Children.Add(_selectionRectangle);
+            SetZIndex(_selectionRectangle, 200);
+            SetLeft(_selectionRectangle, mousePosition.X);
+            SetTop(_selectionRectangle, mousePosition.Y);
         }
 
         private void MoveRectangleSelection(Point mousePosition)
         {
             // защита от случайных движений мыши              
-            if (Math.Max(Math.Abs(_startPointClick.X - mousePosition.X), Math.Abs(_startPointClick.Y - mousePosition.Y)) < 5)
+            if (Math.Max(Math.Abs(_startPointClick.X - mousePosition.X),
+                Math.Abs(_startPointClick.Y - mousePosition.Y)) < 5)
                 return;
             var x = Math.Min(mousePosition.X, _startPointClick.X);
             var y = Math.Min(mousePosition.Y, _startPointClick.Y);
@@ -415,15 +421,15 @@ namespace GraphEditor.View
             _selectionRectangle.Width = w;
             _selectionRectangle.Height = h;
 
-            Canvas.SetLeft(_selectionRectangle, x);
-            Canvas.SetTop(_selectionRectangle, y);
+            SetLeft(_selectionRectangle, x);
+            SetTop(_selectionRectangle, y);
         }
 
         private void CompleteRectangleSelection(Point mousePosition)
         {
             var geometry = new RectangleGeometry(new Rect(_startPointClick, mousePosition));
             GetElements(geometry);
-            this.Children.Remove(_selectionRectangle);
+            Children.Remove(_selectionRectangle);
             _selectionRectangle = null;
         }
 
@@ -432,14 +438,14 @@ namespace GraphEditor.View
         #region Attached dependency property position
 
         protected static readonly DependencyProperty XProperty =
-            DependencyProperty.RegisterAttached("X", typeof(double), typeof(GraphArea),
-                                                 new FrameworkPropertyMetadata(double.NaN,
-                                                    FrameworkPropertyMetadataOptions.AffectsMeasure |
-                                                    FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                    FrameworkPropertyMetadataOptions.AffectsRender |
-                                                    FrameworkPropertyMetadataOptions.AffectsParentMeasure |
-                                                    FrameworkPropertyMetadataOptions.AffectsParentArrange |
-                                                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, x_changed));
+            DependencyProperty.RegisterAttached("X", typeof (double), typeof (GraphArea),
+                new FrameworkPropertyMetadata(double.NaN,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure |
+                    FrameworkPropertyMetadataOptions.AffectsArrange |
+                    FrameworkPropertyMetadataOptions.AffectsRender |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure |
+                    FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, x_changed));
 
         private static void x_changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -448,7 +454,7 @@ namespace GraphEditor.View
 
         public static double GetX(DependencyObject obj)
         {
-            return (double)obj.GetValue(XProperty);
+            return (double) obj.GetValue(XProperty);
         }
 
         public static void SetX(DependencyObject obj, double value, bool alsoSetFinal = true)
@@ -457,23 +463,24 @@ namespace GraphEditor.View
         }
 
         private static readonly DependencyProperty YProperty =
-           DependencyProperty.RegisterAttached("Y", typeof(double), typeof(GraphArea),
-                                                 new FrameworkPropertyMetadata(double.NaN,
-                                                    FrameworkPropertyMetadataOptions.AffectsMeasure |
-                                                    FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                    FrameworkPropertyMetadataOptions.AffectsRender |
-                                                    FrameworkPropertyMetadataOptions.AffectsParentMeasure |
-                                                    FrameworkPropertyMetadataOptions.AffectsParentArrange |
-                                                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault
-                                                    , y_changed));
+            DependencyProperty.RegisterAttached("Y", typeof (double), typeof (GraphArea),
+                new FrameworkPropertyMetadata(double.NaN,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure |
+                    FrameworkPropertyMetadataOptions.AffectsArrange |
+                    FrameworkPropertyMetadataOptions.AffectsRender |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure |
+                    FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault
+                    , y_changed));
 
         private static void y_changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             d.SetValue(TopProperty, e.NewValue);
         }
+
         public static double GetY(DependencyObject obj)
         {
-            return (double)obj.GetValue(YProperty);
+            return (double) obj.GetValue(YProperty);
         }
 
         public static void SetY(DependencyObject obj, double value)
@@ -487,8 +494,8 @@ namespace GraphEditor.View
 
         private IUiElement GetElement(Point p)
         {
-            HitTestResult hitResult = VisualTreeHelper.HitTest(this, p);
-            return hitResult?.VisualHit as IUiElement;    
+            var hitResult = VisualTreeHelper.HitTest(this, p);
+            return hitResult?.VisualHit as IUiElement;
         }
 
         private IVertexElement GetVertexElement(Point p)
@@ -516,7 +523,7 @@ namespace GraphEditor.View
 
         private HitTestResultBehavior HitTestRectangleCallback(HitTestResult result)
         {
-            var geometryResult = (GeometryHitTestResult)result;
+            var geometryResult = (GeometryHitTestResult) result;
             var element = result.VisualHit as IUiElement;
             if (element != null &&
                 geometryResult.IntersectionDetail == IntersectionDetail.FullyInside)
@@ -528,6 +535,6 @@ namespace GraphEditor.View
             return HitTestResultBehavior.Continue;
         }
 
-        #endregion 
+        #endregion
     }
 }

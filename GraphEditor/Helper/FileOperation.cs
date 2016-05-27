@@ -26,11 +26,11 @@ namespace GraphEditor.Helper
         }
 
         public static void Save(GraphModelSerialization model)
-        {       
-            if(string.IsNullOrEmpty(model.FileName))
+        {
+            if (string.IsNullOrEmpty(model.FileName))
                 SaveAs(model);
-            else if(GraphSerializer.Serialization(model, model.FileName))
-                model.Changed = false;    
+            else if (GraphSerializer.Serialization(model, model.FileName))
+                model.Changed = false;
         }
 
         public static void SaveAs(GraphModelSerialization model)
@@ -38,7 +38,9 @@ namespace GraphEditor.Helper
             var saveDialog = new SaveFileDialog
             {
                 Filter = "Graph file (*.ge)|*.ge| All files (*.*)|*.*",
-                InitialDirectory = model.FileName ?? _initialDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+                InitialDirectory =
+                    model.FileName ??
+                    _initialDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
             };
             if (saveDialog.ShowDialog() == true)
             {

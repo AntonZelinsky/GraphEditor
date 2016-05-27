@@ -4,10 +4,6 @@ namespace GraphEditor.Algorithms
 {
     public struct HistoryItemAlgorithm
     {
-        public int Id { get; set; }
-
-        public Color Color { get; set; }
-
         public Color? OldColor;
 
         public HistoryItemAlgorithm(int id, Color color)
@@ -16,5 +12,8 @@ namespace GraphEditor.Algorithms
             Color = color;
             OldColor = null;
         }
+
+        public int Id { get; set; }
+        public Color Color { get; set; }
     }
 }

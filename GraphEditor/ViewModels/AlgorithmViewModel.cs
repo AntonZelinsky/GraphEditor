@@ -1,24 +1,25 @@
-﻿using System.Windows.Input;
+﻿using System.Collections.Generic;
+using System.Windows.Input;
 using GraphEditor.Algorithms;
-using System.Collections.Generic;
-using GraphEditor.Algorithms.Search;           
+using GraphEditor.Algorithms.Search;
 
 namespace GraphEditor.ViewModels
 {
     public class AlgorithmViewModel
     {
         private readonly GraphViewModel _graphViewModel;
-
         public readonly CommandBindingCollection CommandBindings;
- 
+        private IAlgorithm _algorithm;
+        private LinkedListNode<HistoryItemAlgorithm> _historyItem;
+
         public AlgorithmViewModel(GraphViewModel graphViewModel)
         {
             _graphViewModel = graphViewModel;
 
             CommandBindings = new CommandBindingCollection
             {
-                new CommandBinding(StartCommand, Start,CanStart),
-                new CommandBinding(StopCommand, Stop,CanStop),  
+                new CommandBinding(StartCommand, Start, CanStart),
+                new CommandBinding(StopCommand, Stop, CanStop),
                 new CommandBinding(ClearCommand, Clear, CanClear),
                 new CommandBinding(FromCommand, From, CanFrom),
                 new CommandBinding(ToCommand, To, CanTo),
@@ -26,21 +27,17 @@ namespace GraphEditor.ViewModels
                 new CommandBinding(SkipForwardCommand, SkipForvard, CanSkipForward),
                 new CommandBinding(StepBackCommand, StepBack, CanStepBack),
                 new CommandBinding(SkipBackCommand, SkipBack, CanSkipBack),
-
-                new CommandBinding(DFSCommand, DFSAlgorithm),
-                new CommandBinding(BFSCommand, BFSAlgorithm),
-            };   
+                new CommandBinding(DFSCommandDirected, DFSAlgorithmDirected),
+                new CommandBinding(DFSCommandUndirected, DFSAlgorithmUndirected),
+                new CommandBinding(BFSCommand, BFSAlgorithm)
+            };
         }
-
-        private IAlgorithm _algorithm;
-                                         
-        private LinkedListNode<HistoryItemAlgorithm> _historyItem;
 
         #region Commands
 
         #region Manage Command
 
-        public readonly static ICommand StartCommand = new RoutedUICommand();
+        public static readonly ICommand StartCommand = new RoutedUICommand();
 
         private void Start(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
@@ -53,16 +50,17 @@ namespace GraphEditor.ViewModels
 
         private void CanStart(object sender, CanExecuteRoutedEventArgs canExecuteRoutedEventArgs)
         {
-            if (_algorithm != null && _algorithm.SourceId != null & _algorithm.TargetId != null && _algorithm.TargetId != _algorithm.SourceId)
+            if (_algorithm != null && _algorithm.SourceId != null & _algorithm.TargetId != null &&
+                _algorithm.TargetId != _algorithm.SourceId)
                 canExecuteRoutedEventArgs.CanExecute = true;
         }
 
-        public readonly static ICommand StopCommand = new RoutedUICommand();
+        public static readonly ICommand StopCommand = new RoutedUICommand();
 
         private void Stop(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
             Clear(null, null);
-            _algorithm = null;                                                       
+            _algorithm = null;
         }
 
         private void CanStop(object sender, CanExecuteRoutedEventArgs canExecuteRoutedEventArgs)
@@ -71,7 +69,7 @@ namespace GraphEditor.ViewModels
                 canExecuteRoutedEventArgs.CanExecute = true;
         }
 
-        public readonly static ICommand ClearCommand = new RoutedCommand();
+        public static readonly ICommand ClearCommand = new RoutedCommand();
 
         private void Clear(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
@@ -87,37 +85,37 @@ namespace GraphEditor.ViewModels
 
         #region Select from to
 
-        public readonly static ICommand FromCommand = new RoutedUICommand();
+        public static readonly ICommand FromCommand = new RoutedUICommand();
 
         private void From(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
-        {                                            
+        {
             _graphViewModel.SelectedElement += OnSelectedFromElement;
         }
 
         private void CanFrom(object sender, CanExecuteRoutedEventArgs canExecuteRoutedEventArgs)
         {
-            if (_algorithm != null)                
-                    canExecuteRoutedEventArgs.CanExecute = true;
+            if (_algorithm != null)
+                canExecuteRoutedEventArgs.CanExecute = true;
         }
-          
+
         private void OnSelectedFromElement(int id)
         {
             Clear(null, null);
-            _algorithm.SourceId = id;            
+            _algorithm.SourceId = id;
             _graphViewModel.SelectedElement -= OnSelectedFromElement;
         }
 
-        public readonly static ICommand ToCommand = new RoutedUICommand();
+        public static readonly ICommand ToCommand = new RoutedUICommand();
 
         private void To(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
-        {                                               
+        {
             _graphViewModel.SelectedElement += OnSelectedToElement;
         }
 
         private void CanTo(object sender, CanExecuteRoutedEventArgs canExecuteRoutedEventArgs)
         {
-            if (_algorithm != null)                   
-                    canExecuteRoutedEventArgs.CanExecute = true;
+            if (_algorithm != null)
+                canExecuteRoutedEventArgs.CanExecute = true;
         }
 
         private void OnSelectedToElement(int id)
@@ -131,12 +129,12 @@ namespace GraphEditor.ViewModels
 
         #region Forward
 
-        public readonly static ICommand StepForwardCommand = new RoutedUICommand();
+        public static readonly ICommand StepForwardCommand = new RoutedUICommand();
 
         private void StepForward(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
             _historyItem = _historyItem.Next;
-            var oldColor = _graphViewModel.ChangeColor(_historyItem.Value.Id, _historyItem.Value.Color);    
+            var oldColor = _graphViewModel.ChangeColor(_historyItem.Value.Id, _historyItem.Value.Color);
             var copyHistoryItem = _historyItem.Value;
             copyHistoryItem.OldColor = oldColor;
             _historyItem.Value = copyHistoryItem;
@@ -144,38 +142,38 @@ namespace GraphEditor.ViewModels
 
         private void CanStepForward(object sender, CanExecuteRoutedEventArgs canExecuteRoutedEventArgs)
         {
-            if (_algorithm != null && _algorithm.SourceId != null && _algorithm.TargetId != null)     
-                if(_historyItem?.Next != null)
+            if (_algorithm != null && _algorithm.SourceId != null && _algorithm.TargetId != null)
+                if (_historyItem?.Next != null)
                     canExecuteRoutedEventArgs.CanExecute = true;
         }
-              
-        public readonly static ICommand SkipForwardCommand = new RoutedCommand();
+
+        public static readonly ICommand SkipForwardCommand = new RoutedCommand();
 
         private void SkipForvard(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
             while (_historyItem?.Next != null)
             {
-                 StepForward(sender, executedRoutedEventArgs);
+                StepForward(sender, executedRoutedEventArgs);
             }
         }
 
         private void CanSkipForward(object sender, CanExecuteRoutedEventArgs canExecuteRoutedEventArgs)
-        {                                                     
-            CanStepForward(sender, canExecuteRoutedEventArgs);  
+        {
+            CanStepForward(sender, canExecuteRoutedEventArgs);
         }
 
         #endregion Forward
 
         #region Back
 
-        public readonly static ICommand StepBackCommand = new RoutedCommand();
+        public static readonly ICommand StepBackCommand = new RoutedCommand();
 
         private void StepBack(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
             if (_historyItem.Value.OldColor != null)
             {
                 _graphViewModel.ChangeColor(_historyItem.Value.Id, _historyItem.Value.OldColor.Value);
-                _historyItem = _historyItem.Previous;  
+                _historyItem = _historyItem.Previous;
             }
         }
 
@@ -184,9 +182,9 @@ namespace GraphEditor.ViewModels
             if (_algorithm != null && _algorithm.SourceId != null && _algorithm.TargetId != null)
                 if (_historyItem?.Previous != null)
                     canExecuteRoutedEventArgs.CanExecute = true;
-        }        
+        }
 
-        public readonly static ICommand SkipBackCommand = new RoutedCommand();
+        public static readonly ICommand SkipBackCommand = new RoutedCommand();
 
         private void SkipBack(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
@@ -207,14 +205,21 @@ namespace GraphEditor.ViewModels
 
         #region Search algorithms
 
-        public readonly static ICommand DFSCommand = new RoutedCommand();
+        public static readonly ICommand DFSCommandDirected = new RoutedCommand();
 
-        private void DFSAlgorithm(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
+        private void DFSAlgorithmDirected(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
-            _algorithm = new DepthFirstSearchAlgorithm(_graphViewModel.GetModel());
+            _algorithm = new DepthFirstSearchDirectedAlgorithm(_graphViewModel.GetModel());
         }
 
-        public readonly static ICommand BFSCommand = new RoutedCommand();
+        public static readonly ICommand DFSCommandUndirected = new RoutedCommand();
+
+        private void DFSAlgorithmUndirected(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
+        {
+            _algorithm = new DepthFirstSearchUndirectedAlgorithm(_graphViewModel.GetModel());
+        }
+
+        public static readonly ICommand BFSCommand = new RoutedCommand();
 
         private void BFSAlgorithm(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {

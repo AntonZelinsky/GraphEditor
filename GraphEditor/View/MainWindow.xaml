@@ -10,22 +10,26 @@
     <DockPanel>
         <Menu VerticalAlignment="Top" DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Command="ApplicationCommands.New"/>
-                <MenuItem Command="ApplicationCommands.Open"/>
+                <MenuItem Command="ApplicationCommands.New" />
+                <MenuItem Command="ApplicationCommands.Open" />
                 <MenuItem Command="ApplicationCommands.Save" />
                 <MenuItem Command="ApplicationCommands.SaveAs" />
                 <Separator />
-                <MenuItem Command="ApplicationCommands.Close"/>
+                <MenuItem Command="ApplicationCommands.Close" />
             </MenuItem>
             <MenuItem Header="_Edit">
-                <MenuItem Command ="ApplicationCommands.Copy"/>
-                <MenuItem Command ="ApplicationCommands.Cut"/>
-                <MenuItem Command ="ApplicationCommands.Paste"/>
+                <MenuItem Command="ApplicationCommands.Copy" />
+                <MenuItem Command="ApplicationCommands.Cut" />
+                <MenuItem Command="ApplicationCommands.Paste" />
             </MenuItem>
             <MenuItem Header="_Algorithms">
                 <MenuItem Header="_Search">
-                    <MenuItem Header="Depth-first search" Command="VM:AlgorithmViewModel.DFSCommand" CommandParameter="{Binding Path=DataContext}"></MenuItem>
-                    <MenuItem Header="Breadth-first search" Command="VM:AlgorithmViewModel.BFSCommand" CommandParameter="{Binding Path=DataContext}"></MenuItem>
+                    <MenuItem Header="Depth-first search">
+                        <MenuItem Header="Directed" Command="VM:AlgorithmViewModel.DFSCommandDirected" />
+                        <MenuItem Header="Undirected" Command="VM:AlgorithmViewModel.DFSCommandUndirected" />
+                    </MenuItem>
+                    <MenuItem Header="Breadth-first search" Command="VM:AlgorithmViewModel.BFSCommand"
+                              CommandParameter="{Binding Path=DataContext}" />
                 </MenuItem>
             </MenuItem>
         </Menu>
@@ -47,21 +51,21 @@
                 <ItemsPanelTemplate>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                     </Grid>
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
             <StatusBarItem Grid.Column="0">
-                <TextBlock x:Name="Coordinates"/>
+                <TextBlock x:Name="Coordinates" />
             </StatusBarItem>
-            <Separator Grid.Column="1"/>
+            <Separator Grid.Column="1" />
             <StatusBarItem Grid.Column="2">
-                <TextBlock x:Name="Counter"/>
+                <TextBlock x:Name="Counter" />
             </StatusBarItem>
         </StatusBar>
-        <Ui:GraphArea x:Name="graphArea" Background="White" Focusable="True"/>
+        <Ui:GraphArea x:Name="graphArea" Background="White" Focusable="True" />
     </DockPanel>
 </Window>
