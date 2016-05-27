@@ -55,7 +55,8 @@
     <Compile Include="Algorithms\HistoryItemAlgorithm.cs" />
     <Compile Include="Algorithms\IAlgorithm.cs" />
     <Compile Include="Algorithms\Search\BreadthFirstSearchAlgorithm.cs" />
-    <Compile Include="Algorithms\Search\DepthFirstSearchAlgorithm.cs" />
+    <Compile Include="Algorithms\Search\DepthFirstSearchDirectedAlgorithm.cs" />
+    <Compile Include="Algorithms\Search\DepthFirstSearchUndirectedAlgorithm.cs" />
     <Compile Include="Controls\EdgeControl.cs" />
     <Compile Include="Controls\Interfaces\ILabelElement.cs" />
     <Compile Include="Controls\Interfaces\IEdgeUiElement.cs" />

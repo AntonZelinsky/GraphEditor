@@ -10,6 +10,9 @@ namespace GraphEditor.Models
                      
         public Dictionary<int, Vertex> Verticies { get; set; }  
 
+        /// <summary>
+        /// Коллекция дуг принадлежищих вершине
+        /// </summary>
         public Dictionary<int, List<int>> VertexOfEdgesById { get; set; }
 
         public bool Changed { get; set; } 
@@ -47,6 +50,14 @@ namespace GraphEditor.Models
             var v = new List<int>();
             VertexOfEdgesById[id].ForEach(edge => v.Add(GetVertexIdByEdge(edge, id)));
             return v;
+        }
+          
+        public List<int> GetAdjacentOrientedVerticies(int id)
+        {
+            var verticies = new List<int>();
+            VertexOfEdgesById[id].ForEach(edge => { if(Edges[edge].ToId != id)
+                    verticies.Add(Edges[edge].ToId); });
+            return verticies;
         }
 
         public Edge GetEdge(int id)

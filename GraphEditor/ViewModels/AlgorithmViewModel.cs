@@ -26,8 +26,9 @@ namespace GraphEditor.ViewModels
                 new CommandBinding(SkipForwardCommand, SkipForvard, CanSkipForward),
                 new CommandBinding(StepBackCommand, StepBack, CanStepBack),
                 new CommandBinding(SkipBackCommand, SkipBack, CanSkipBack),
-
-                new CommandBinding(DFSCommand, DFSAlgorithm),
+ 
+                new CommandBinding(DFSCommandDirected, DFSAlgorithmDirected),       
+                new CommandBinding(DFSCommandUndirected, DFSAlgorithmUndirected),
                 new CommandBinding(BFSCommand, BFSAlgorithm),
             };   
         }
@@ -207,11 +208,18 @@ namespace GraphEditor.ViewModels
 
         #region Search algorithms
 
-        public readonly static ICommand DFSCommand = new RoutedCommand();
+        public readonly static ICommand DFSCommandDirected = new RoutedCommand();
 
-        private void DFSAlgorithm(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
+        private void DFSAlgorithmDirected(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
-            _algorithm = new DepthFirstSearchAlgorithm(_graphViewModel.GetModel());
+            _algorithm = new DepthFirstSearchDirectedAlgorithm(_graphViewModel.GetModel());
+        }
+          
+        public readonly static ICommand DFSCommandUndirected = new RoutedCommand();
+
+        private void DFSAlgorithmUndirected(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
+        {
+            _algorithm = new DepthFirstSearchUndirectedAlgorithm(_graphViewModel.GetModel());
         }
 
         public readonly static ICommand BFSCommand = new RoutedCommand();
