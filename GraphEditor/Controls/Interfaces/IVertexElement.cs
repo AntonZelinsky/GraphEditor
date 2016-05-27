@@ -17,5 +17,7 @@ namespace GraphEditor.Controls.Interfaces
         Point GetPosition();
         void SetPosition(Point pt);
         void SetPosition(double x, double y);
+
+        int Rate { get; }
     }
 }
