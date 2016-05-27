@@ -49,8 +49,15 @@ namespace GraphEditor.View
 
         private HashSet<int> _coloredElements; 
         private void OnResetedColor()
-        {     
-            _coloredElements.ToList().ForEach(id => _elementsGraph[id].ResetColor());   
+        {
+            foreach (var id in _coloredElements.ToList())
+            {
+                try
+                {
+                    _elementsGraph[id].ResetColor();
+                }
+                catch { }
+            }  
             _coloredElements.Clear();    
         }
 
@@ -274,6 +281,7 @@ namespace GraphEditor.View
                 return;
             _elementsGraph[id].Destruction();
             _elementsGraph.Remove(id);
+            _coloredElements.Remove(id);
         }
          
         private void OnLabelUpdate(int id, string name)
@@ -311,7 +319,7 @@ namespace GraphEditor.View
         #endregion Ui events
 
         #endregion Events
-
+  
 
         #region Add
 
