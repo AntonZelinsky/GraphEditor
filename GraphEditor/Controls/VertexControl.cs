@@ -165,14 +165,17 @@ namespace GraphEditor.Controls
             InvalidateVisual();
             base.OnMouseLeave(e);
         }
-        
+
+        private int rate;
+
+        public int Rate => -(rate + 12);
         protected override void OnRender(DrawingContext drawingContext)
         {            
-            var rate = _edges.Count / 2;                   
+            rate = _edges.Count / 2;                   
             drawingContext.DrawEllipse(
                 Brushes.White, 
                 new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
-                new Point(0, 0), 10 + rate, 10 + rate);   
+                new Point(0, 0), 10 + rate, 10 + rate);
 
             rate = _edges.Count / 3;
             if (Color != Colors.Green)

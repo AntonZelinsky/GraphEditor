@@ -234,7 +234,49 @@ namespace GraphEditor.Controls
             if (Color != Colors.Black) 
                 drawingContext.DrawLine(new Pen(ColorAlgorithm, 6), from, to);                                                    
             drawingContext.DrawLine(new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, Color != Colors.Black ? 2 : 3), from, to);
+            if(To!=null)
+                RenderArrow(drawingContext, from, to);
             base.OnRender(drawingContext);
+        }
+                   
+        private void RenderArrow(DrawingContext drawingContext, Point from, Point to)
+        {
+            // alghoritm arrow from http://www.codeproject.com/Articles/23116/WPF-Arrow-and-Custom-Shapes
+            int radiusVertex = To.Rate;
+            var HeadHeight = 18; 
+            var HeadWidth = 5;
+            double theta = Math.Atan2(from.Y - to.Y, from.X - to.X);
+            double sint = Math.Sin(theta);
+            double cost = Math.Cos(theta);                       
+
+            Point pt3 = new Point(
+                to.X + ( HeadHeight * cost - HeadWidth * sint ),
+                to.Y + ( HeadHeight * sint + HeadWidth * cost ));
+
+            Point pt4 = new Point(
+                to.X + ( HeadHeight * cost + HeadWidth * sint ),
+                to.Y - ( HeadWidth * cost - HeadHeight * sint ));
+
+            // offset arrow from vertex
+            double R = Math.Sqrt(Math.Pow(from.X - to.X, 2) + Math.Pow(from.Y - to.Y, 2));
+            double cosX = ( from.X - to.X)/R;
+            double cosY = ( from.Y - to.Y ) / R;
+            double ΔX = radiusVertex * cosX;
+            double ΔY = radiusVertex * cosY;
+            Point pt1 = new Point(to.X - ΔX, to.Y - ΔY);
+
+            //drawingContext.DrawLine(new Pen(new SolidColorBrush(Color), 3), pt1, pt3);
+            //drawingContext.DrawLine(new Pen(new SolidColorBrush(Color), 3), pt1, pt4);
+                  
+            var segments = new[]
+            {
+               new LineSegment(pt3, true),
+               new LineSegment(pt4, true)
+            };
+
+            var figure = new PathFigure(pt1, segments, true);
+            var geometry = new PathGeometry(new[] { figure });
+            drawingContext.DrawGeometry(new SolidColorBrush(Color), new Pen(new SolidColorBrush(Color), 3), geometry); 
         }
 
         public override string ToString()
