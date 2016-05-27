@@ -8,7 +8,8 @@ namespace GraphEditor.Helper
 {
     public static class GraphSerializer
     {
-        private static readonly DataContractJsonSerializer JsonFormatter = new DataContractJsonSerializer(typeof(GraphModelSerialization));
+        private static readonly DataContractJsonSerializer JsonFormatter =
+            new DataContractJsonSerializer(typeof (GraphModelSerialization));
 
         public static bool Serialization(GraphModelSerialization model, string path)
         {
@@ -30,10 +31,10 @@ namespace GraphEditor.Helper
         public static GraphModelSerialization Deserialization(string path)
         {
             try
-            {  
+            {
                 using (var fs = new FileStream(path, FileMode.OpenOrCreate))
                 {
-                    var model = (GraphModelSerialization)JsonFormatter.ReadObject(fs);
+                    var model = (GraphModelSerialization) JsonFormatter.ReadObject(fs);
                     return model;
                 }
             }
@@ -43,5 +44,5 @@ namespace GraphEditor.Helper
                 return null;
             }
         }
-    }  
+    }
 }

@@ -1,49 +1,54 @@
-﻿using System.Linq;
-using System.Collections.Generic;            
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace GraphEditor.Models
 {
     [DataContract]
-    public class GraphModelSerialization 
+    public class GraphModelSerialization
     {
+        private readonly GraphModel _model;
+        private List<Edge> _edges;
+        private string _fileName;
+        private List<Vertex> _verticies;
+
+        public GraphModelSerialization()
+        {
+        }
+
+        public GraphModelSerialization(GraphModel model)
+        {
+            _model = model;
+        }
+
         [DataMember]
-        public List<Vertex> Verticies {
+        public List<Vertex> Verticies
+        {
             get
             {
                 if (_model == null)
                     return _verticies;
                 return _model.Verticies.Values.ToList();
             }
-            set
-            {
-                _verticies = value;  
-            }
-        }   
-
-        private List<Vertex> _verticies;
+            set { _verticies = value; }
+        }
 
         [DataMember]
-        public List<Edge> Edges {
+        public List<Edge> Edges
+        {
             get
             {
                 if (_model == null)
                     return _edges;
                 return _model.Edges.Values.ToList();
             }
-            set
-            {
-                _edges = value;
-                
-            }
-        } 
-        private List<Edge> _edges;
+            set { _edges = value; }
+        }
 
-        private readonly GraphModel _model;
+        public bool Changed { get; set; }
 
-        public bool Changed { get; set; }  
-              
-        public string FileName {
+        public string FileName
+        {
             get
             {
                 if (_model == null)
@@ -54,19 +59,8 @@ namespace GraphEditor.Models
             {
                 if (_model != null)
                     _model.FileName = value;
-                _fileName = value;  
+                _fileName = value;
             }
         }
-
-        private string _fileName;
-
-        public GraphModelSerialization()
-        {                    
-        }
-
-        public GraphModelSerialization(GraphModel model)
-        {
-            _model = model;
-        }    
     }
 }

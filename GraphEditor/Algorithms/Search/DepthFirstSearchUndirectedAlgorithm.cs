@@ -14,7 +14,6 @@ namespace GraphEditor.Algorithms.Search
         }
 
         public override int? SourceId { get; set; }
-
         public override int? TargetId { get; set; }
 
         public override void Compute()
