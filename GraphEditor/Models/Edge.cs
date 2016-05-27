@@ -1,17 +1,36 @@
-﻿using GraphEditor.Helper;
-using System.Runtime.Serialization;  
+﻿using System.Runtime.Serialization;
+using GraphEditor.Helper;
 
 namespace GraphEditor.Models
 {
     [DataContract]
     public class Edge : IElement
     {
+        private int? _id;
+
+        public Edge()
+        {
+        }
+
+        public Edge(int fromId, int toId)
+        {
+            FromId = fromId;
+            ToId = toId;
+        }
+
+        [DataMember]
+        public int FromId { get; }
+
+        [DataMember]
+        public int ToId { get; }
+
         [DataMember]
         public int Id
         {
-            get {
+            get
+            {
                 if (!_id.HasValue)
-                      _id = GetHashCode();
+                    _id = GetHashCode();
                 return _id.Value;
             }
             set
@@ -19,25 +38,10 @@ namespace GraphEditor.Models
                 if (!_id.HasValue)
                     _id = value;
             }
-        }    
-        private int? _id;
-
-        [DataMember]
-        public int FromId { get; set; }
-
-        [DataMember]
-        public int ToId { get; set; }
+        }
 
         [DataMember]
         public string LabelName { get; set; }
-                      
-        public Edge() { }
-
-        public Edge(int fromId, int toId)
-        {
-            FromId = fromId;
-            ToId = toId;                    
-        }
 
         public int OtherId(int id)
         {

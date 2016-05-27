@@ -1,67 +1,34 @@
-﻿using System;     
-using System.Linq;
-using System.Windows;
-using GraphEditor.View;
-using GraphEditor.Models;  
-using System.Windows.Input;
-using System.Windows.Media;    
-using System.Windows.Controls;
+﻿using System;
 using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using GraphEditor.Controls.Interfaces;
 using GraphEditor.Helper;
+using GraphEditor.Models;
+using GraphEditor.View;
 
 namespace GraphEditor.Controls
 {
     public class VertexControl : Control, IVertexElement
     {
-        private readonly Dictionary<int, IEdgeUiElement> _edges;          
-
-        public Dictionary<int, IEdgeUiElement> Edges => _edges;                                                
-
-        public GraphArea RootGraph { get; }
-
-        public int Id { get; }
-
-        public VertexControl(GraphArea rootGraph, int id, Point p) 
+        public VertexControl(GraphArea rootGraph, int id, Point p)
         {
             Id = id;
             RootGraph = rootGraph;
             SetPosition(p);
             RootGraph.Children.Add(this);
-            GraphArea.SetZIndex(this, 100);
-                                                      
-            _edges = new Dictionary<int, IEdgeUiElement>();
+            Panel.SetZIndex(this, 100);
+
+            Edges = new Dictionary<int, IEdgeUiElement>();
             Color = Colors.Green;
-        }  
-
-        #region Graph operation
-
-        public void AddEdge(IEdgeUiElement e)
-        {
-           if(!_edges.ContainsKey(e.Id))
-                _edges.Add(e.Id, e);
-
-            InvalidateVisual();   
         }
 
-        public void Remove(IEdgeUiElement e)
-        {
-            if (_edges.ContainsKey(e.Id))
-                _edges.Remove(e.Id);
-
-            InvalidateVisual(); 
-        }
-
-        public IEdgeUiElement FindEdge(IVertexElement v)
-        {
-            var idEdge = HashCode.GetHashCode(Id, v.Id);
-            if (_edges.ContainsKey(idEdge))
-                return _edges[idEdge];
-            else
-                return null;
-        }
-
-        #endregion
+        private Brush _colorAlgorithm => new RadialGradientBrush(Color, Colors.White);
+        public Dictionary<int, IEdgeUiElement> Edges { get; }
+        public GraphArea RootGraph { get; }
+        public int Id { get; }
 
         public void Destruction()
         {
@@ -69,6 +36,53 @@ namespace GraphEditor.Controls
 
             RootGraph.Children.Remove(this);
         }
+
+        public Color Color { get; set; }
+
+        public void ChangeColor(Color color)
+        {
+            Color = color;
+            InvalidateVisual();
+        }
+
+        public void ResetColor()
+        {
+            Color = Colors.Green;
+            InvalidateVisual();
+        }
+
+        public override string ToString()
+        {
+            return $"{Id} - {LabelName}";
+        }
+
+        #region Graph operation
+
+        public void AddEdge(IEdgeUiElement e)
+        {
+            if (!Edges.ContainsKey(e.Id))
+                Edges.Add(e.Id, e);
+
+            InvalidateVisual();
+        }
+
+        public void RemoveEdge(IEdgeUiElement e)
+        {
+            if (Edges.ContainsKey(e.Id))
+                Edges.Remove(e.Id);
+
+            InvalidateVisual();
+        }
+
+        public IEdgeUiElement FindEdge(IVertexElement v)
+        {
+            var idEdge = HashCode.GetHashCode(Id, v.Id);
+            if (Edges.ContainsKey(idEdge))
+                return Edges[idEdge];
+            return null;
+        }
+
+        #endregion
 
         #region Label
 
@@ -83,7 +97,7 @@ namespace GraphEditor.Controls
         }
 
         /// <summary>
-        /// Internal method. Attaches label to control
+        ///     Internal method. Attaches label to control
         /// </summary>
         /// <param name="element">Label control</param>
         public void AttachLabel(ILabelElement element)
@@ -92,14 +106,14 @@ namespace GraphEditor.Controls
         }
 
         /// <summary>
-        /// Internal method. Detaches label from control.
+        ///     Internal method. Detaches label from control.
         /// </summary>
         public void DetachLabel()
         {
             if (IsLabel)
             {
-                _labelElement.Detach();   
-                RootGraph.Children.Remove((UIElement) _labelElement);   
+                _labelElement.Detach();
+                RootGraph.Children.Remove((UIElement) _labelElement);
                 _labelElement = null;
             }
         }
@@ -108,60 +122,44 @@ namespace GraphEditor.Controls
 
         #region Property
 
-        private Brush BrushColor = Brushes.Green;
-        private Brush BrushColorSelected = Brushes.Orange;
-                                          
+        private readonly Brush BrushColor = Brushes.Green;
+        private readonly Brush BrushColorSelected = Brushes.Orange;
+
         #region DependencyProperty Content
 
         /// <summary>
-        /// Registers a dependency property as backing store for the IsSelected property
+        ///     Registers a dependency property as backing store for the IsSelected property
         /// </summary>
         public static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register(
                 "IsSelected", typeof (bool), typeof (VertexControl),
                 new FrameworkPropertyMetadata(false,
-                  FrameworkPropertyMetadataOptions.AffectsRender));
+                    FrameworkPropertyMetadataOptions.AffectsRender));
 
         /// <summary>
-        /// Gets or sets the Content.
+        ///     Gets or sets the Content.
         /// </summary>
         /// <value>The IsSelected.</value>
         public bool IsSelected
         {
-            get { return (bool)GetValue(IsSelectedProperty); }
+            get { return (bool) GetValue(IsSelectedProperty); }
             set { SetValue(IsSelectedProperty, value); }
         }
 
         #endregion
 
-        #endregion         
-
-        public Color Color { get; set; }
-
-        private Brush _colorAlgorithm => new RadialGradientBrush(Color, Colors.White);
-
-        public void ChangeColor(Color color)
-        {
-            Color = color;
-            InvalidateVisual();
-        }
-
-        public void ResetColor()
-        {
-            Color = Colors.Green;
-            InvalidateVisual();
-        }
+        #endregion
 
         #region Override event
 
         protected override void OnMouseEnter(MouseEventArgs e)
-        {                     
+        {
             InvalidateVisual();
             base.OnMouseEnter(e);
         }
 
         protected override void OnMouseLeave(MouseEventArgs e)
-        {                       
+        {
             InvalidateVisual();
             base.OnMouseLeave(e);
         }
@@ -169,23 +167,24 @@ namespace GraphEditor.Controls
         private int rate;
 
         public int Rate => -(rate + 12);
+
         protected override void OnRender(DrawingContext drawingContext)
-        {            
-            rate = _edges.Count / 2;                   
+        {
+            rate = Edges.Count/2;
             drawingContext.DrawEllipse(
-                Brushes.White, 
+                Brushes.White,
                 new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
                 new Point(0, 0), 10 + rate, 10 + rate);
 
-            rate = _edges.Count / 3;
+            rate = Edges.Count/3;
             if (Color != Colors.Green)
             {
                 drawingContext.DrawEllipse(
-                 _colorAlgorithm,
-                 new Pen(null, 0),
-                 new Point(0, 0), 8 + rate, 8 + rate);
+                    _colorAlgorithm,
+                    new Pen(null, 0),
+                    new Point(0, 0), 8 + rate, 8 + rate);
             }
-            else  
+            else
                 drawingContext.DrawEllipse(
                     IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor,
                     new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor, 3),
@@ -198,7 +197,7 @@ namespace GraphEditor.Controls
 
         public Point GetPosition()
         {
-            return new Point((int)GraphArea.GetX(this), (int)GraphArea.GetY(this));
+            return new Point((int) GraphArea.GetX(this), (int) GraphArea.GetY(this));
         }
 
         public void SetPosition(Point pt)
@@ -214,9 +213,9 @@ namespace GraphEditor.Controls
             GraphArea.SetY(this, y);
             OnPositionChanged(new Point(), GetPosition());
         }
-        
+
         /// <summary>
-        /// Fires when Position property set and object changes its coordinates.
+        ///     Fires when Position property set and object changes its coordinates.
         /// </summary>
         public event PositionChanged PositionChanged;
 
@@ -226,10 +225,5 @@ namespace GraphEditor.Controls
         }
 
         #endregion
-             
-        public override string ToString()
-        {
-            return $"{Id} - {LabelName}";
-        }
     }
 }
