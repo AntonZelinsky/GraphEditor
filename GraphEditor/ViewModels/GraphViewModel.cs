@@ -217,15 +217,8 @@ namespace GraphEditor.ViewModels
 
         #region Commands
 
-        public void NewFile()
-        {
-            RemoveAllElements();
-            _graphModel = new GraphModel();
-        }
-
         public void LoadFile(GraphModelSerialization model)
         {
-            NewFile();
             model.Verticies.ForEach(v => AddVertex(v));
             model.Edges.ForEach(es => AddEdge(es));
             Changed = model.Changed;

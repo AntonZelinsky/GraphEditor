@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using GraphEditor.ViewModels;
 
 namespace GraphEditor.View
 {
@@ -14,6 +15,8 @@ namespace GraphEditor.View
             DefaultStyleKeyProperty.OverrideMetadata(typeof (MDITabItem),
                 new FrameworkPropertyMetadata(typeof (MDITabItem)));
         }
+
+        public GraphViewModel GraphViewModel { get; set; }
 
         public event RoutedEventHandler CloseTab
         {

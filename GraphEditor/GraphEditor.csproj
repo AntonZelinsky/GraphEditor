@@ -66,6 +66,7 @@
     <Compile Include="Controls\LabelElement.cs" />
     <Compile Include="Helper\FileOperation.cs" />
     <Compile Include="Helper\HashCode.cs" />
+    <Compile Include="Helper\PropertyChangedBase.cs" />
     <Compile Include="Models\Edge.cs" />
     <Compile Include="Models\GraphModelSerialization.cs" />
     <Compile Include="Models\IElement.cs" />

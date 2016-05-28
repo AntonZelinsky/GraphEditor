@@ -1,41 +1,94 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using GraphEditor.Helper;
 using GraphEditor.Models;
+using GraphEditor.View;
 
 namespace GraphEditor.ViewModels
 {
-    public class WindowViewModel
+    public class WindowViewModel : PropertyChangedBase
     {
-        private readonly GraphViewModel _graphViewModel;
+        private static int _indexNewTab;
         public readonly CommandBindingCollection CommandBindings;
+        private MDITabItem _selectedTab;
 
-        public WindowViewModel(GraphViewModel graphViewModel)
+        public WindowViewModel()
         {
-            _graphViewModel = graphViewModel;
-
             CommandBindings = new CommandBindingCollection();
             CommandBindings.Add(new CommandBinding(ApplicationCommands.New, NewCommand));
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Open, LoadCommand));
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, SaveCommand, IsChangedCommand));
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, ExitCommand));
+
+            //var algorithmViewModel = new AlgorithmViewModel(graphViewModel);
+            Tabs = new ObservableCollection<MDITabItem>();
+            NewTab();
+            NewTab();
+            GenerateExample(Tabs[0]);
+        }
+
+        public MDITabItem SelectedTab
+        {
+            get { return _selectedTab; }
+            set
+            {
+                _selectedTab = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public ObservableCollection<MDITabItem> Tabs { get; }
+
+        private MDITabItem NewTab()
+        {
+            var model = new GraphModel();
+            var graphViewModel = new GraphViewModel(model);
+
+            var area = new GraphArea
+            {
+                DataContext = graphViewModel,
+                Background = Brushes.WhiteSmoke,
+                Name = "graphArea",
+                Focusable = true
+            };
+            area.SubscribeEvents();
+            var tab = new MDITabItem
+            {
+                Header = $"Tab {_indexNewTab}",
+                Content = area,
+                GraphViewModel = graphViewModel
+            };
+            _indexNewTab++;
+            tab.CloseTab += TabOnCloseTab;
+            Tabs.Add(tab);
+            return tab;
+        }
+
+        private void GenerateExample(MDITabItem item)
+        {
+            var v1 = new Vertex(100, 100);
+            var v2 = new Vertex(200, 200);
+            var v3 = new Vertex(100, 200);
+            var v = new List<Vertex> {v1, v2, v3};
+            var es = new List<Edge> {new Edge(v1.Id, v2.Id), new Edge(v1.Id, v3.Id), new Edge(v2.Id, v3.Id)};
+
+            item.GraphViewModel.CreateGraph(v, es);
+        }
+
+        private void TabOnCloseTab(object sender, RoutedEventArgs routedEventArgs)
+        {
+            Tabs.Remove(sender as MDITabItem);
         }
 
         #region Commands File menu
 
         private void NewCommand(object obj, ExecutedRoutedEventArgs e)
         {
-            if (_graphViewModel.Changed)
-            {
-                var result = MessageBox.Show("Save changed?", "Save?", MessageBoxButton.YesNoCancel,
-                    MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
-                    SaveCommand(null, null);
-                if (result == MessageBoxResult.Cancel)
-                    return;
-            }
-            _graphViewModel.NewFile();
-            ((Shell) obj).StopAlgorithm.Command.Execute(null);
+            var tab = NewTab();
+            SelectedTab = tab;
         }
 
         private void LoadCommand(object obj, ExecutedRoutedEventArgs e)
@@ -43,20 +96,22 @@ namespace GraphEditor.ViewModels
             var model = FileOperation.Load();
             if (model == null)
                 return;
-            _graphViewModel.LoadFile(model);
-            ((Shell) obj).StopAlgorithm.Command.Execute(null);
+            var tab = NewTab();
+            SelectedTab = tab;
+            SelectedTab.GraphViewModel.LoadFile(model);
         }
 
         private void SaveCommand(object obj, ExecutedRoutedEventArgs e)
         {
-            var model = new GraphModelSerialization(_graphViewModel.GetModel());
+            var model = new GraphModelSerialization(SelectedTab.GraphViewModel.GetModel());
             FileOperation.Save(model);
-            _graphViewModel.SaveFile(model);
+            SelectedTab.GraphViewModel.SaveFile(model);
         }
 
         private void IsChangedCommand(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = _graphViewModel.Changed;
+            if (SelectedTab?.GraphViewModel != null)
+                e.CanExecute = SelectedTab.GraphViewModel.Changed;
         }
 
         private void ExitCommand(object obj, ExecutedRoutedEventArgs e)
