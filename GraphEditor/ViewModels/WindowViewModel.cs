@@ -35,7 +35,7 @@ namespace GraphEditor.ViewModels
                     return;
             }
             _graphViewModel.NewFile();
-            ((MainWindow) obj).StopAlgorithm.Command.Execute(null);
+            ((Shell) obj).StopAlgorithm.Command.Execute(null);
         }
 
         private void LoadCommand(object obj, ExecutedRoutedEventArgs e)
@@ -44,7 +44,7 @@ namespace GraphEditor.ViewModels
             if (model == null)
                 return;
             _graphViewModel.LoadFile(model);
-            ((MainWindow) obj).StopAlgorithm.Command.Execute(null);
+            ((Shell) obj).StopAlgorithm.Command.Execute(null);
         }
 
         private void SaveCommand(object obj, ExecutedRoutedEventArgs e)

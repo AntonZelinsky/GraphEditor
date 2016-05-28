@@ -1,22 +1,36 @@
 ﻿using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using GraphEditor.View;
 using GraphEditor.ViewModels;
 
 namespace GraphEditor
 {
-    public partial class MainWindow : Window
+    public partial class Shell : Window
     {
         private readonly GraphViewModel _model;
 
-        public MainWindow(GraphViewModel model)
+        public Shell(GraphViewModel model)
         {
             InitializeComponent();
+            AddHandler(MDITabItem.CloseTabEvent, new RoutedEventHandler(CloseTab));
             Loaded += (x, y) => Keyboard.Focus(graphArea);
             _model = model;
             _model.ModelChanged += UpdateTitle;
             UpdateTitle();
             graphArea.MouseMove += GraphAreaOnMouseMove;
+        }
+
+        private void CloseTab(object source, RoutedEventArgs args)
+        {
+            var tabItem = args.Source as TabItem;
+            if (tabItem != null)
+            {
+                var tabControl = tabItem.Parent as TabControl;
+                if (tabControl != null)
+                    tabControl.Items.Remove(tabItem);
+            }
         }
 
         private void GraphAreaOnMouseMove(object sender, MouseEventArgs e)
