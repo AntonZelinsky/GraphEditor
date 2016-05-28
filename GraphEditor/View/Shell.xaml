@@ -21,7 +21,7 @@
                 <MenuItem Command="ApplicationCommands.Cut" />
                 <MenuItem Command="ApplicationCommands.Paste" />
             </MenuItem>
-            <MenuItem Header="_Algorithms">
+            <MenuItem Header="_Algorithms" Command="VM:AlgorithmViewModel.AlghoritmCommand">
                 <MenuItem Header="_Search">
                     <MenuItem Header="Depth-first search">
                         <MenuItem Header="Directed" Command="VM:AlgorithmViewModel.DFSCommandDirected" />

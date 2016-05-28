@@ -12,18 +12,20 @@ namespace GraphEditor.ViewModels
     public class WindowViewModel : PropertyChangedBase
     {
         private static int _indexNewTab;
+        private readonly AlgorithmViewModel AlgorithmViewModel;
         public readonly CommandBindingCollection CommandBindings;
         private MDITabItem _selectedTab;
 
         public WindowViewModel()
         {
+            AlgorithmViewModel = new AlgorithmViewModel();
+
             CommandBindings = new CommandBindingCollection();
             CommandBindings.Add(new CommandBinding(ApplicationCommands.New, NewCommand));
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Open, LoadCommand));
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, SaveCommand, IsChangedCommand));
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, ExitCommand));
-
-            //var algorithmViewModel = new AlgorithmViewModel(graphViewModel);
+            CommandBindings.AddRange(AlgorithmViewModel.CommandBindings);
             Tabs = new ObservableCollection<MDITabItem>();
             NewTab();
             NewTab();
@@ -36,6 +38,7 @@ namespace GraphEditor.ViewModels
             set
             {
                 _selectedTab = value;
+                AlgorithmViewModel.SetModel(value?.GraphViewModel);
                 RaisePropertyChanged();
             }
         }

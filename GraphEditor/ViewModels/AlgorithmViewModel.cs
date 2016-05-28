@@ -7,17 +7,16 @@ namespace GraphEditor.ViewModels
 {
     public class AlgorithmViewModel
     {
-        private readonly GraphViewModel _graphViewModel;
         public readonly CommandBindingCollection CommandBindings;
         private IAlgorithm _algorithm;
+        private GraphViewModel _graphViewModel;
         private LinkedListNode<HistoryItemAlgorithm> _historyItem;
 
-        public AlgorithmViewModel(GraphViewModel graphViewModel)
+        public AlgorithmViewModel()
         {
-            _graphViewModel = graphViewModel;
-
             CommandBindings = new CommandBindingCollection
             {
+                new CommandBinding(AlghoritmCommand, null, CanAlghoritm),
                 new CommandBinding(StartCommand, Start, CanStart),
                 new CommandBinding(StopCommand, Stop, CanStop),
                 new CommandBinding(ClearCommand, Clear, CanClear),
@@ -27,15 +26,34 @@ namespace GraphEditor.ViewModels
                 new CommandBinding(SkipForwardCommand, SkipForvard, CanSkipForward),
                 new CommandBinding(StepBackCommand, StepBack, CanStepBack),
                 new CommandBinding(SkipBackCommand, SkipBack, CanSkipBack),
+                /* Algorithms */
                 new CommandBinding(DFSCommandDirected, DFSAlgorithmDirected),
                 new CommandBinding(DFSCommandUndirected, DFSAlgorithmUndirected),
                 new CommandBinding(BFSCommand, BFSAlgorithm)
             };
         }
 
+        public void SetModel(GraphViewModel graphViewModel)
+        {
+            if (_algorithm != null)
+            {
+                Clear(null, null);
+                _algorithm = null;
+            }
+            _graphViewModel = graphViewModel;
+        }
+
         #region Commands
 
         #region Manage Command
+
+        public static readonly ICommand AlghoritmCommand = new RoutedUICommand();
+
+        private void CanAlghoritm(object sender, CanExecuteRoutedEventArgs canExecuteRoutedEventArgs)
+        {
+            if (_graphViewModel != null)
+                canExecuteRoutedEventArgs.CanExecute = true;
+        }
 
         public static readonly ICommand StartCommand = new RoutedUICommand();
 
