@@ -13,7 +13,7 @@ namespace GraphEditor.ViewModels
     {
         private static int _indexNewTab;
         private readonly AlgorithmViewModel AlgorithmViewModel;
-        public readonly CommandBindingCollection CommandBindings;
+        public readonly CommandBindingCollection CommandBindings;    
         private MDITabItem _selectedTab;
 
         public WindowViewModel()
@@ -44,6 +44,7 @@ namespace GraphEditor.ViewModels
         }
 
         public ObservableCollection<MDITabItem> Tabs { get; }
+        public string Coordinates { get; set; }
 
         private MDITabItem NewTab()
         {
@@ -57,6 +58,7 @@ namespace GraphEditor.ViewModels
                 Name = "graphArea",
                 Focusable = true
             };
+            area.MouseMove += GraphAreaOnMouseMove;
             area.SubscribeEvents();
             var tab = new MDITabItem
             {
@@ -68,6 +70,13 @@ namespace GraphEditor.ViewModels
             tab.CloseTab += TabOnCloseTab;
             Tabs.Add(tab);
             return tab;
+        }
+
+        private void GraphAreaOnMouseMove(object sender, MouseEventArgs mouseEventArgs)
+        {
+            var mousePosition = mouseEventArgs.GetPosition(null);
+            Coordinates = $"X: {mousePosition.X}, Y: {mousePosition.Y}";
+            RaisePropertyChanged("Coordinates");
         }
 
         private void GenerateExample(MDITabItem item)
