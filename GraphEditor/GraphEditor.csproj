@@ -66,6 +66,7 @@
     <Compile Include="Controls\LabelElement.cs" />
     <Compile Include="Helper\FileOperation.cs" />
     <Compile Include="Helper\HashCode.cs" />
+    <Compile Include="Helper\PropertyChangedBase.cs" />
     <Compile Include="Models\Edge.cs" />
     <Compile Include="Models\GraphModelSerialization.cs" />
     <Compile Include="Models\IElement.cs" />
@@ -77,10 +78,15 @@
     <Compile Include="Models\Vertex.cs" />
     <Compile Include="ViewModels\WindowViewModel.cs" />
     <Compile Include="View\GraphArea.cs" />
+    <Compile Include="View\MDITabItem.cs" />
     <Compile Include="View\RenameDialog.xaml.cs">
       <DependentUpon>RenameDialog.xaml</DependentUpon>
     </Compile>
-    <Page Include="View\MainWindow.xaml">
+    <Page Include="Themes\Generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Shell.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -88,8 +94,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="View\MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
+    <Compile Include="View\Shell.xaml.cs">
+      <DependentUpon>Shell.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Page Include="View\RenameDialog.xaml">
