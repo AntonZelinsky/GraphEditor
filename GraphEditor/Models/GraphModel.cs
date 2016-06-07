@@ -33,6 +33,7 @@ namespace GraphEditor.Models
 
         public bool Changed { get; set; }
         public string FileName { get; set; }
+        public int GetCountElements => Edges.Count + Verticies.Count;
 
         public Vertex GetVertex(int id)
         {

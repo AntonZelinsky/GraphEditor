@@ -347,12 +347,7 @@ namespace GraphEditor.View
         }
 
         private void CreatedEdgeControl(VertexControl to)
-        {
-            if (_createdEdge.From == to)
-            {
-                UnreleasedEdgeControl();
-                return;
-            }
+        {   
             _createdEdge.SetTo(to);
             _createdEdge.From.AddEdge(_createdEdge);
             _createdEdge.To.AddEdge(_createdEdge);

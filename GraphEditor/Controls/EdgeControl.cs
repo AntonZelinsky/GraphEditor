@@ -73,16 +73,25 @@ namespace GraphEditor.Controls
         {
             var from = From.GetPosition();
             var to = To?.GetPosition() ?? toPoint;
-            if (to.X == 0 && to.Y == 0)
-                return;
+            if (to == from)
+                RenderLoop(drawingContext, from);
             if (Color != Colors.Black)
                 drawingContext.DrawLine(new Pen(ColorAlgorithm, 6), from, to);
+
             drawingContext.DrawLine(
                 new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor,
                     Color != Colors.Black ? 2 : 3), from, to);
             if (To != null)
                 RenderArrow(drawingContext, from, to);
             base.OnRender(drawingContext);
+        }
+
+        private void RenderLoop(DrawingContext drawingContext, Point fromTo)
+        {
+            var elipseCenter = new Point(fromTo.X, fromTo.Y - 20);
+            drawingContext.DrawEllipse(null,
+                new Pen(IsMouseOver ? BrushColorSelected : IsSelected ? BrushColorSelected : BrushColor,
+                    Color != Colors.Black ? 2 : 3), elipseCenter, 20, 20);
         }
 
         private void RenderArrow(DrawingContext drawingContext, Point from, Point to)
