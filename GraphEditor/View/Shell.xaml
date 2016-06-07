@@ -1,12 +1,11 @@
-﻿<Window x:Class="GraphEditor.MainWindow"
+﻿<Window x:Class="GraphEditor.Shell"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:Ui="clr-namespace:GraphEditor.View"
         xmlns:VM="clr-namespace:GraphEditor.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Shell" Height="350" Width="525">
     <DockPanel>
         <Menu VerticalAlignment="Top" DockPanel.Dock="Top">
             <MenuItem Header="_File">
@@ -22,7 +21,7 @@
                 <MenuItem Command="ApplicationCommands.Cut" />
                 <MenuItem Command="ApplicationCommands.Paste" />
             </MenuItem>
-            <MenuItem Header="_Algorithms">
+            <MenuItem Header="_Algorithms" Command="VM:AlgorithmViewModel.AlghoritmCommand">
                 <MenuItem Header="_Search">
                     <MenuItem Header="Depth-first search">
                         <MenuItem Header="Directed" Command="VM:AlgorithmViewModel.DFSCommandDirected" />
@@ -59,13 +58,13 @@
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
             <StatusBarItem Grid.Column="0">
-                <TextBlock x:Name="Coordinates" />
+                <TextBlock Text="{Binding Coordinates}" />
             </StatusBarItem>
             <Separator Grid.Column="1" />
             <StatusBarItem Grid.Column="2">
-                <TextBlock x:Name="Counter" />
+                <TextBlock  Text="{Binding Counter}" />
             </StatusBarItem>
         </StatusBar>
-        <Ui:GraphArea x:Name="graphArea" Background="White" Focusable="True" />
+        <TabControl x:Name="MDIControl" SelectedItem="{Binding SelectedTab}" ItemsSource="{Binding Tabs}" />
     </DockPanel>
 </Window>

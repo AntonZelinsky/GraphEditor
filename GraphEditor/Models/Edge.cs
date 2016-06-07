@@ -19,10 +19,10 @@ namespace GraphEditor.Models
         }
 
         [DataMember]
-        public int FromId { get; }
+        public int FromId { get; set; }
 
         [DataMember]
-        public int ToId { get; }
+        public int ToId { get; set; }
 
         [DataMember]
         public int Id
