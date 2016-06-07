@@ -9,20 +9,9 @@ namespace GraphEditor
         public Shell()
         {
             InitializeComponent();
-            UpdateTitle();
-            //Loaded += (x, y) => Keyboard.Focus(graphArea);      
-            //_model.ModelChanged += UpdateTitle;
-            //graphArea.MouseMove += GraphAreaOnMouseMove;
+            UpdateTitle();    
         }
-
-        private void GraphAreaOnMouseMove(object sender, MouseEventArgs e)
-        {
-            //var p = e.GetPosition(graphArea);
-            //Coordinates.Text = $"X: {p.X}, Y: {p.Y}";
-            //Counter.Text =
-            //    $"Elements: {graphArea.Children.Count}, Selected Elements: {( (GraphViewModel)graphArea.DataContext ).SelectedElementsCount}";
-        }
-
+                
         private void UpdateTitle()
         {
             var version = Assembly.GetExecutingAssembly().GetName();

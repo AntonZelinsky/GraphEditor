@@ -10,14 +10,15 @@ namespace GraphEditor.ViewModels
     public sealed class GraphViewModel
     {
         public readonly CommandBindingCollection CommandBindings;
-        private GraphModel _graphModel;
 
         public GraphViewModel(GraphModel graphModel)
         {
-            _graphModel = graphModel;
+            GetModel = graphModel;
 
             RegisterChangedEvent();
         }
+
+        public GraphModel GetModel { get; }
 
         public void CreateGraph(List<Vertex> verticies, List<Edge> edges)
         {
@@ -27,36 +28,52 @@ namespace GraphEditor.ViewModels
 
         #region Change Model
 
-        public delegate void Change();
+        public delegate void Change(GraphViewModel model);
 
         public event Change ModelChanged;
 
         public string FileName
         {
-            get { return _graphModel.FileName; }
+            get { return GetModel.FileName; }
             private set
             {
-                _graphModel.FileName = value;
-                ModelChanged?.Invoke();
+                GetModel.FileName = value;
+                ModelChanged?.Invoke(this);
             }
         }
 
         public bool Changed
         {
-            get { return _graphModel.Changed; }
+            get { return GetModel.Changed; }
             private set
             {
-                _graphModel.Changed = value;
-                ModelChanged?.Invoke();
+                GetModel.Changed = value;
+                ModelChanged?.Invoke(this);
             }
         }
 
         private void RegisterChangedEvent()
         {
-            AddedVertex += delegate { Changed = true; };
-            AddedEdge += delegate { Changed = true; };
-            RemovedElement += delegate { Changed = true; };
-            UpdateLabel += delegate { Changed = true; };
+            AddedVertex += delegate
+            {
+                Changed = true;
+                ModelChanged?.Invoke(this);
+            };
+            AddedEdge += delegate
+            {
+                Changed = true;
+                ModelChanged?.Invoke(this);
+            };
+            RemovedElement += delegate
+            {
+                Changed = true;
+                ModelChanged?.Invoke(this);
+            };
+            UpdateLabel += delegate
+            {
+                Changed = true;
+                ModelChanged?.Invoke(this);
+            };
         }
 
         #endregion ChangeModel
@@ -76,10 +93,10 @@ namespace GraphEditor.ViewModels
 
         private bool AddVertex(Vertex v)
         {
-            if (_graphModel.ContainsVerticies(v.Id))
+            if (GetModel.ContainsVerticies(v.Id))
                 return false;
 
-            _graphModel.AddVertex(v);
+            GetModel.AddVertex(v);
             AddedVertex?.Invoke(v);
             return true;
         }
@@ -102,12 +119,12 @@ namespace GraphEditor.ViewModels
         /// <returns>status</returns>
         private bool AddEdge(Edge e)
         {
-            if (_graphModel.ContainsEdges(e.Id))
+            if (GetModel.ContainsEdges(e.Id))
                 return false;
-            _graphModel.AddEdge(e);
+            GetModel.AddEdge(e);
 
-            _graphModel.GetVertex(e.FromId).EdgesId.Add(e.Id);
-            _graphModel.GetVertex(e.ToId).EdgesId.Add(e.Id);
+            GetModel.GetVertex(e.FromId).EdgesId.Add(e.Id);
+            GetModel.GetVertex(e.ToId).EdgesId.Add(e.Id);
 
             AddedEdge?.Invoke(e);
             return true;
@@ -140,26 +157,28 @@ namespace GraphEditor.ViewModels
                 SelectedElements.Add(id);
                 SelectedElement?.Invoke(id);
             }
+            ModelChanged?.Invoke(this);
         }
 
         public void SelectAll()
         {
-            SelectedElements.AddRange(_graphModel.GetAllElements().Select(e => e.Id));
+            SelectedElements.AddRange(GetModel.GetAllElements().Select(e => e.Id));
         }
 
         public void UnselectElements()
         {
             SelectedElements.ForEach(id => UnselectedElement?.Invoke(id));
             SelectedElements.Clear();
+            ModelChanged?.Invoke(this);
         }
 
         public void ChangePosition(Point p)
         {
             SelectedElements.ForEach(v =>
             {
-                if (!_graphModel.ContainsVerticies(v))
+                if (!GetModel.ContainsVerticies(v))
                     return;
-                var vc = _graphModel.GetVertex(v);
+                var vc = GetModel.GetVertex(v);
 
                 vc.PositionX = p.X;
                 vc.PositionY = p.Y;
@@ -184,18 +203,18 @@ namespace GraphEditor.ViewModels
         private void RemoveElement(int id)
         {
             RemovedElement?.Invoke(id);
-            if (_graphModel.VertexOfEdgesById.ContainsKey(id))
+            if (GetModel.VertexOfEdgesById.ContainsKey(id))
             {
-                _graphModel.VertexOfEdgesById[id].ForEach(RemoveElement);
+                GetModel.VertexOfEdgesById[id].ForEach(RemoveElement);
             }
 
-            _graphModel.RemoveById(id);
+            GetModel.RemoveById(id);
         }
 
         private void RemoveAllElements()
         {
-            _graphModel.Verticies.Keys.ToList().ForEach(RemoveElement);
-            _graphModel.Edges.Keys.ToList().ForEach(RemoveElement);
+            GetModel.Verticies.Keys.ToList().ForEach(RemoveElement);
+            GetModel.Edges.Keys.ToList().ForEach(RemoveElement);
             SelectedElements.Clear();
         }
 
@@ -209,7 +228,7 @@ namespace GraphEditor.ViewModels
 
         public void UpdeteElementLabel(int id, string name)
         {
-            _graphModel.GetElement(id).LabelName = name;
+            GetModel.GetElement(id).LabelName = name;
             UpdateLabel?.Invoke(id, name);
         }
 
@@ -223,11 +242,6 @@ namespace GraphEditor.ViewModels
             model.Edges.ForEach(es => AddEdge(es));
             Changed = model.Changed;
             FileName = model.FileName;
-        }
-
-        public GraphModel GetModel()
-        {
-            return _graphModel;
         }
 
         public void SaveFile(GraphModelSerialization model)

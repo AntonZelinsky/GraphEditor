@@ -227,21 +227,21 @@ namespace GraphEditor.ViewModels
 
         private void DFSAlgorithmDirected(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
-            _algorithm = new DepthFirstSearchDirectedAlgorithm(_graphViewModel.GetModel());
+            _algorithm = new DepthFirstSearchDirectedAlgorithm(_graphViewModel.GetModel);
         }
 
         public static readonly ICommand DFSCommandUndirected = new RoutedCommand();
 
         private void DFSAlgorithmUndirected(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
-            _algorithm = new DepthFirstSearchUndirectedAlgorithm(_graphViewModel.GetModel());
+            _algorithm = new DepthFirstSearchUndirectedAlgorithm(_graphViewModel.GetModel);
         }
 
         public static readonly ICommand BFSCommand = new RoutedCommand();
 
         private void BFSAlgorithm(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
-            _algorithm = new BreadthFirstSearchAlgorithm(_graphViewModel.GetModel());
+            _algorithm = new BreadthFirstSearchAlgorithm(_graphViewModel.GetModel);
         }
 
         #endregion Search algorithms

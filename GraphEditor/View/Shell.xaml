@@ -62,7 +62,7 @@
             </StatusBarItem>
             <Separator Grid.Column="1" />
             <StatusBarItem Grid.Column="2">
-                <TextBlock x:Name="Counter" />
+                <TextBlock  Text="{Binding Counter}" />
             </StatusBarItem>
         </StatusBar>
         <TabControl x:Name="MDIControl" SelectedItem="{Binding SelectedTab}" ItemsSource="{Binding Tabs}" />

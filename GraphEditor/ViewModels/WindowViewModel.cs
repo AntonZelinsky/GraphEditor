@@ -13,7 +13,7 @@ namespace GraphEditor.ViewModels
     {
         private static int _indexNewTab;
         private readonly AlgorithmViewModel AlgorithmViewModel;
-        public readonly CommandBindingCollection CommandBindings;    
+        public readonly CommandBindingCollection CommandBindings;
         private MDITabItem _selectedTab;
 
         public WindowViewModel()
@@ -45,12 +45,13 @@ namespace GraphEditor.ViewModels
 
         public ObservableCollection<MDITabItem> Tabs { get; }
         public string Coordinates { get; set; }
+        public string Counter { get; set; }
 
         private MDITabItem NewTab()
         {
             var model = new GraphModel();
             var graphViewModel = new GraphViewModel(model);
-
+            graphViewModel.ModelChanged += OnModelChanged;
             var area = new GraphArea
             {
                 DataContext = graphViewModel,
@@ -70,6 +71,12 @@ namespace GraphEditor.ViewModels
             tab.CloseTab += TabOnCloseTab;
             Tabs.Add(tab);
             return tab;
+        }
+
+        private void OnModelChanged(GraphViewModel model)
+        {
+            Counter = $"Elements: {model.GetModel.GetCountElements}, Selected Elements: {model.SelectedElements.Count}";
+            RaisePropertyChanged("Counter");
         }
 
         private void GraphAreaOnMouseMove(object sender, MouseEventArgs mouseEventArgs)
@@ -115,7 +122,7 @@ namespace GraphEditor.ViewModels
 
         private void SaveCommand(object obj, ExecutedRoutedEventArgs e)
         {
-            var model = new GraphModelSerialization(SelectedTab.GraphViewModel.GetModel());
+            var model = new GraphModelSerialization(SelectedTab.GraphViewModel.GetModel);
             FileOperation.Save(model);
             SelectedTab.GraphViewModel.SaveFile(model);
         }
